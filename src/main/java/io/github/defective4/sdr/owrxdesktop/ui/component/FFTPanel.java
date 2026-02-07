@@ -28,8 +28,8 @@ public class FFTPanel extends JComponent {
     private static final Color TEXT_COLOR = Color.white;
     private static final Color TUNE = Color.red;
 
-    private int bandwidth = (int) 2.4e6f;
-    private int centerFrequency = (int) 101e6f;
+    private int bandwidth = 968000;
+    private int centerFrequency = (int) 1e6f;
     private float[] fft = new float[0];
     private final Object fftLock = new Object();
     private final float fftMultiplier = 2;
@@ -43,7 +43,7 @@ public class FFTPanel extends JComponent {
 
     private int scopeLower = (int) -75e3f;
     private int scopeUpper = (int) 75e3f;
-    private int tuningStep = (int) 50e3f;
+    private int tuningStep = (int) 1e3f;
 
     public FFTPanel() {
         setCursor(new Cursor(Cursor.HAND_CURSOR));
@@ -131,10 +131,12 @@ public class FFTPanel extends JComponent {
 
     public void setBandwidth(int bandwidth) {
         this.bandwidth = bandwidth;
+        repaint();
     }
 
     public void setCenterFrequency(int centerFrequency) {
         this.centerFrequency = centerFrequency;
+        repaint();
     }
 
     public void setFFT(float[] fft) {
@@ -154,15 +156,20 @@ public class FFTPanel extends JComponent {
 
     public void setTuningStep(int tuningStep) {
         this.tuningStep = tuningStep;
+        repaint();
     }
 
     public void tune(int offset) {
+        tune(offset, true);
+    }
+
+    public void tune(int offset, boolean fireEvents) {
         this.offset = (int) Math.round(offset / (double) tuningStep) * tuningStep;
         int bound = bandwidth / 2;
         if (this.offset > bound) this.offset = (int) (Math.floor(bound / (double) tuningStep) * tuningStep);
         if (this.offset < -bound) this.offset = (int) (Math.ceil(-bound / (double) tuningStep) * tuningStep);
         repaint();
-        listeners.forEach(ls -> ls.tuned(this.offset));
+        if (fireEvents) listeners.forEach(ls -> ls.tuned(this.offset));
     }
 
     @Override

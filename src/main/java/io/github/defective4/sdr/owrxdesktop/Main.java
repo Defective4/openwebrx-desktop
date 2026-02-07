@@ -5,6 +5,7 @@ import javax.swing.UIManager;
 import com.formdev.flatlaf.FlatDarkLaf;
 
 import io.github.defective4.sdr.owrxdesktop.ui.ReceiverWindow;
+import io.github.defective4.sdr.owrxdesktop.ui.component.FFTPanel;
 
 public class Main {
     public static void main(String[] args) {
@@ -12,6 +13,7 @@ public class Main {
             UIManager.setLookAndFeel(new FlatDarkLaf());
             ReceiverWindow window = new ReceiverWindow();
             window.setVisible(true);
+            FFTPanel fftPanel = window.getFFTPanel();
 //            OpenWebRXClient client = new OpenWebRXClient(URI.create("wss://radio.raspberry.local/ws/"));
 //            client.addListener(new OWRXAdapter() {
 //
@@ -31,9 +33,21 @@ public class Main {
 //                            .filter(profile -> profile.name().equals("RTL-SDR Broadcast FM 100-102 MHz")).findAny()
 //                            .get());
 //                }
+//
+//                @Override
+//                public void serverConfigChanged(ServerConfig config) {
+//                    if (config.sampleRate() != null) fftPanel.setBandwidth(config.sampleRate());
+//                    if (config.tuningStep() != null) fftPanel.setTuningStep(config.tuningStep());
+//                    if (config.centerFrequency() != null) fftPanel.setCenterFrequency(config.centerFrequency());
+//                    if (config.startOffsetFrequency() != null) {
+//                        fftPanel.tune(config.startOffsetFrequency(), false);
+//                    }
+//                }
 //            });
 //            client.connect();
-        } catch (Exception e) {
+        } catch (
+
+        Exception e) {
             e.printStackTrace();
         }
     }
