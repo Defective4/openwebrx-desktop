@@ -31,17 +31,36 @@ public class FFTPanel extends JComponent {
     private int bandwidth = 960000;
     private int centerFrequency = (int) 100e6f;
     private final List<TuningListener> listeners = new CopyOnWriteArrayList<>();
+    private boolean mouseDown = false;
+    private int mouseX = -1;
+
+    private int mouseY = -1;
+
     private int offset = 0;
     private int scope = (int) 150e3f;
-
     private int tuningStep = (int) 50e3f;
 
     public FFTPanel() {
         setCursor(new Cursor(Cursor.HAND_CURSOR));
         addMouseListener(new MouseAdapter() {
             @Override
+            public void mouseExited(MouseEvent e) {
+                mouseX = -1;
+                mouseY = -1;
+                repaint();
+            }
+
+            @Override
             public void mousePressed(MouseEvent e) {
+                mouseDown = true;
                 tune(calculateOffsetAtPoint(e.getX()));
+            }
+
+            @Override
+            public void mouseReleased(MouseEvent e) {
+                updateMouseCoordinates(e);
+                mouseDown = false;
+                repaint();
             }
         });
 
@@ -49,6 +68,12 @@ public class FFTPanel extends JComponent {
             @Override
             public void mouseDragged(MouseEvent e) {
                 tune(calculateOffsetAtPoint(e.getX()));
+            }
+
+            @Override
+            public void mouseMoved(MouseEvent e) {
+                updateMouseCoordinates(e);
+                repaint();
             }
         });
     }
@@ -150,6 +175,12 @@ public class FFTPanel extends JComponent {
 
         g2.setColor(TUNE);
         g2.drawLine((int) x, 0, (int) x, getLineHeight());
+
+        g2.setColor(TEXT_COLOR);
+        if (mouseX != -1 && mouseY != -1 && !mouseDown && mouseY < getLineHeight()) {
+            String freq = getDisplayFrequencyAt(mouseX, 100, true);
+            g2.drawString(freq, mouseX + 5, mouseY - 5);
+        }
     }
 
     private int calculateHerzPerPixel() {
@@ -169,7 +200,7 @@ public class FFTPanel extends JComponent {
         g2.drawLine(x, 0, x, getLineHeight());
 
         g2.setColor(TEXT_COLOR);
-        String displayFreq = Double.toString(getDisplayFrequencyAt(x));
+        String displayFreq = getDisplayFrequencyAt(x, 10, false);
 
         FontMetrics metrics = g2.getFontMetrics();
         int width = metrics.stringWidth(displayFreq);
@@ -181,18 +212,23 @@ public class FFTPanel extends JComponent {
         g2.setColor(BG);
     }
 
-    private double getDisplayFrequencyAt(int x) {
+    private String getDisplayFrequencyAt(int x, double accuracy, boolean drawUnits) {
         int freq = calculateOffsetAtPoint(x) + centerFrequency;
-        double divider = 1;
-        if (freq >= 1e6f)
-            divider = 1e6f;
-        else if (freq >= 1e3f) divider = 1e3f;
+        int divider = (int) 1e6f;
 
-        return (int) Math.round(freq / (divider / 10d)) / 10d;
+        StringBuilder str = new StringBuilder(
+                Double.toString((int) Math.round(freq / (divider / accuracy)) / accuracy));
+        if (drawUnits) str.append(" MHz");
+        return str.toString();
     }
 
     private int getLineHeight() {
         return getHeight() - 24;
+    }
+
+    private void updateMouseCoordinates(MouseEvent e) {
+        mouseX = Math.max(Math.min(getWidth(), e.getX()), 0);
+        mouseY = Math.max(Math.min(getHeight(), e.getY()), 0);
     }
 
     private static int calculateDrawingStep(double pxPerHz) {
