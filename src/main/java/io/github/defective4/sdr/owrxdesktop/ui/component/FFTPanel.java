@@ -3,7 +3,6 @@ package io.github.defective4.sdr.owrxdesktop.ui.component;
 import static java.awt.RenderingHints.*;
 
 import java.awt.Color;
-import java.awt.Cursor;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
@@ -52,9 +51,8 @@ public class FFTPanel extends JComponent {
     private int scopeUpper = (int) 10e3f;
     private boolean tuningReady;
     private int tuningStep = (int) 1e3f;
-    public FFTPanel() {
-        setCursor(new Cursor(Cursor.HAND_CURSOR));
 
+    public FFTPanel() {
         MouseAdapter adapter = new MouseAdapter() {
 
             @Override
@@ -103,12 +101,14 @@ public class FFTPanel extends JComponent {
     public boolean addListener(TuningListener listener) {
         return listeners.add(Objects.requireNonNull(listener));
     }
+
     public void drawFFT(float[] fft) {
         synchronized (fftLock) {
             this.fft = fft;
         }
         repaint();
     }
+
     public int getBandwidth() {
         return bandwidth;
     }
@@ -236,6 +236,16 @@ public class FFTPanel extends JComponent {
             drawFrequencyLine(g2, (int) x, LINE);
         }
 
+        double dy = 0;
+
+        double dbStep = calculatePixelPerDb() * 10d;
+
+        dy += dbStep;
+        while (dy < getLineHeight()) {
+            drawSignalLine(g2, (int) Math.round(dy), LINE);
+            dy += dbStep;
+        }
+
         x = (int) (pxPerHz * offset + center);
 
         g2.setColor(FFT_COLOR);
@@ -277,6 +287,11 @@ public class FFTPanel extends JComponent {
 
     }
 
+    private double calculateDbPerPixel() {
+        float diff = fftMax - fftMin;
+        return diff / (double) getLineHeight();
+    }
+
     private int calculateHerzPerPixel() {
         return (int) (bandwidth / (double) getWidth());
     }
@@ -285,8 +300,17 @@ public class FFTPanel extends JComponent {
         return Math.round(x * calculateHerzPerPixel() - bandwidth / 2);
     }
 
+    private double calculatePixelPerDb() {
+        float diff = fftMax - fftMin;
+        return getLineHeight() / diff;
+    }
+
     private double calculatePixelPerHerz() {
         return getWidth() / (double) bandwidth;
+    }
+
+    private int calculateSignalAtPoint(int y) {
+        return (int) Math.round(fftMax - y * calculateDbPerPixel());
     }
 
     private void drawFrequencyLine(Graphics2D g2, int x, Color color) {
@@ -304,6 +328,15 @@ public class FFTPanel extends JComponent {
             g2.drawString(displayFreq, textX, getLineHeight() + metrics.getHeight());
 
         g2.setColor(BG);
+    }
+
+    private void drawSignalLine(Graphics2D g2, int y, Color color) {
+        g2.setColor(color);
+        g2.drawLine(0, y, getWidth(), y);
+
+        String signal = Integer.toString(calculateSignalAtPoint(y));
+
+        if (y - 5 < getLineHeight()) g2.drawString(signal, 1, y - 5);
     }
 
     private String getDisplayFrequencyAt(int x, double accuracy, boolean drawUnits) {
