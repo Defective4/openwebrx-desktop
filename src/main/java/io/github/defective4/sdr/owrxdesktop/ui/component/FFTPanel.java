@@ -218,6 +218,15 @@ public class FFTPanel extends JComponent {
         g2.fillRect(0, getLineHeight(), getWidth(), getHeight());
         g2.drawLine(0, getLineHeight(), getWidth(), getLineHeight());
 
+        double dy = 0;
+        double dbStep = calculatePixelPerDb() * 10d;
+
+        dy += dbStep;
+        while (dy < getLineHeight()) {
+            drawSignalLine(g2, (int) Math.round(dy), LINE);
+            dy += dbStep;
+        }
+
         int center = getWidth() / 2;
         drawFrequencyLine(g2, center, LINE_CENTER);
 
@@ -234,16 +243,6 @@ public class FFTPanel extends JComponent {
         while (x > 0) {
             x -= pxPerHz * step;
             drawFrequencyLine(g2, (int) x, LINE);
-        }
-
-        double dy = 0;
-
-        double dbStep = calculatePixelPerDb() * 10d;
-
-        dy += dbStep;
-        while (dy < getLineHeight()) {
-            drawSignalLine(g2, (int) Math.round(dy), LINE);
-            dy += dbStep;
         }
 
         x = (int) (pxPerHz * offset + center);
