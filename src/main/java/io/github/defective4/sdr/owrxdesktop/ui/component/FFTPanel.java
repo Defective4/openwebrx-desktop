@@ -9,7 +9,7 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.event.MouseMotionAdapter;
+import java.awt.event.MouseWheelEvent;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -37,16 +37,30 @@ public class FFTPanel extends JComponent {
     private int mouseY = -1;
 
     private int offset = 0;
-    private int scope = (int) 150e3f;
+    private int scopeLower = (int) -75e3f;
+    private int scopeUpper = (int) 75e3f;
     private int tuningStep = (int) 50e3f;
 
     public FFTPanel() {
         setCursor(new Cursor(Cursor.HAND_CURSOR));
-        addMouseListener(new MouseAdapter() {
+
+        MouseAdapter adapter = new MouseAdapter() {
+
+            @Override
+            public void mouseDragged(MouseEvent e) {
+                tune(calculateOffsetAtPoint(e.getX()));
+            }
+
             @Override
             public void mouseExited(MouseEvent e) {
                 mouseX = -1;
                 mouseY = -1;
+                repaint();
+            }
+
+            @Override
+            public void mouseMoved(MouseEvent e) {
+                updateMouseCoordinates(e);
                 repaint();
             }
 
@@ -62,20 +76,16 @@ public class FFTPanel extends JComponent {
                 mouseDown = false;
                 repaint();
             }
-        });
-
-        addMouseMotionListener(new MouseMotionAdapter() {
-            @Override
-            public void mouseDragged(MouseEvent e) {
-                tune(calculateOffsetAtPoint(e.getX()));
-            }
 
             @Override
-            public void mouseMoved(MouseEvent e) {
-                updateMouseCoordinates(e);
-                repaint();
+            public void mouseWheelMoved(MouseWheelEvent e) {
+                if (e.getY() < getLineHeight()) tune(offset + -e.getWheelRotation() * tuningStep);
             }
-        });
+        };
+
+        addMouseListener(adapter);
+        addMouseMotionListener(adapter);
+        addMouseWheelListener(adapter);
     }
 
     public boolean addListener(TuningListener listener) {
@@ -98,8 +108,12 @@ public class FFTPanel extends JComponent {
         return offset;
     }
 
-    public int getScope() {
-        return scope;
+    public int getScopeLower() {
+        return scopeLower;
+    }
+
+    public int getScopeUpper() {
+        return scopeUpper;
     }
 
     public int getTuningStep() {
@@ -118,8 +132,12 @@ public class FFTPanel extends JComponent {
         this.centerFrequency = centerFrequency;
     }
 
-    public void setScope(int scope) {
-        this.scope = scope;
+    public void setScopeLower(int scopeLower) {
+        this.scopeLower = scopeLower;
+    }
+
+    public void setScopeUpper(int scopeUpper) {
+        this.scopeUpper = scopeUpper;
     }
 
     public void setTuningStep(int tuningStep) {
@@ -169,9 +187,9 @@ public class FFTPanel extends JComponent {
 
         g2.setColor(SCOPE);
 
-        int start = (int) Math.round(x - calculatePixelPerHerz() * scope / 2);
+        int start = (int) Math.round(x - calculatePixelPerHerz() * -scopeLower);
 
-        g2.fillRect(start, 0, (int) (calculatePixelPerHerz() * scope), getLineHeight());
+        g2.fillRect(start, 0, (int) (calculatePixelPerHerz() * (-scopeLower + scopeUpper)), getLineHeight());
 
         g2.setColor(TUNE);
         g2.drawLine((int) x, 0, (int) x, getLineHeight());
