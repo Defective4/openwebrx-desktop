@@ -31,23 +31,27 @@ public class FFTPanel extends JComponent {
 
     private int bandwidth = 968000;
     private int centerFrequency = (int) 1e6f;
+
     private float[] fft = new float[0];
+
     private final Object fftLock = new Object();
-    private final float fftMultiplier = 2;
+
+    private float fftMax = -20;
+
+    private float fftMin = -88;
 
     private final List<TuningListener> listeners = new CopyOnWriteArrayList<>();
-
     private boolean mouseDown = false;
-
     private int mouseX = -1;
     private int mouseY = -1;
+
     private int offset = 0;
+
     private int scopeLower = (int) -10e3f;
 
     private int scopeUpper = (int) 10e3f;
     private boolean tuningReady;
     private int tuningStep = (int) 1e3f;
-
     public FFTPanel() {
         setCursor(new Cursor(Cursor.HAND_CURSOR));
 
@@ -99,13 +103,26 @@ public class FFTPanel extends JComponent {
     public boolean addListener(TuningListener listener) {
         return listeners.add(Objects.requireNonNull(listener));
     }
-
+    public void drawFFT(float[] fft) {
+        synchronized (fftLock) {
+            this.fft = fft;
+        }
+        repaint();
+    }
     public int getBandwidth() {
         return bandwidth;
     }
 
     public int getCenterFrequency() {
         return centerFrequency;
+    }
+
+    public float getFftMax() {
+        return fftMax;
+    }
+
+    public float getFftMin() {
+        return fftMin;
     }
 
     public List<TuningListener> getListeners() {
@@ -146,11 +163,12 @@ public class FFTPanel extends JComponent {
         repaint();
     }
 
-    public void setFFT(float[] fft) {
-        synchronized (fftLock) {
-            this.fft = fft;
-        }
-        repaint();
+    public void setFFTMax(float fftMax) {
+        this.fftMax = fftMax;
+    }
+
+    public void setFFTMin(float fftMin) {
+        this.fftMin = fftMin;
     }
 
     public void setScopeLower(int scopeLower) {
@@ -227,7 +245,12 @@ public class FFTPanel extends JComponent {
             float prevVal = -1;
             if (fft.length > 0) for (int i = 0; i < fft.length; i++) {
                 int ix = (int) Math.round(i / (double) fft.length * getWidth());
-                int y = (int) (getLineHeight() - fft[i] * fftMultiplier);
+                float range = fftMax - fftMin;
+                float val = fftMax - fft[i];
+                double r = val / range;
+
+                int y = (int) (getLineHeight() * r);
+
                 if (prevVal != -1) {
                     g2.drawLine(prevX, (int) prevVal, ix, y);
                 }

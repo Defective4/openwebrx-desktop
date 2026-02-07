@@ -11,6 +11,7 @@ import io.github.defective4.sdr.owrxclient.client.OpenWebRXClient;
 import io.github.defective4.sdr.owrxclient.event.OWRXAdapter;
 import io.github.defective4.sdr.owrxclient.model.ReceiverProfile;
 import io.github.defective4.sdr.owrxclient.model.ServerConfig;
+import io.github.defective4.sdr.owrxclient.model.WaterfallLevels;
 import io.github.defective4.sdr.owrxdesktop.ui.ReceiverWindow;
 import io.github.defective4.sdr.owrxdesktop.ui.component.FFTPanel;
 
@@ -26,12 +27,7 @@ public class Main {
 
                 @Override
                 public void fftUpdated(float[] fft) {
-                    float[] converted = new float[fft.length];
-                    for (int i = 0; i < fft.length; i++) {
-                        float f = 100 + fft[i];
-                        converted[i] = f;
-                    }
-                    window.getFFTPanel().setFFT(converted);
+                    window.getFFTPanel().drawFFT(fft);
                 }
 
                 @Override
@@ -52,10 +48,17 @@ public class Main {
                     if(config.startModulation()!=null) {
                         int low = config.startModulation().getLowPass().orElse(-10000);
                         int high = config.startModulation().getHighPass().orElse(10000);
-                        
+
                         fftPanel.setScopeLower(low);
                         fftPanel.setScopeUpper(high);
                     }
+
+                    if(config.waterfallLevels()!=null) {
+                        WaterfallLevels levels = config.waterfallLevels();
+                        fftPanel.setFFTMax(levels.max());
+                        fftPanel.setFFTMin(levels.min());
+                    }
+
 
                     fftPanel.setTuningReady(true);
                 }
