@@ -28,15 +28,19 @@ public class FFTPanel extends JComponent {
     private static final Color TEXT_COLOR = Color.white;
     private static final Color TUNE = Color.red;
 
-    private int bandwidth = 960000;
-    private int centerFrequency = (int) 100e6f;
+    private int bandwidth = (int) 2.4e6f;
+    private int centerFrequency = (int) 101e6f;
+    private float[] fft = new float[0];
+    private final Object fftLock = new Object();
+    private final float fftMultiplier = 2;
+
     private final List<TuningListener> listeners = new CopyOnWriteArrayList<>();
+
     private boolean mouseDown = false;
     private int mouseX = -1;
-
     private int mouseY = -1;
-
     private int offset = 0;
+
     private int scopeLower = (int) -75e3f;
     private int scopeUpper = (int) 75e3f;
     private int tuningStep = (int) 50e3f;
@@ -86,6 +90,7 @@ public class FFTPanel extends JComponent {
         addMouseListener(adapter);
         addMouseMotionListener(adapter);
         addMouseWheelListener(adapter);
+
     }
 
     public boolean addListener(TuningListener listener) {
@@ -130,6 +135,13 @@ public class FFTPanel extends JComponent {
 
     public void setCenterFrequency(int centerFrequency) {
         this.centerFrequency = centerFrequency;
+    }
+
+    public void setFFT(float[] fft) {
+        synchronized (fftLock) {
+            this.fft = fft;
+        }
+        repaint();
     }
 
     public void setScopeLower(int scopeLower) {
@@ -198,6 +210,20 @@ public class FFTPanel extends JComponent {
         if (mouseX != -1 && mouseY != -1 && !mouseDown && mouseY < getLineHeight()) {
             String freq = getDisplayFrequencyAt(mouseX, 100, true);
             g2.drawString(freq, mouseX + 5, mouseY - 5);
+        }
+
+        synchronized (fftLock) {
+            int prevX = 0;
+            float prevVal = -1;
+            if (fft.length > 0) for (int i = 0; i < fft.length; i++) {
+                int ix = (int) Math.round(i / (double) fft.length * getWidth());
+                int y = (int) (getLineHeight() - fft[i] * fftMultiplier);
+                if (prevVal != -1) {
+                    g2.drawLine(prevX, (int) prevVal, ix, y);
+                }
+                prevVal = y;
+                prevX = ix;
+            }
         }
     }
 

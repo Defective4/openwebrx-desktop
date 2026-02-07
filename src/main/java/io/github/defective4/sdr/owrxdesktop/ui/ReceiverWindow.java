@@ -9,6 +9,8 @@ import io.github.defective4.sdr.owrxdesktop.ui.component.FFTPanel;
 
 public class ReceiverWindow extends JFrame {
 
+    private final FFTPanel panel;
+
     public ReceiverWindow() {
         setBounds(100, 100, 768, 468);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -21,9 +23,13 @@ public class ReceiverWindow extends JFrame {
         JPanel controlPanel = new JPanel();
         splitPane.setRightComponent(controlPanel);
 
-        FFTPanel panel = new FFTPanel();
+        panel = new FFTPanel();
         splitPane.setLeftComponent(panel);
 
+    }
+
+    public FFTPanel getFFTPanel() {
+        return panel;
     }
 
 }
