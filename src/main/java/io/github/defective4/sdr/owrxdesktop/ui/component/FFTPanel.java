@@ -42,9 +42,9 @@ public class FFTPanel extends JComponent {
     private int mouseX = -1;
     private int mouseY = -1;
     private int offset = 0;
-    private int scopeLower = (int) -75e3f;
+    private int scopeLower = (int) -10e3f;
 
-    private int scopeUpper = (int) 75e3f;
+    private int scopeUpper = (int) 10e3f;
     private boolean tuningReady;
     private int tuningStep = (int) 1e3f;
 
@@ -220,6 +220,22 @@ public class FFTPanel extends JComponent {
 
         x = (int) (pxPerHz * offset + center);
 
+        g2.setColor(FFT_COLOR);
+
+        synchronized (fftLock) {
+            int prevX = 0;
+            float prevVal = -1;
+            if (fft.length > 0) for (int i = 0; i < fft.length; i++) {
+                int ix = (int) Math.round(i / (double) fft.length * getWidth());
+                int y = (int) (getLineHeight() - fft[i] * fftMultiplier);
+                if (prevVal != -1) {
+                    g2.drawLine(prevX, (int) prevVal, ix, y);
+                }
+                prevVal = y;
+                prevX = ix;
+            }
+        }
+
         if (tuningReady) {
             g2.setColor(SCOPE);
             int start = (int) Math.round(x - calculatePixelPerHerz() * -scopeLower);
@@ -236,21 +252,6 @@ public class FFTPanel extends JComponent {
             }
         }
 
-        g2.setColor(FFT_COLOR);
-
-        synchronized (fftLock) {
-            int prevX = 0;
-            float prevVal = -1;
-            if (fft.length > 0) for (int i = 0; i < fft.length; i++) {
-                int ix = (int) Math.round(i / (double) fft.length * getWidth());
-                int y = (int) (getLineHeight() - fft[i] * fftMultiplier);
-                if (prevVal != -1) {
-                    g2.drawLine(prevX, (int) prevVal, ix, y);
-                }
-                prevVal = y;
-                prevX = ix;
-            }
-        }
     }
 
     private int calculateHerzPerPixel() {
