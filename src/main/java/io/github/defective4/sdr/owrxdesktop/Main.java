@@ -42,6 +42,8 @@ public class Main {
 //                    if (config.startOffsetFrequency() != null) {
 //                        fftPanel.tune(config.startOffsetFrequency(), false);
 //                    }
+//
+//                    fftPanel.setTuningReady(true);
 //                }
 //            });
 //            client.connect();

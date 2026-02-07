@@ -21,6 +21,7 @@ import io.github.defective4.sdr.owrxdesktop.ui.event.TuningListener;
 
 public class FFTPanel extends JComponent {
     private static final Color BG = Color.decode("#1F1D1D");
+    private static final Color FFT_COLOR = Color.white;
     private static final Color FREQ_BAR = Color.decode("#282525");
     private static final Color LINE = Color.decode("#3F3B3B");
     private static final Color LINE_CENTER = Color.white;
@@ -37,12 +38,14 @@ public class FFTPanel extends JComponent {
     private final List<TuningListener> listeners = new CopyOnWriteArrayList<>();
 
     private boolean mouseDown = false;
+
     private int mouseX = -1;
     private int mouseY = -1;
     private int offset = 0;
-
     private int scopeLower = (int) -75e3f;
+
     private int scopeUpper = (int) 75e3f;
+    private boolean tuningReady;
     private int tuningStep = (int) 1e3f;
 
     public FFTPanel() {
@@ -125,6 +128,10 @@ public class FFTPanel extends JComponent {
         return tuningStep;
     }
 
+    public boolean isTuningReady() {
+        return tuningReady;
+    }
+
     public boolean removeListener(TuningListener listener) {
         return listeners.remove(listener);
     }
@@ -154,6 +161,11 @@ public class FFTPanel extends JComponent {
         this.scopeUpper = scopeUpper;
     }
 
+    public void setTuningReady(boolean tuningReady) {
+        this.tuningReady = tuningReady;
+        repaint();
+    }
+
     public void setTuningStep(int tuningStep) {
         this.tuningStep = tuningStep;
         repaint();
@@ -164,6 +176,10 @@ public class FFTPanel extends JComponent {
     }
 
     public void tune(int offset, boolean fireEvents) {
+        if (!tuningReady) {
+            repaint();
+            return;
+        }
         this.offset = (int) Math.round(offset / (double) tuningStep) * tuningStep;
         int bound = bandwidth / 2;
         if (this.offset > bound) this.offset = (int) (Math.floor(bound / (double) tuningStep) * tuningStep);
@@ -204,20 +220,23 @@ public class FFTPanel extends JComponent {
 
         x = (int) (pxPerHz * offset + center);
 
-        g2.setColor(SCOPE);
+        if (tuningReady) {
+            g2.setColor(SCOPE);
+            int start = (int) Math.round(x - calculatePixelPerHerz() * -scopeLower);
 
-        int start = (int) Math.round(x - calculatePixelPerHerz() * -scopeLower);
+            g2.fillRect(start, 0, (int) (calculatePixelPerHerz() * (-scopeLower + scopeUpper)), getLineHeight());
 
-        g2.fillRect(start, 0, (int) (calculatePixelPerHerz() * (-scopeLower + scopeUpper)), getLineHeight());
+            g2.setColor(TUNE);
+            g2.drawLine((int) x, 0, (int) x, getLineHeight());
 
-        g2.setColor(TUNE);
-        g2.drawLine((int) x, 0, (int) x, getLineHeight());
-
-        g2.setColor(TEXT_COLOR);
-        if (mouseX != -1 && mouseY != -1 && !mouseDown && mouseY < getLineHeight()) {
-            String freq = getDisplayFrequencyAt(mouseX, 100, true);
-            g2.drawString(freq, mouseX + 5, mouseY - 5);
+            g2.setColor(TEXT_COLOR);
+            if (mouseX != -1 && mouseY != -1 && !mouseDown && mouseY < getLineHeight()) {
+                String freq = getDisplayFrequencyAt(mouseX, 100, true);
+                g2.drawString(freq, mouseX + 5, mouseY - 5);
+            }
         }
+
+        g2.setColor(FFT_COLOR);
 
         synchronized (fftLock) {
             int prevX = 0;
