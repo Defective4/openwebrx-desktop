@@ -3,7 +3,6 @@ package io.github.defective4.sdr.owrxdesktop.ui.component;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
-import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
 import java.util.ArrayDeque;
 import java.util.Deque;
@@ -12,11 +11,9 @@ import java.util.Objects;
 public class WaterfallPanel extends TuneablePanel implements FFTVisualizer {
 
     private int fftDecimation = 1;
+    private final Deque<BufferedImage> fftLines = new ArrayDeque<>();
     private float fftMax = -20;
     private float fftMin = -88;
-    private final Deque<float[]> fftQueue = new ArrayDeque<>();
-
-    private BufferedImage lineBuffer;
 
     private final Color[] theme;
 
@@ -25,16 +22,25 @@ public class WaterfallPanel extends TuneablePanel implements FFTVisualizer {
     }
 
     @Override
-    public void drawFFT(float[] fft) {
-        synchronized (fftQueue) {
-            if (!fftQueue.isEmpty()) {
-                if (fft.length != fftQueue.element().length) fftQueue.clear();
-            }
-            fftQueue.addFirst(fft);
-            if (fftQueue.size() > getLineHeight() / 2) {
-                fftQueue.removeLast();
+    public void drawFFT(float[] raw) {
+        float[] fft = fftDecimation == 1 ? raw : decimateFFT(raw, fftDecimation);
+        BufferedImage image = new BufferedImage(fft.length, 1, BufferedImage.TYPE_INT_RGB);
+
+        for (int i = 0; i < fft.length; i++) {
+            float element = fft[i];
+            double ratio = calculateFFTValueInRange(element) / calculateFFTRange();
+            Color color = theme[theme.length - 1 - (int) Math.max(0, Math.round((theme.length - 1) * ratio))];
+            image.setRGB(i, 0, color.getRGB());
+        }
+
+        synchronized (fftLines) {
+            if (!fftLines.isEmpty() && fftLines.peekFirst().getWidth() != fft.length) fftLines.clear();
+            fftLines.addFirst(image);
+            while (fftLines.size() > getLineHeight()) {
+                fftLines.removeLast();
             }
         }
+
         repaint();
     }
 
@@ -77,36 +83,13 @@ public class WaterfallPanel extends TuneablePanel implements FFTVisualizer {
     @Override
     protected void paintComponent(Graphics graphics) {
         Graphics2D g2 = (Graphics2D) graphics;
-        g2.setRenderingHint(RenderingHints.KEY_DITHERING, RenderingHints.VALUE_DITHER_ENABLE);
-        g2.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
         g2.setColor(BG);
         g2.fillRect(0, 0, getWidth(), getHeight());
-        synchronized (fftQueue) {
-            if (fftQueue.isEmpty()) return;
-            int fftSize = fftQueue.element().length;
-            int decimation = (int) Math.max(1, Math.floor(fftSize / (double) getWidth())) + fftDecimation - 1;
-            fftSize = fftSize / decimation;
-            double pixelSpacing = getWidth() / (double) fftSize;
-            int pixelWidth = (int) Math.max(Math.ceil(pixelSpacing), 1);
-            int lineWidth = (int) Math.ceil(pixelWidth * (double) fftSize);
-            if (lineBuffer == null || lineBuffer.getWidth() != lineWidth)
-                lineBuffer = new BufferedImage(lineWidth, 1, BufferedImage.TYPE_INT_RGB);
-            int y = 0;
-            for (float[] rawFFT : fftQueue) {
-                float[] fft = decimation > 1 ? decimateFFT(rawFFT, decimation) : rawFFT;
-                for (int i = 0; i < fft.length; i++) {
-                    float fftElement = fft[i];
-                    float range = calculateFFTRange();
-                    float valInRange = calculateFFTValueInRange(fftElement);
-                    double ratio = valInRange / range;
-                    Color color = theme[theme.length - 1 - (int) Math.round(Math.max((theme.length - 1) * ratio, 0))];
 
-                    int x = (int) Math.round(i * pixelSpacing);
-                    for (int j = 0; j < pixelWidth; j++) {
-                        lineBuffer.setRGB(x + j, 0, color.getRGB());
-                    }
-                }
-                g2.drawImage(lineBuffer, 0, y += 2, lineWidth, 2, null);
+        int y = 0;
+        synchronized (fftLines) {
+            for (BufferedImage line : fftLines) {
+                g2.drawImage(line, 0, y++, getWidth(), 1, null);
             }
         }
     }

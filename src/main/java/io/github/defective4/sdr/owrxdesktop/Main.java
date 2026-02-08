@@ -84,7 +84,8 @@ public class Main {
 //                        fft[i] = Math.max(min, last);
 //                    }
 //
-//                    window.getPanel().drawFFT(fft);
+//                    long start = System.nanoTime();
+//                    fftPanel.drawFFT(fft);
 //                }
 //            }, 100, 100);
         } catch (Exception e) {
