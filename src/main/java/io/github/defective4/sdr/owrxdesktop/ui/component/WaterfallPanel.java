@@ -22,15 +22,6 @@ public class WaterfallPanel extends TuneablePanel implements FFTVisualizer {
         drawScope = false;
     }
 
-    public Color[] getTheme() {
-        return theme;
-    }
-
-    public void setTheme(Color[] theme) {
-        if (theme.length < 1) throw new IllegalArgumentException("A theme must contain at least one color");
-        this.theme = Objects.requireNonNull(theme);
-    }
-
     @Override
     public void drawFFT(float[] raw) {
         float[] fft = fftDecimation == 1 ? raw : decimateFFT(raw, fftDecimation);
@@ -73,6 +64,10 @@ public class WaterfallPanel extends TuneablePanel implements FFTVisualizer {
         return getHeight();
     }
 
+    public Color[] getTheme() {
+        return theme;
+    }
+
     public void setFFTDecimation(int fftDecimation) {
         if (fftDecimation < 1) throw new IllegalArgumentException("FFT Decimation can't be less than 1");
         this.fftDecimation = fftDecimation;
@@ -88,6 +83,11 @@ public class WaterfallPanel extends TuneablePanel implements FFTVisualizer {
     public void setFFTMin(float max) {
         fftMax = max;
         repaint();
+    }
+
+    public void setTheme(Color[] theme) {
+        if (theme.length < 1) throw new IllegalArgumentException("A theme must contain at least one color");
+        this.theme = Objects.requireNonNull(theme);
     }
 
     @Override

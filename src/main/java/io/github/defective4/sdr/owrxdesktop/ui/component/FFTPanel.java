@@ -11,27 +11,17 @@ public class FFTPanel extends TuneablePanel implements FFTVisualizer {
     private static final Color FREQ_BAR = Color.decode("#282525");
     private static final Color LINE = Color.decode("#3F3B3B");
     private static final Color LINE_CENTER = Color.white;
-    private boolean solid;
-
-    public boolean isSolid() {
-        return solid;
-    }
-
-    public void setSolid(boolean solid) {
-        this.solid = solid;
-    }
-
     private float[] fft = new float[0];
 
     private final Object fftLock = new Object();
 
     private float fftMax = -20;
+
     private float fftMin = -88;
 
-    public FFTPanel() {
+    private boolean solid;
 
-    }
-
+    public FFTPanel() {}
     @Override
     public void drawFFT(float[] fft) {
         synchronized (fftLock) {
@@ -55,6 +45,10 @@ public class FFTPanel extends TuneablePanel implements FFTVisualizer {
         return getHeight() - 24;
     }
 
+    public boolean isSolid() {
+        return solid;
+    }
+
     @Override
     public void setFFTMax(float fftMax) {
         this.fftMax = fftMax;
@@ -63,6 +57,10 @@ public class FFTPanel extends TuneablePanel implements FFTVisualizer {
     @Override
     public void setFFTMin(float fftMin) {
         this.fftMin = fftMin;
+    }
+
+    public void setSolid(boolean solid) {
+        this.solid = solid;
     }
 
     @Override

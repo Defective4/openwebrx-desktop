@@ -36,7 +36,7 @@ public class Main {
                 @Override
                 public void receiverProfilesUpdated(ReceiverProfile[] profiles) {
                     client.switchProfile(Arrays.stream(profiles)
-                            .filter(profile -> profile.name().equals("RTL-SDR Broadcast FM 100-102 MHz")).findAny()
+                            .filter(profile -> profile.name().equals("RTL-SDR 80m")).findAny()
                             .get());
                 }
 
@@ -87,8 +87,7 @@ public class Main {
 //                        fft[i] = Math.max(min, last);
 //                    }
 //
-//                    long start = System.nanoTime();
-//                    fftPanel.drawFFT(fft);
+//                    rxWindow.drawFFT(fft);
 //                }
 //            }, 100, 100);
         } catch (Exception e) {

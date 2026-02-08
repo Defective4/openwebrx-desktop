@@ -1,7 +1,9 @@
 package io.github.defective4.sdr.owrxdesktop.ui.component;
 
 import java.awt.Color;
+import java.awt.Cursor;
 import java.awt.Graphics;
+import java.awt.Rectangle;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseWheelEvent;
@@ -39,12 +41,26 @@ public abstract class TuneablePanel extends JComponent implements FFTVisualizer 
     public TuneablePanel() {
         MouseAdapter adapter = new MouseAdapter() {
 
+            private final Cursor DEFAULT = new Cursor(Cursor.DEFAULT_CURSOR);
+
+            private int dragX = 0;
+
+            private final Cursor RESIZE = new Cursor(Cursor.MOVE_CURSOR);
+
+            private boolean tuneMode = false;
             @Override
             public void mouseDragged(MouseEvent e) {
+                if (tuneMode)
+                    tune(calculateOffsetAtPoint(e.getX()));
+                else {
+                    int xMod = e.getXOnScreen() - dragX;
+                    Rectangle bounds = getBounds();
+                    setBounds(bounds.x + xMod, bounds.y, bounds.width, bounds.height);
+                    dragX = e.getXOnScreen();
+                    listeners.forEach(ls -> ls.zoomChanged(bounds.x, bounds.width));
+                }
                 updateMouseCoordinates(e);
-                tune(calculateOffsetAtPoint(e.getX()));
             }
-
             @Override
             public void mouseExited(MouseEvent e) {
                 mouseX = -1;
@@ -55,13 +71,23 @@ public abstract class TuneablePanel extends JComponent implements FFTVisualizer 
             @Override
             public void mouseMoved(MouseEvent e) {
                 updateMouseCoordinates(e);
+                if (e.getY() > getLineHeight()) {
+                    setCursor(RESIZE);
+                } else {
+                    setCursor(DEFAULT);
+                }
                 repaint();
             }
 
             @Override
             public void mousePressed(MouseEvent e) {
                 mouseDown = true;
-                tune(calculateOffsetAtPoint(e.getX()));
+                tuneMode = e.getY() <= getLineHeight();
+                if (tuneMode) {
+                    tune(calculateOffsetAtPoint(e.getX()));
+                } else {
+                    dragX = e.getXOnScreen();
+                }
             }
 
             @Override
@@ -73,7 +99,18 @@ public abstract class TuneablePanel extends JComponent implements FFTVisualizer 
 
             @Override
             public void mouseWheelMoved(MouseWheelEvent e) {
-                if (e.getY() < getLineHeight()) tune(offset + -e.getWheelRotation() * tuningStep);
+                if (e.getY() <= getLineHeight())
+                    tune(offset + -e.getWheelRotation() * tuningStep);
+                else {
+                    double ratio = e.getX() / (double) getWidth();
+                    int width = Math.max(getWidth() + getWidth() / 2 * -e.getWheelRotation(), getParent().getWidth());
+                    int x = getBounds().x - (int) (getWidth() / 2 * ratio) * -e.getWheelRotation();
+                    if (width == getParent().getWidth()) x = 0;
+                    if (x > 0) x = 0;
+                    int fx = x;
+                    setBounds(x, getY(), width, getHeight());
+                    listeners.forEach(ls -> ls.zoomChanged(fx, width));
+                }
             }
         };
 

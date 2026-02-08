@@ -11,14 +11,12 @@ import javax.swing.JSplitPane;
 import io.github.defective4.sdr.owrxdesktop.ui.component.FFTPanel;
 import io.github.defective4.sdr.owrxdesktop.ui.component.TuneablePanel;
 import io.github.defective4.sdr.owrxdesktop.ui.component.WaterfallPanel;
-import io.github.defective4.sdr.owrxdesktop.ui.event.TuningListener;
+import io.github.defective4.sdr.owrxdesktop.ui.event.TuningAdapter;
 
 public class ReceiverWindow extends JFrame {
 
     private final FFTPanel fftPanel;
     private final WaterfallPanel waterfallPanel;
-
-
 
     public ReceiverWindow() {
         setBounds(100, 100, 768, 468);
@@ -48,18 +46,25 @@ public class ReceiverWindow extends JFrame {
 
         fftPane.setRightComponent(waterfallPanel);
 
-        waterfallPanel.addListener(new TuningListener() {
+        waterfallPanel.addListener(new TuningAdapter() {
             @Override
             public void tuned(int offset) {
                 fftPanel.tune(offset, false);
             }
         });
 
-        fftPanel.addListener(new TuningListener() {
+        fftPanel.addListener(new TuningAdapter() {
             @Override
             public void tuned(int offset) {
                 waterfallPanel.tune(offset, false);
             }
+
+            @Override
+            public void zoomChanged(int x, int width) {
+                waterfallPanel.setBounds(x, waterfallPanel.getY(), width, getHeight());
+                waterfallPanel.invalidate();
+            }
+
         });
     }
 
