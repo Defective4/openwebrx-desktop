@@ -11,6 +11,15 @@ public class FFTPanel extends TuneablePanel implements FFTVisualizer {
     private static final Color FREQ_BAR = Color.decode("#282525");
     private static final Color LINE = Color.decode("#3F3B3B");
     private static final Color LINE_CENTER = Color.white;
+    private boolean solid;
+
+    public boolean isSolid() {
+        return solid;
+    }
+
+    public void setSolid(boolean solid) {
+        this.solid = solid;
+    }
 
     private float[] fft = new float[0];
 
@@ -108,11 +117,15 @@ public class FFTPanel extends TuneablePanel implements FFTVisualizer {
 
                 int y = (int) (getLineHeight() * r);
 
-                if (prevVal != -1) {
-                    g2.drawLine(prevX, (int) prevVal, ix, y);
+                if (solid) {
+                    g2.drawLine(ix, getLineHeight(), ix, y);
+                } else {
+                    if (prevVal != -1) {
+                        g2.drawLine(prevX, (int) prevVal, ix, y);
+                    }
+                    prevVal = y;
+                    prevX = ix;
                 }
-                prevVal = y;
-                prevX = ix;
             }
         }
 
