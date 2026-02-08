@@ -15,6 +15,7 @@ import javax.swing.JComponent;
 import io.github.defective4.sdr.owrxdesktop.ui.event.TuningListener;
 
 public abstract class TuneablePanel extends JComponent {
+    protected static final Color BG = Color.decode("#1F1D1D");
     protected static final Color TEXT_COLOR = Color.white;
     private static final Color SCOPE = new Color(255, 255, 255, 50);
     private static final Color TUNE = Color.red;
@@ -202,9 +203,11 @@ public abstract class TuneablePanel extends JComponent {
             }
         }
     }
+
     private int calculateHerzPerPixel() {
         return (int) (bandwidth / (double) getWidth());
     }
+
     private int calculateOffsetAtPoint(int x) {
         return Math.round(x * calculateHerzPerPixel() - bandwidth / 2);
     }

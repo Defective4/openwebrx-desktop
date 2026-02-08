@@ -7,8 +7,7 @@ import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 
-public class FFTPanel extends TuneablePanel {
-    private static final Color BG = Color.decode("#1F1D1D");
+public class FFTPanel extends TuneablePanel implements FFTVisualizer {
     private static final Color FFT_COLOR = Color.white;
     private static final Color FREQ_BAR = Color.decode("#282525");
     private static final Color LINE = Color.decode("#3F3B3B");
@@ -25,6 +24,7 @@ public class FFTPanel extends TuneablePanel {
 
     }
 
+    @Override
     public void drawFFT(float[] fft) {
         synchronized (fftLock) {
             this.fft = fft;
@@ -32,11 +32,13 @@ public class FFTPanel extends TuneablePanel {
         repaint();
     }
 
-    public float getFftMax() {
+    @Override
+    public float getFFTMax() {
         return fftMax;
     }
 
-    public float getFftMin() {
+    @Override
+    public float getFFTMin() {
         return fftMin;
     }
 
@@ -45,10 +47,12 @@ public class FFTPanel extends TuneablePanel {
         return getHeight() - 24;
     }
 
+    @Override
     public void setFFTMax(float fftMax) {
         this.fftMax = fftMax;
     }
 
+    @Override
     public void setFFTMin(float fftMin) {
         this.fftMin = fftMin;
     }
@@ -99,9 +103,9 @@ public class FFTPanel extends TuneablePanel {
             float prevVal = -1;
             if (fft.length > 0) for (int i = 0; i < fft.length; i++) {
                 int ix = (int) Math.round(i / (double) fft.length * getWidth());
-                float range = fftMax - fftMin;
-                float val = fftMax - fft[i];
-                double r = val / range;
+                float range = calculateFFTRange();
+                float valueInRange = calculateFFTValueInRange(fft[i]);
+                double r = valueInRange / range;
 
                 int y = (int) (getLineHeight() * r);
 
@@ -114,20 +118,6 @@ public class FFTPanel extends TuneablePanel {
         }
 
         super.paintComponent(graphics);
-    }
-
-    private double calculateDbPerPixel() {
-        float diff = fftMax - fftMin;
-        return diff / (double) getLineHeight();
-    }
-
-    private double calculatePixelPerDb() {
-        float diff = fftMax - fftMin;
-        return getLineHeight() / diff;
-    }
-
-    private int calculateSignalAtPoint(int y) {
-        return (int) Math.round(fftMax - y * calculateDbPerPixel());
     }
 
     private void drawFrequencyLine(Graphics2D g2, int x, Color color) {
