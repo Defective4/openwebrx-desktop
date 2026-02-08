@@ -3,6 +3,7 @@ package io.github.defective4.sdr.owrxdesktop.ui.component;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
 import java.util.ArrayDeque;
 import java.util.Deque;
@@ -76,6 +77,8 @@ public class WaterfallPanel extends TuneablePanel implements FFTVisualizer {
     @Override
     protected void paintComponent(Graphics graphics) {
         Graphics2D g2 = (Graphics2D) graphics;
+        g2.setRenderingHint(RenderingHints.KEY_DITHERING, RenderingHints.VALUE_DITHER_ENABLE);
+        g2.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
         g2.setColor(BG);
         g2.fillRect(0, 0, getWidth(), getHeight());
         synchronized (fftQueue) {
