@@ -14,7 +14,7 @@ import javax.swing.JComponent;
 
 import io.github.defective4.sdr.owrxdesktop.ui.event.TuningListener;
 
-public abstract class TuneablePanel extends JComponent {
+public abstract class TuneablePanel extends JComponent implements FFTVisualizer {
     protected static final Color BG = Color.decode("#1F1D1D");
     protected static final Color TEXT_COLOR = Color.white;
     private static final Color SCOPE = new Color(255, 255, 255, 50);
@@ -92,6 +92,7 @@ public abstract class TuneablePanel extends JComponent {
         return centerFrequency;
     }
 
+    @Override
     public abstract int getLineHeight();
 
     public List<TuningListener> getListeners() {

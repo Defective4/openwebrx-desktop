@@ -12,20 +12,17 @@ import io.github.defective4.sdr.owrxclient.event.OWRXAdapter;
 import io.github.defective4.sdr.owrxclient.model.ReceiverProfile;
 import io.github.defective4.sdr.owrxclient.model.ServerConfig;
 import io.github.defective4.sdr.owrxdesktop.ui.ReceiverWindow;
-import io.github.defective4.sdr.owrxdesktop.ui.component.WaterfallPanel;
 
 public class Main {
     public static void main(String[] args) {
         try {
             UIManager.setLookAndFeel(new FlatDarkLaf());
-            ReceiverWindow window = new ReceiverWindow();
-            window.setVisible(true);
-            WaterfallPanel fftPanel = window.getPanel();
+            ReceiverWindow fftPanel = new ReceiverWindow();
+            fftPanel.setVisible(true);
             fftPanel.setTuningStep((int) 50e3f);
             fftPanel.setCenterFrequency((int) 100e6);
             fftPanel.setScopeLower((int) -75e3f);
             fftPanel.setScopeUpper((int) 75e3f);
-            fftPanel.setFFTDecimation(1);
             fftPanel.setTuningReady(true);
 
             OpenWebRXClient client = new OpenWebRXClient(URI.create("wss://radio.raspberry.local/ws/"));
