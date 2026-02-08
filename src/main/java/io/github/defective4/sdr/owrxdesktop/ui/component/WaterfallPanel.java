@@ -3,6 +3,7 @@ package io.github.defective4.sdr.owrxdesktop.ui.component;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
 import java.util.ArrayDeque;
 import java.util.Deque;
@@ -19,6 +20,7 @@ public class WaterfallPanel extends TuneablePanel implements FFTVisualizer {
 
     public WaterfallPanel(Color... theme) {
         this.theme = Objects.requireNonNull(theme);
+        drawScope = false;
     }
 
     @Override
@@ -83,6 +85,7 @@ public class WaterfallPanel extends TuneablePanel implements FFTVisualizer {
     @Override
     protected void paintComponent(Graphics graphics) {
         Graphics2D g2 = (Graphics2D) graphics;
+        g2.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_LCD_HRGB);
         g2.setColor(BG);
         g2.fillRect(0, 0, getWidth(), getHeight());
 
@@ -92,6 +95,9 @@ public class WaterfallPanel extends TuneablePanel implements FFTVisualizer {
                 g2.drawImage(line, 0, y++, getWidth(), 1, null);
             }
         }
+
+        graphics.setFont(graphics.getFont().deriveFont(12f));
+        super.paintComponent(graphics);
     }
 
     private static float[] decimateFFT(float[] fft, int decimation) {

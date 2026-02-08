@@ -1,11 +1,10 @@
 package io.github.defective4.sdr.owrxdesktop.ui.component;
 
-import static java.awt.RenderingHints.*;
-
 import java.awt.Color;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.RenderingHints;
 
 public class FFTPanel extends TuneablePanel implements FFTVisualizer {
     private static final Color FFT_COLOR = Color.white;
@@ -60,9 +59,9 @@ public class FFTPanel extends TuneablePanel implements FFTVisualizer {
     @Override
     protected void paintComponent(Graphics graphics) {
         Graphics2D g2 = (Graphics2D) graphics;
+        g2.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_LCD_HRGB);
         g2.setColor(BG);
         g2.fillRect(0, 0, getWidth(), getHeight());
-        g2.setRenderingHint(KEY_TEXT_ANTIALIASING, VALUE_TEXT_ANTIALIAS_LCD_HRGB);
         g2.setFont(g2.getFont().deriveFont(12f));
 
         g2.setColor(LINE);

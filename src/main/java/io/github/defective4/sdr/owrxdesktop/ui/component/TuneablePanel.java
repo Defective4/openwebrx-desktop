@@ -21,6 +21,7 @@ public abstract class TuneablePanel extends JComponent implements FFTVisualizer 
     private static final Color TUNE = Color.red;
     protected int bandwidth = 968000;
     protected int centerFrequency = (int) 1e6f;
+    protected boolean drawScope = true;
     protected boolean mouseDown = false;
 
     protected int mouseX = -1;
@@ -40,6 +41,7 @@ public abstract class TuneablePanel extends JComponent implements FFTVisualizer 
 
             @Override
             public void mouseDragged(MouseEvent e) {
+                updateMouseCoordinates(e);
                 tune(calculateOffsetAtPoint(e.getX()));
             }
 
@@ -181,24 +183,24 @@ public abstract class TuneablePanel extends JComponent implements FFTVisualizer 
     }
 
     @Override
-    protected void paintComponent(Graphics graphics) {
-        Graphics g2 = graphics;
-
+    protected void paintComponent(Graphics g2) {
         double pxPerHz = calculatePixelPerHerz();
         int center = getWidth() / 2;
 
         int x = (int) (pxPerHz * offset + center);
         if (tuningReady) {
-            g2.setColor(SCOPE);
-            int start = (int) Math.round(x - calculatePixelPerHerz() * -scopeLower);
+            if (drawScope) {
+                g2.setColor(SCOPE);
+                int start = (int) Math.round(x - calculatePixelPerHerz() * -scopeLower);
 
-            g2.fillRect(start, 0, (int) (calculatePixelPerHerz() * (-scopeLower + scopeUpper)), getLineHeight());
+                g2.fillRect(start, 0, (int) (calculatePixelPerHerz() * (-scopeLower + scopeUpper)), getLineHeight());
 
-            g2.setColor(TUNE);
-            g2.drawLine(x, 0, x, getLineHeight());
+                g2.setColor(TUNE);
+                g2.drawLine(x, 0, x, getLineHeight());
+            }
 
             g2.setColor(TEXT_COLOR);
-            if (mouseX != -1 && mouseY != -1 && !mouseDown && mouseY < getLineHeight()) {
+            if (mouseX != -1 && mouseY != -1 && (!drawScope || !mouseDown) && mouseY < getLineHeight()) {
                 String freq = getDisplayFrequencyAt(mouseX, 100, true);
                 g2.drawString(freq, mouseX + 5, mouseY - 5);
             }
