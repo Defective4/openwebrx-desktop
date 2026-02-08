@@ -16,11 +16,19 @@ public class WaterfallPanel extends TuneablePanel implements FFTVisualizer {
     private float fftMax = -20;
     private float fftMin = -88;
 
-    private final Color[] theme;
+    private Color[] theme = new Color[] { Color.black, Color.white };
 
-    public WaterfallPanel(Color... theme) {
-        this.theme = Objects.requireNonNull(theme);
+    public WaterfallPanel() {
         drawScope = false;
+    }
+
+    public Color[] getTheme() {
+        return theme;
+    }
+
+    public void setTheme(Color[] theme) {
+        if (theme.length < 1) throw new IllegalArgumentException("A theme must contain at least one color");
+        this.theme = Objects.requireNonNull(theme);
     }
 
     @Override

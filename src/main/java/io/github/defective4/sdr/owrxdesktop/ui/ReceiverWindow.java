@@ -16,7 +16,7 @@ import io.github.defective4.sdr.owrxdesktop.ui.event.TuningListener;
 public class ReceiverWindow extends JFrame {
 
     private final TuneablePanel fftPanel;
-    private final TuneablePanel waterfallPanel;
+    private final WaterfallPanel waterfallPanel;
 
     public ReceiverWindow() {
         setBounds(100, 100, 768, 468);
@@ -38,7 +38,8 @@ public class ReceiverWindow extends JFrame {
         fftPanel = new FFTPanel();
         fftPane.setLeftComponent(fftPanel);
 
-        waterfallPanel = new WaterfallPanel(Arrays.stream(
+        waterfallPanel = new WaterfallPanel();
+        waterfallPanel.setTheme(Arrays.stream(
                 "0x000020, 0x000030, 0x000050, 0x000091, 0x1E90FF, 0xFFFFFF, 0xFFFF00, 0xFE6D16, 0xFF0000, 0xC60000, 0x9F0000, 0x750000, 0x4A0000"
                         .replace("0x", "#").split(", "))
                 .map(Color::decode).toArray(Color[]::new));
@@ -58,6 +59,10 @@ public class ReceiverWindow extends JFrame {
                 waterfallPanel.tune(offset, false);
             }
         });
+    }
+    
+    public void setWaterfallTheme(Color[] theme) {
+        waterfallPanel.setTheme(theme);
     }
 
     public void drawFFT(float[] fft) {

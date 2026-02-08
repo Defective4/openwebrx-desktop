@@ -17,20 +17,20 @@ public class Main {
     public static void main(String[] args) {
         try {
             UIManager.setLookAndFeel(new FlatDarkLaf());
-            ReceiverWindow fftPanel = new ReceiverWindow();
-            fftPanel.setVisible(true);
-            fftPanel.setTuningStep((int) 50e3f);
-            fftPanel.setCenterFrequency((int) 100e6);
-            fftPanel.setScopeLower((int) -75e3f);
-            fftPanel.setScopeUpper((int) 75e3f);
-            fftPanel.setTuningReady(true);
+            ReceiverWindow rxWindow = new ReceiverWindow();
+            rxWindow.setVisible(true);
+            rxWindow.setTuningStep((int) 50e3f);
+            rxWindow.setCenterFrequency((int) 100e6);
+            rxWindow.setScopeLower((int) -75e3f);
+            rxWindow.setScopeUpper((int) 75e3f);
+            rxWindow.setTuningReady(true);
 
             OpenWebRXClient client = new OpenWebRXClient(URI.create("wss://radio.raspberry.local/ws/"));
             client.addListener(new OWRXAdapter() {
 
                 @Override
                 public void fftUpdated(float[] fft) {
-                    fftPanel.drawFFT(fft);
+                    rxWindow.drawFFT(fft);
                 }
 
                 @Override
@@ -42,21 +42,24 @@ public class Main {
 
                 @Override
                 public void serverConfigChanged(ServerConfig config) {
-                    if (config.sampleRate() != null) fftPanel.setBandwidth(config.sampleRate());
-                    if (config.tuningStep() != null) fftPanel.setTuningStep(config.tuningStep());
-                    if (config.centerFrequency() != null) fftPanel.setCenterFrequency(config.centerFrequency());
+                    if (config.sampleRate() != null) rxWindow.setBandwidth(config.sampleRate());
+                    if (config.tuningStep() != null) rxWindow.setTuningStep(config.tuningStep());
+                    if (config.centerFrequency() != null) rxWindow.setCenterFrequency(config.centerFrequency());
                     if (config.startOffsetFrequency() != null) {
-                        fftPanel.tune(config.startOffsetFrequency(), false);
+                        rxWindow.tune(config.startOffsetFrequency(), false);
                     }
                     if (config.startModulation() != null) {
                         int low = config.startModulation().getLowPass().orElse(-10000);
                         int high = config.startModulation().getHighPass().orElse(10000);
 
-                        fftPanel.setScopeLower(low);
-                        fftPanel.setScopeUpper(high);
+                        rxWindow.setScopeLower(low);
+                        rxWindow.setScopeUpper(high);
+                    }
+                    if(config.waterfallColors()!=null) {
+                        rxWindow.setWaterfallTheme(config.mappedWaterfallColors());
                     }
 
-                    fftPanel.setTuningReady(true);
+                    rxWindow.setTuningReady(true);
                 }
             });
             client.connect();
