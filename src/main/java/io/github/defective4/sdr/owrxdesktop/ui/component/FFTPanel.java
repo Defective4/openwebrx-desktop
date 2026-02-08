@@ -6,100 +6,23 @@ import java.awt.Color;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseWheelEvent;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
-import java.util.concurrent.CopyOnWriteArrayList;
 
-import javax.swing.JComponent;
-
-import io.github.defective4.sdr.owrxdesktop.ui.event.TuningListener;
-
-public class FFTPanel extends JComponent {
+public class FFTPanel extends TuneablePanel {
     private static final Color BG = Color.decode("#1F1D1D");
     private static final Color FFT_COLOR = Color.white;
     private static final Color FREQ_BAR = Color.decode("#282525");
     private static final Color LINE = Color.decode("#3F3B3B");
     private static final Color LINE_CENTER = Color.white;
-    private static final Color SCOPE = new Color(255, 255, 255, 50);
-    private static final Color TEXT_COLOR = Color.white;
-    private static final Color TUNE = Color.red;
-
-    private int bandwidth = 968000;
-    private int centerFrequency = (int) 1e6f;
 
     private float[] fft = new float[0];
 
     private final Object fftLock = new Object();
 
     private float fftMax = -20;
-
     private float fftMin = -88;
 
-    private final List<TuningListener> listeners = new CopyOnWriteArrayList<>();
-    private boolean mouseDown = false;
-    private int mouseX = -1;
-    private int mouseY = -1;
-
-    private int offset = 0;
-
-    private int scopeLower = (int) -10e3f;
-
-    private int scopeUpper = (int) 10e3f;
-    private boolean tuningReady;
-    private int tuningStep = (int) 1e3f;
-
     public FFTPanel() {
-        MouseAdapter adapter = new MouseAdapter() {
 
-            @Override
-            public void mouseDragged(MouseEvent e) {
-                tune(calculateOffsetAtPoint(e.getX()));
-            }
-
-            @Override
-            public void mouseExited(MouseEvent e) {
-                mouseX = -1;
-                mouseY = -1;
-                repaint();
-            }
-
-            @Override
-            public void mouseMoved(MouseEvent e) {
-                updateMouseCoordinates(e);
-                repaint();
-            }
-
-            @Override
-            public void mousePressed(MouseEvent e) {
-                mouseDown = true;
-                tune(calculateOffsetAtPoint(e.getX()));
-            }
-
-            @Override
-            public void mouseReleased(MouseEvent e) {
-                updateMouseCoordinates(e);
-                mouseDown = false;
-                repaint();
-            }
-
-            @Override
-            public void mouseWheelMoved(MouseWheelEvent e) {
-                if (e.getY() < getLineHeight()) tune(offset + -e.getWheelRotation() * tuningStep);
-            }
-        };
-
-        addMouseListener(adapter);
-        addMouseMotionListener(adapter);
-        addMouseWheelListener(adapter);
-
-    }
-
-    public boolean addListener(TuningListener listener) {
-        return listeners.add(Objects.requireNonNull(listener));
     }
 
     public void drawFFT(float[] fft) {
@@ -107,14 +30,6 @@ public class FFTPanel extends JComponent {
             this.fft = fft;
         }
         repaint();
-    }
-
-    public int getBandwidth() {
-        return bandwidth;
-    }
-
-    public int getCenterFrequency() {
-        return centerFrequency;
     }
 
     public float getFftMax() {
@@ -125,42 +40,9 @@ public class FFTPanel extends JComponent {
         return fftMin;
     }
 
-    public List<TuningListener> getListeners() {
-        return Collections.unmodifiableList(listeners);
-    }
-
-    public int getOffset() {
-        return offset;
-    }
-
-    public int getScopeLower() {
-        return scopeLower;
-    }
-
-    public int getScopeUpper() {
-        return scopeUpper;
-    }
-
-    public int getTuningStep() {
-        return tuningStep;
-    }
-
-    public boolean isTuningReady() {
-        return tuningReady;
-    }
-
-    public boolean removeListener(TuningListener listener) {
-        return listeners.remove(listener);
-    }
-
-    public void setBandwidth(int bandwidth) {
-        this.bandwidth = bandwidth;
-        repaint();
-    }
-
-    public void setCenterFrequency(int centerFrequency) {
-        this.centerFrequency = centerFrequency;
-        repaint();
+    @Override
+    public int getLineHeight() {
+        return getHeight() - 24;
     }
 
     public void setFFTMax(float fftMax) {
@@ -169,41 +51,6 @@ public class FFTPanel extends JComponent {
 
     public void setFFTMin(float fftMin) {
         this.fftMin = fftMin;
-    }
-
-    public void setScopeLower(int scopeLower) {
-        this.scopeLower = scopeLower;
-    }
-
-    public void setScopeUpper(int scopeUpper) {
-        this.scopeUpper = scopeUpper;
-    }
-
-    public void setTuningReady(boolean tuningReady) {
-        this.tuningReady = tuningReady;
-        repaint();
-    }
-
-    public void setTuningStep(int tuningStep) {
-        this.tuningStep = tuningStep;
-        repaint();
-    }
-
-    public void tune(int offset) {
-        tune(offset, true);
-    }
-
-    public void tune(int offset, boolean fireEvents) {
-        if (!tuningReady) {
-            repaint();
-            return;
-        }
-        this.offset = (int) Math.round(offset / (double) tuningStep) * tuningStep;
-        int bound = bandwidth / 2;
-        if (this.offset > bound) this.offset = (int) (Math.floor(bound / (double) tuningStep) * tuningStep);
-        if (this.offset < -bound) this.offset = (int) (Math.ceil(-bound / (double) tuningStep) * tuningStep);
-        repaint();
-        if (fireEvents) listeners.forEach(ls -> ls.tuned(this.offset));
     }
 
     @Override
@@ -245,8 +92,6 @@ public class FFTPanel extends JComponent {
             drawFrequencyLine(g2, (int) x, LINE);
         }
 
-        x = (int) (pxPerHz * offset + center);
-
         g2.setColor(FFT_COLOR);
 
         synchronized (fftLock) {
@@ -268,22 +113,7 @@ public class FFTPanel extends JComponent {
             }
         }
 
-        if (tuningReady) {
-            g2.setColor(SCOPE);
-            int start = (int) Math.round(x - calculatePixelPerHerz() * -scopeLower);
-
-            g2.fillRect(start, 0, (int) (calculatePixelPerHerz() * (-scopeLower + scopeUpper)), getLineHeight());
-
-            g2.setColor(TUNE);
-            g2.drawLine((int) x, 0, (int) x, getLineHeight());
-
-            g2.setColor(TEXT_COLOR);
-            if (mouseX != -1 && mouseY != -1 && !mouseDown && mouseY < getLineHeight()) {
-                String freq = getDisplayFrequencyAt(mouseX, 100, true);
-                g2.drawString(freq, mouseX + 5, mouseY - 5);
-            }
-        }
-
+        super.paintComponent(graphics);
     }
 
     private double calculateDbPerPixel() {
@@ -291,21 +121,9 @@ public class FFTPanel extends JComponent {
         return diff / (double) getLineHeight();
     }
 
-    private int calculateHerzPerPixel() {
-        return (int) (bandwidth / (double) getWidth());
-    }
-
-    private int calculateOffsetAtPoint(int x) {
-        return Math.round(x * calculateHerzPerPixel() - bandwidth / 2);
-    }
-
     private double calculatePixelPerDb() {
         float diff = fftMax - fftMin;
         return getLineHeight() / diff;
-    }
-
-    private double calculatePixelPerHerz() {
-        return getWidth() / (double) bandwidth;
     }
 
     private int calculateSignalAtPoint(int y) {
@@ -336,25 +154,6 @@ public class FFTPanel extends JComponent {
         String signal = Integer.toString(calculateSignalAtPoint(y));
 
         if (y - 5 < getLineHeight()) g2.drawString(signal, 1, y - 5);
-    }
-
-    private String getDisplayFrequencyAt(int x, double accuracy, boolean drawUnits) {
-        int freq = calculateOffsetAtPoint(x) + centerFrequency;
-        int divider = (int) 1e6f;
-
-        StringBuilder str = new StringBuilder(
-                Double.toString((int) Math.round(freq / (divider / accuracy)) / accuracy));
-        if (drawUnits) str.append(" MHz");
-        return str.toString();
-    }
-
-    private int getLineHeight() {
-        return getHeight() - 24;
-    }
-
-    private void updateMouseCoordinates(MouseEvent e) {
-        mouseX = Math.max(Math.min(getWidth(), e.getX()), 0);
-        mouseY = Math.max(Math.min(getHeight(), e.getY()), 0);
     }
 
     private static int calculateDrawingStep(double pxPerHz) {

@@ -25,10 +25,9 @@ public class ReceiverWindow extends JFrame {
 
         panel = new FFTPanel();
         splitPane.setLeftComponent(panel);
-
     }
 
-    public FFTPanel getFFTPanel() {
+    public FFTPanel getPanel() {
         return panel;
     }
 
