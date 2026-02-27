@@ -18,7 +18,7 @@ public class WaterfallPanel extends TuneablePanel implements FFTVisualizer {
     private Color[] theme = new Color[] { Color.black, Color.white };
 
     public WaterfallPanel() {
-        drawScope = false;
+        drawScope = true;
     }
 
     @Override

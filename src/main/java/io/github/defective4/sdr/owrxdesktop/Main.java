@@ -2,8 +2,11 @@ package io.github.defective4.sdr.owrxdesktop;
 
 import java.net.URI;
 import java.util.Arrays;
+
 import javax.swing.UIManager;
+
 import com.formdev.flatlaf.FlatDarkLaf;
+
 import io.github.defective4.sdr.owrxclient.client.OpenWebRXClient;
 import io.github.defective4.sdr.owrxclient.event.OWRXAdapter;
 import io.github.defective4.sdr.owrxclient.model.ReceiverProfile;
@@ -27,7 +30,7 @@ public class Main {
 
                 @Override
                 public void fftUpdated(float[] fft) {
-                    rxWindow.drawFFT(fft, 14);
+                    rxWindow.drawFFT(fft, 18);
                 }
 
                 @Override
