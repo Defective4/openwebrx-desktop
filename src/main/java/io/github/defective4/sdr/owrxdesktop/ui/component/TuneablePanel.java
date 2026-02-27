@@ -11,7 +11,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.CopyOnWriteArrayList;
+
 import javax.swing.JComponent;
+
 import io.github.defective4.sdr.owrxdesktop.ui.event.TuningListener;
 
 public abstract class TuneablePanel extends JComponent implements FFTVisualizer {
@@ -244,12 +246,12 @@ public abstract class TuneablePanel extends JComponent implements FFTVisualizer 
         }
     }
 
-    private int calculateHerzPerPixel() {
-        return (int) (bandwidth / (double) getWidth());
+    private double calculateHerzPerPixel() {
+        return bandwidth / (double) getWidth();
     }
 
     private int calculateOffsetAtPoint(int x) {
-        return Math.round(x * calculateHerzPerPixel() - bandwidth / 2);
+        return (int) Math.round(x * calculateHerzPerPixel() - bandwidth / 2);
     }
 
     private void updateMouseCoordinates(MouseEvent e) {
