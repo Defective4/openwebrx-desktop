@@ -2,12 +2,10 @@ package io.github.defective4.sdr.owrxdesktop.ui;
 
 import java.awt.Color;
 import java.util.Arrays;
-
 import javax.swing.BoxLayout;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JSplitPane;
-
 import io.github.defective4.sdr.owrxdesktop.ui.component.FFTPanel;
 import io.github.defective4.sdr.owrxdesktop.ui.component.TuneablePanel;
 import io.github.defective4.sdr.owrxdesktop.ui.component.WaterfallPanel;
@@ -57,6 +55,7 @@ public class ReceiverWindow extends JFrame {
             @Override
             public void tuned(int offset) {
                 waterfallPanel.tune(offset, false);
+                System.out.println(offset);
             }
 
             @Override
@@ -68,8 +67,8 @@ public class ReceiverWindow extends JFrame {
         });
     }
 
-    public void drawFFT(float[] fft) {
-        for (TuneablePanel fftPanel : getPanels()) fftPanel.drawFFT(fft);
+    public void drawFFT(float[] fft, int offset) {
+        for (TuneablePanel fftPanel : getPanels()) fftPanel.drawFFT(fft, offset);
     }
 
     public void setBandwidth(int bandwidth) {

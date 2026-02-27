@@ -19,11 +19,14 @@ public class FFTPanel extends TuneablePanel implements FFTVisualizer {
 
     private float fftMin = -88;
 
+    private int fftOffset;
     private boolean solid;
 
     public FFTPanel() {}
+
     @Override
-    public void drawFFT(float[] fft) {
+    public void drawFFT(float[] fft, int offset) {
+        fftOffset = offset;
         synchronized (fftLock) {
             this.fft = fft;
         }
@@ -107,10 +110,11 @@ public class FFTPanel extends TuneablePanel implements FFTVisualizer {
         synchronized (fftLock) {
             int prevX = 0;
             float prevVal = -1;
-            if (fft.length > 0) for (int i = 0; i < fft.length; i++) {
-                int ix = (int) Math.round(i / (double) fft.length * getWidth());
+            int fftLength = fft.length - fftOffset;
+            if (fftLength > 0) for (int i = 0; i < fftLength; i++) {
+                int ix = (int) Math.round(i / (double) fftLength * getWidth());
                 float range = calculateFFTRange();
-                float valueInRange = calculateFFTValueInRange(fft[i]);
+                float valueInRange = calculateFFTValueInRange(fft[i + fftOffset]);
                 double r = valueInRange / range;
 
                 int y = (int) (getLineHeight() * r);

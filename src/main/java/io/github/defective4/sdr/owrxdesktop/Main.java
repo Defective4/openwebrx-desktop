@@ -2,11 +2,8 @@ package io.github.defective4.sdr.owrxdesktop;
 
 import java.net.URI;
 import java.util.Arrays;
-
 import javax.swing.UIManager;
-
 import com.formdev.flatlaf.FlatDarkLaf;
-
 import io.github.defective4.sdr.owrxclient.client.OpenWebRXClient;
 import io.github.defective4.sdr.owrxclient.event.OWRXAdapter;
 import io.github.defective4.sdr.owrxclient.model.ReceiverProfile;
@@ -30,14 +27,13 @@ public class Main {
 
                 @Override
                 public void fftUpdated(float[] fft) {
-                    rxWindow.drawFFT(fft);
+                    rxWindow.drawFFT(fft, 14);
                 }
 
                 @Override
                 public void receiverProfilesUpdated(ReceiverProfile[] profiles) {
-                    client.switchProfile(Arrays.stream(profiles)
-                            .filter(profile -> profile.name().equals("RTL-SDR 80m")).findAny()
-                            .get());
+                    client.switchProfile(Arrays.stream(profiles).filter(profile -> profile.name().equals("RTL-SDR 2m"))
+                            .findAny().get());
                 }
 
                 @Override
@@ -55,7 +51,7 @@ public class Main {
                         rxWindow.setScopeLower(low);
                         rxWindow.setScopeUpper(high);
                     }
-                    if(config.waterfallColors()!=null) {
+                    if (config.waterfallColors() != null) {
                         rxWindow.setWaterfallTheme(config.mappedWaterfallColors());
                     }
 

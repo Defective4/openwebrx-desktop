@@ -24,7 +24,7 @@ public interface FFTVisualizer {
         return (int) Math.round(getFFTMax() - y * calculateDbPerPixel());
     }
 
-    void drawFFT(float[] fft);
+    void drawFFT(float[] fft, int offset);
 
     float getFFTMax();
 

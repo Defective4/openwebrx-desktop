@@ -11,9 +11,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.CopyOnWriteArrayList;
-
 import javax.swing.JComponent;
-
 import io.github.defective4.sdr.owrxdesktop.ui.event.TuningListener;
 
 public abstract class TuneablePanel extends JComponent implements FFTVisualizer {
@@ -48,6 +46,7 @@ public abstract class TuneablePanel extends JComponent implements FFTVisualizer 
             private final Cursor RESIZE = new Cursor(Cursor.MOVE_CURSOR);
 
             private boolean tuneMode = false;
+
             @Override
             public void mouseDragged(MouseEvent e) {
                 if (tuneMode)
@@ -61,6 +60,7 @@ public abstract class TuneablePanel extends JComponent implements FFTVisualizer 
                 }
                 updateMouseCoordinates(e);
             }
+
             @Override
             public void mouseExited(MouseEvent e) {
                 mouseX = -1;
