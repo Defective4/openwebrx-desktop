@@ -2,10 +2,12 @@ package io.github.defective4.sdr.owrxdesktop.ui;
 
 import java.awt.Color;
 import java.util.Arrays;
+
 import javax.swing.BoxLayout;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JSplitPane;
+
 import io.github.defective4.sdr.owrxdesktop.ui.component.FFTPanel;
 import io.github.defective4.sdr.owrxdesktop.ui.component.TuneablePanel;
 import io.github.defective4.sdr.owrxdesktop.ui.component.WaterfallPanel;
@@ -84,7 +86,7 @@ public class ReceiverWindow extends JFrame {
     }
 
     public void setScopeUpper(int scopeUpper) {
-        fftPanel.setScopeUpper(scopeUpper);
+        for (TuneablePanel fftPanel : getPanels()) fftPanel.setScopeUpper(scopeUpper);
     }
 
     public void setSolid(boolean solid) {
