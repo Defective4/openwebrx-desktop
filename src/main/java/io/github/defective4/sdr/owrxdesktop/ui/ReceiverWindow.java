@@ -57,7 +57,6 @@ public class ReceiverWindow extends JFrame {
             @Override
             public void tuned(int offset) {
                 waterfallPanel.tune(offset, false);
-                System.out.println(offset);
             }
 
             @Override
