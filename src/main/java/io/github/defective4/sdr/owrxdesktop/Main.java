@@ -9,6 +9,8 @@ import com.formdev.flatlaf.FlatDarkLaf;
 
 import io.github.defective4.sdr.owrxclient.client.OpenWebRXClient;
 import io.github.defective4.sdr.owrxclient.event.OWRXAdapter;
+import io.github.defective4.sdr.owrxclient.model.Bandpass;
+import io.github.defective4.sdr.owrxclient.model.ReceiverMode;
 import io.github.defective4.sdr.owrxclient.model.ReceiverProfile;
 import io.github.defective4.sdr.owrxclient.model.ServerConfig;
 import io.github.defective4.sdr.owrxdesktop.ui.ReceiverWindow;
@@ -28,9 +30,22 @@ public class Main {
             OpenWebRXClient client = new OpenWebRXClient(URI.create("wss://radio.raspberry.local/ws/"));
             client.addListener(new OWRXAdapter() {
 
+                private String modulation;
+
                 @Override
                 public void fftUpdated(float[] fft) {
                     rxWindow.drawFFT(fft, 18);
+                }
+
+                @Override
+                public void receiverModesUpdated(ReceiverMode[] modes) {
+                    if (modulation != null) {
+                        client.getModeByName(modulation).ifPresent(mode -> {
+                            Bandpass bandpass = mode.bandpass();
+                            rxWindow.setScopeLower(bandpass.lowCut());
+                            rxWindow.setScopeUpper(bandpass.highCut());
+                        });
+                    }
                 }
 
                 @Override
@@ -48,11 +63,7 @@ public class Main {
                         rxWindow.tune(config.startOffsetFrequency(), false);
                     }
                     if (config.startModulation() != null) {
-                        int low = config.startModulation().getLowPass().orElse(-10000);
-                        int high = config.startModulation().getHighPass().orElse(10000);
-
-                        rxWindow.setScopeLower(low);
-                        rxWindow.setScopeUpper(high);
+                        modulation = config.startModulation();
                     }
                     if (config.waterfallColors() != null) {
                         rxWindow.setWaterfallTheme(config.mappedWaterfallColors());
