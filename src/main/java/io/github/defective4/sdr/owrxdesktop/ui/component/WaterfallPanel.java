@@ -42,9 +42,9 @@ public class WaterfallPanel extends TuneablePanel {
 
                 double gradientRatio = index - Math.floor(index);
 
-                int r = gradient(upper.getRed(), lower.getRed(), gradientRatio);
-                int g = gradient(upper.getGreen(), lower.getGreen(), gradientRatio);
-                int b = gradient(upper.getBlue(), lower.getBlue(), gradientRatio);
+                int r = (int) (upper.getRed() * gradientRatio + lower.getRed() * (1 - gradientRatio));
+                int g = (int) (upper.getGreen() * gradientRatio + lower.getGreen() * (1 - gradientRatio));
+                int b = (int) (upper.getBlue() * gradientRatio + lower.getBlue() * (1 - gradientRatio));
 
                 color = new Color(r, g, b);
             } else {
@@ -125,11 +125,6 @@ public class WaterfallPanel extends TuneablePanel {
 
         graphics.setFont(graphics.getFont().deriveFont(12f));
         super.paintComponent(graphics);
-    }
-
-    private static int gradient(int a, int b, double ratio) {
-        int diff = Math.max(a, b) - Math.min(a, b);
-        return (int) Math.round(Math.min(a, b) + diff * ratio);
     }
 
 }
