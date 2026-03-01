@@ -75,6 +75,7 @@ public class FFTPanel extends BandplanPanel {
 
     public void setShowBandplan(boolean showBandplan) {
         this.showBandplan = showBandplan;
+        repaint();
     }
 
     public void setSolid(boolean solid) {

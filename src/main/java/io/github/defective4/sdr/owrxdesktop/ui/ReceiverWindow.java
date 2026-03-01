@@ -1,12 +1,25 @@
 package io.github.defective4.sdr.owrxdesktop.ui;
 
 import java.awt.Color;
+import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.FlowLayout;
+import java.awt.event.ActionListener;
 import java.util.Arrays;
 
+import javax.swing.AbstractButton;
 import javax.swing.BoxLayout;
+import javax.swing.JCheckBox;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JSlider;
 import javax.swing.JSplitPane;
+import javax.swing.JTabbedPane;
+import javax.swing.JTextField;
+import javax.swing.border.TitledBorder;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 import io.github.defective4.sdr.owrxdesktop.bandplan.Bandplan;
 import io.github.defective4.sdr.owrxdesktop.ui.component.FFTPanel;
@@ -28,14 +41,15 @@ public class ReceiverWindow extends JFrame {
         getContentPane().setLayout(new BoxLayout(getContentPane(), BoxLayout.Y_AXIS));
 
         JSplitPane splitPane = new JSplitPane();
-        splitPane.setResizeWeight(0.75);
+        splitPane.setResizeWeight(1);
         getContentPane().add(splitPane);
 
-        {
-            JPanel controlPanel = new JPanel();
-            splitPane.setRightComponent(controlPanel);
-            controlPanel.setLayout(new BoxLayout(controlPanel, BoxLayout.X_AXIS));
-        }
+        JPanel controlPanel = new JPanel();
+        splitPane.setRightComponent(controlPanel);
+        controlPanel.setLayout(new BoxLayout(controlPanel, BoxLayout.X_AXIS));
+
+        JTabbedPane controlTabs = new JTabbedPane(JTabbedPane.TOP);
+        controlPanel.add(controlTabs);
 
         {
             JSplitPane fftPane = new JSplitPane();
@@ -74,6 +88,129 @@ public class ReceiverWindow extends JFrame {
                 }
             });
         }
+
+        {
+            JPanel fftCtlPanel = new JPanel();
+            controlTabs.addTab("FFT", null, fftCtlPanel, null);
+            fftCtlPanel.setLayout(new BoxLayout(fftCtlPanel, BoxLayout.Y_AXIS));
+
+            JPanel featPanel = new JPanel();
+            featPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
+            compactPanel(featPanel);
+            FlowLayout flowLayout = (FlowLayout) featPanel.getLayout();
+            flowLayout.setAlignment(FlowLayout.LEFT);
+            featPanel.setBorder(new TitledBorder(null, "Features", TitledBorder.LEADING, TitledBorder.TOP, null, null));
+            fftCtlPanel.add(featPanel);
+
+            JCheckBox bandplanCheck = new JCheckBox("Bandplan");
+            bandplanCheck.setSelected(true);
+            featPanel.add(bandplanCheck);
+
+            JPanel levelsPanel = new JPanel();
+            compactPanel(levelsPanel);
+            levelsPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
+            levelsPanel.setBorder(new TitledBorder(null, "Levels", TitledBorder.LEADING, TitledBorder.TOP, null, null));
+            fftCtlPanel.add(levelsPanel);
+            levelsPanel.setLayout(new BoxLayout(levelsPanel, BoxLayout.Y_AXIS));
+
+            JCheckBox autoCheck = new JCheckBox("Auto");
+            autoCheck.setSelected(true);
+            levelsPanel.add(autoCheck);
+
+            levelsPanel.add(new JLabel("Min"));
+
+            JPanel minPanel = new JPanel();
+            minPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
+            levelsPanel.add(minPanel);
+            minPanel.setLayout(new BoxLayout(minPanel, BoxLayout.X_AXIS));
+
+            JTextField minField = new JTextField();
+            minField.setEditable(false);
+            minPanel.add(minField);
+            minField.setColumns(3);
+
+            JSlider minSlider = new JSlider();
+            minSlider.setMinimum(-100);
+            minSlider.setMaximum(0);
+            minSlider.setValue(-88);
+            minPanel.add(minSlider);
+
+            levelsPanel.add(new JLabel("Max"));
+
+            JPanel maxPanel = new JPanel();
+            maxPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
+            levelsPanel.add(maxPanel);
+            maxPanel.setLayout(new BoxLayout(maxPanel, BoxLayout.X_AXIS));
+
+            JTextField maxField = new JTextField();
+            maxField.setEditable(false);
+            maxPanel.add(maxField);
+            maxField.setColumns(3);
+
+            JSlider maxSlider = new JSlider();
+            maxSlider.setMinimum(-100);
+            maxSlider.setMaximum(0);
+            maxSlider.setValue(-20);
+            maxPanel.add(maxSlider);
+
+            JPanel stylePanel = new JPanel();
+            compactPanel(stylePanel);
+            FlowLayout flowLayout_1 = (FlowLayout) stylePanel.getLayout();
+            flowLayout_1.setAlignment(FlowLayout.LEFT);
+            stylePanel.setAlignmentX(Component.LEFT_ALIGNMENT);
+            stylePanel.setBorder(new TitledBorder(null, "Style", TitledBorder.LEADING, TitledBorder.TOP, null, null));
+            fftCtlPanel.add(stylePanel);
+
+            JCheckBox solidCheck = new JCheckBox("Solid");
+            stylePanel.add(solidCheck);
+
+            JPanel filler = new JPanel();
+            filler.setAlignmentX(Component.LEFT_ALIGNMENT);
+            fftCtlPanel.add(filler);
+
+            bandplanCheck.addActionListener(e -> { fftPanel.setShowBandplan(bandplanCheck.isSelected()); });
+
+            autoCheck.addActionListener(e -> {
+                boolean enabled = autoCheck.isSelected();
+                minSlider.setEnabled(!enabled);
+                maxSlider.setEnabled(!enabled);
+
+                minField.setText(enabled ? "Auto" : Integer.toString(minSlider.getValue()));
+                maxField.setText(enabled ? "Auto" : Integer.toString(maxSlider.getValue()));
+            });
+
+            minSlider.addChangeListener(new ChangeListener() {
+                @Override
+                public void stateChanged(ChangeEvent e) {
+                    int val = minSlider.getValue();
+                    if (val >= maxSlider.getValue()) maxSlider.setValue(val + 1);
+                    minField.setText(Integer.toString(val));
+                    maxField.setText(Integer.toString(maxSlider.getValue()));
+
+                    setFFTMax(maxSlider.getValue());
+                    setFFTMin(val);
+                }
+            });
+
+            maxSlider.addChangeListener(new ChangeListener() {
+                @Override
+                public void stateChanged(ChangeEvent e) {
+                    int val = maxSlider.getValue();
+                    if (val <= minSlider.getValue()) minSlider.setValue(val - 1);
+                    maxField.setText(Integer.toString(val));
+                    minField.setText(Integer.toString(minSlider.getValue()));
+
+                    setFFTMin(minSlider.getValue());
+                    setFFTMax(val);
+                }
+            });
+
+            solidCheck.addActionListener(e -> fftPanel.setSolid(solidCheck.isSelected()));
+
+            confirmComponentState(bandplanCheck);
+            confirmComponentState(autoCheck);
+            confirmComponentState(solidCheck);
+        }
     }
 
     public void drawFFT(float[] fft, int offset) {
@@ -94,6 +231,14 @@ public class ReceiverWindow extends JFrame {
 
     public void setCenterFrequency(int centerFrequency) {
         for (TuneablePanel fftPanel : getPanels()) fftPanel.setCenterFrequency(centerFrequency);
+    }
+
+    public void setFFTMax(int max) {
+        for (TuneablePanel fftPanel : getPanels()) fftPanel.setFFTMax(max);
+    }
+
+    public void setFFTMin(int min) {
+        for (TuneablePanel fftPanel : getPanels()) fftPanel.setFFTMin(min);
     }
 
     public void setScopeLower(int scopeLower) {
@@ -130,6 +275,14 @@ public class ReceiverWindow extends JFrame {
 
     public void updateBandplan() {
         fftPanel.updateVisibleBands();
+    }
+
+    private static void compactPanel(JPanel featPanel) {
+        featPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 0));
+    }
+
+    private static void confirmComponentState(AbstractButton component) {
+        for (ActionListener ls : component.getActionListeners()) ls.actionPerformed(null);
     }
 
 }
