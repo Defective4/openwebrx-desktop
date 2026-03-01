@@ -29,7 +29,8 @@ public class WaterfallPanel extends TuneablePanel {
         for (int i = 0; i < fftLength; i++) {
             float element = fft[i + offset];
             double ratio = calculateFFTValueInRange(element) / calculateFFTRange();
-            Color color = theme[theme.length - 1 - (int) Math.max(0, Math.round((theme.length - 1) * ratio))];
+            Color color = theme[Math.min(Math.max(0, theme.length - 1 - (int) Math.round((theme.length - 1) * ratio)),
+                    theme.length - 1)];
             image.setRGB(i, 0, color.getRGB());
         }
 
