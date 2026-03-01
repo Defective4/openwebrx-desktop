@@ -68,7 +68,6 @@ public class ReceiverWindow extends JFrame {
                 waterfallPanel.setBounds(x, waterfallPanel.getY(), width, getHeight());
                 waterfallPanel.invalidate();
             }
-
         });
     }
 
