@@ -24,6 +24,7 @@ public class FFTPanel extends BandplanPanel {
     private float fftMin = -88;
 
     private int fftOffset;
+    private boolean showBandplan = true;
     private boolean solid;
 
     public FFTPanel(Bandplan bandplan) {
@@ -54,6 +55,10 @@ public class FFTPanel extends BandplanPanel {
         return getHeight() - 24;
     }
 
+    public boolean isShowBandplan() {
+        return showBandplan;
+    }
+
     public boolean isSolid() {
         return solid;
     }
@@ -66,6 +71,10 @@ public class FFTPanel extends BandplanPanel {
     @Override
     public void setFFTMin(float fftMin) {
         this.fftMin = fftMin;
+    }
+
+    public void setShowBandplan(boolean showBandplan) {
+        this.showBandplan = showBandplan;
     }
 
     public void setSolid(boolean solid) {
@@ -136,33 +145,35 @@ public class FFTPanel extends BandplanPanel {
             }
         }
 
-        Set<Band> bands = getVisibleBands();
-        if (!bands.isEmpty()) {
-            int low = centerFrequency - bandwidth / 2;
-            int hi = centerFrequency + bandwidth / 2;
-            for (Band band : bands) {
-                int loDiff = Math.max(0, band.startFreq() - low);
-                int hiDiff = Math.max(0, hi - band.endFreq());
-                int startX = (int) Math.round(loDiff * pxPerHz);
-                int width = (int) (getWidth() - Math.round(hiDiff * pxPerHz) - startX);
-                g2.setColor(band.color());
-                g2.fillRect(startX, getHeight() - 23 - 16, width, 16);
+        if (showBandplan) {
+            Set<Band> bands = getVisibleBands();
+            if (!bands.isEmpty()) {
+                int low = centerFrequency - bandwidth / 2;
+                int hi = centerFrequency + bandwidth / 2;
+                for (Band band : bands) {
+                    int loDiff = Math.max(0, band.startFreq() - low);
+                    int hiDiff = Math.max(0, hi - band.endFreq());
+                    int startX = (int) Math.round(loDiff * pxPerHz);
+                    int width = (int) (getWidth() - Math.round(hiDiff * pxPerHz) - startX);
+                    g2.setColor(band.color());
+                    g2.fillRect(startX, getHeight() - 23 - 16, width, 16);
 
-                String str = band.name();
+                    String str = band.name();
 
-                FontMetrics metrics = g2.getFontMetrics();
-                int strWidth = metrics.stringWidth(str);
-                if (strWidth > width) {
-                    str = "...";
-                    strWidth = metrics.stringWidth(str);
+                    FontMetrics metrics = g2.getFontMetrics();
+                    int strWidth = metrics.stringWidth(str);
+                    if (strWidth > width) {
+                        str = "...";
+                        strWidth = metrics.stringWidth(str);
+                    }
+
+                    if (strWidth > width) continue;
+
+                    int strX = startX + width / 2 - strWidth / 2;
+
+                    g2.setColor(Color.white);
+                    g2.drawString(str, strX, getHeight() - 23 - 4);
                 }
-
-                if (strWidth > width) continue;
-
-                int strX = startX + width / 2 - strWidth / 2;
-
-                g2.setColor(Color.white);
-                g2.drawString(str, strX, getHeight() - 23 - 4);
             }
         }
 
