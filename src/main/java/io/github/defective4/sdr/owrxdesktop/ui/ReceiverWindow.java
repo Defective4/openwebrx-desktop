@@ -8,6 +8,7 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JSplitPane;
 
+import io.github.defective4.sdr.owrxdesktop.bandplan.Bandplan;
 import io.github.defective4.sdr.owrxdesktop.ui.component.FFTPanel;
 import io.github.defective4.sdr.owrxdesktop.ui.component.TuneablePanel;
 import io.github.defective4.sdr.owrxdesktop.ui.component.WaterfallPanel;
@@ -15,10 +16,13 @@ import io.github.defective4.sdr.owrxdesktop.ui.event.TuningAdapter;
 
 public class ReceiverWindow extends JFrame {
 
+    private final Bandplan bandplan;
     private final FFTPanel fftPanel;
+
     private final WaterfallPanel waterfallPanel;
 
-    public ReceiverWindow() {
+    public ReceiverWindow(Bandplan bandplan) {
+        this.bandplan = bandplan;
         setBounds(100, 100, 768, 468);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         getContentPane().setLayout(new BoxLayout(getContentPane(), BoxLayout.Y_AXIS));
@@ -35,7 +39,7 @@ public class ReceiverWindow extends JFrame {
         fftPane.setOrientation(JSplitPane.VERTICAL_SPLIT);
         splitPane.setLeftComponent(fftPane);
 
-        fftPanel = new FFTPanel();
+        fftPanel = new FFTPanel(bandplan);
         fftPane.setLeftComponent(fftPanel);
 
         waterfallPanel = new WaterfallPanel();

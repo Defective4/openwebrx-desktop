@@ -1,5 +1,7 @@
 package io.github.defective4.sdr.owrxdesktop;
 
+import java.awt.Color;
+import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -7,13 +9,19 @@ import javax.swing.UIManager;
 
 import com.formdev.flatlaf.FlatDarkLaf;
 
+import io.github.defective4.sdr.owrxdesktop.bandplan.Band;
+import io.github.defective4.sdr.owrxdesktop.bandplan.Bandplan;
 import io.github.defective4.sdr.owrxdesktop.ui.ReceiverWindow;
 
 public class Main {
     public static void main(String[] args) {
         try {
             UIManager.setLookAndFeel(new FlatDarkLaf());
-            ReceiverWindow rxWindow = new ReceiverWindow();
+
+            Bandplan bandplan = new Bandplan(
+                    Set.of(new Band((int) 88e6f, (int) 108e6f, new Color(55, 55, 255, 155), "Broadcast FM")));
+
+            ReceiverWindow rxWindow = new ReceiverWindow(bandplan);
             rxWindow.setVisible(true);
             rxWindow.setTuningStep((int) 50e3f);
             rxWindow.setCenterFrequency((int) 100e6);

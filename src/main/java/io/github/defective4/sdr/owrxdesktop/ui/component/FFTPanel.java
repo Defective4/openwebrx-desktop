@@ -5,8 +5,12 @@ import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
+import java.util.Set;
 
-public class FFTPanel extends TuneablePanel implements FFTVisualizer {
+import io.github.defective4.sdr.owrxdesktop.bandplan.Band;
+import io.github.defective4.sdr.owrxdesktop.bandplan.Bandplan;
+
+public class FFTPanel extends BandplanPanel {
     private static final Color FFT_COLOR = Color.white;
     private static final Color FREQ_BAR = Color.decode("#282525");
     private static final Color LINE = Color.decode("#3F3B3B");
@@ -22,7 +26,9 @@ public class FFTPanel extends TuneablePanel implements FFTVisualizer {
     private int fftOffset;
     private boolean solid;
 
-    public FFTPanel() {}
+    public FFTPanel(Bandplan bandplan) {
+        super(bandplan);
+    }
 
     @Override
     public void drawFFT(float[] fft, int offset) {
@@ -128,6 +134,36 @@ public class FFTPanel extends TuneablePanel implements FFTVisualizer {
                     prevVal = y;
                     prevX = ix;
                 }
+            }
+        }
+
+        Set<Band> bands = getVisibleBands();
+        if (!bands.isEmpty()) {
+            int low = centerFrequency - bandwidth / 2;
+            int hi = centerFrequency + bandwidth / 2;
+            for (Band band : bands) {
+                int loDiff = Math.max(0, band.startFreq() - low);
+                int hiDiff = Math.max(0, hi - band.endFreq());
+                int startX = (int) Math.round(loDiff * pxPerHz);
+                int width = (int) (getWidth() - Math.round(hiDiff * pxPerHz) - startX);
+                g2.setColor(band.color());
+                g2.fillRect(startX, getHeight() - 23 - 16, width, 16);
+
+                String str = band.name();
+
+                FontMetrics metrics = g2.getFontMetrics();
+                int strWidth = metrics.stringWidth(str);
+                if (strWidth > width) {
+                    str = "...";
+                    strWidth = metrics.stringWidth(str);
+                }
+
+                if (strWidth > width) continue;
+
+                int strX = startX + width / 2 - strWidth / 2;
+
+                g2.setColor(Color.white);
+                g2.drawString(str, strX, getHeight() - 23 - 4);
             }
         }
 

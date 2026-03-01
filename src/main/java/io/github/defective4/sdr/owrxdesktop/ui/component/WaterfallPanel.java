@@ -9,7 +9,7 @@ import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.Objects;
 
-public class WaterfallPanel extends TuneablePanel implements FFTVisualizer {
+public class WaterfallPanel extends TuneablePanel {
 
     private final Deque<BufferedImage> fftLines = new ArrayDeque<>();
     private float fftMax = -20;
