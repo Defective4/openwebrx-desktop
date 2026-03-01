@@ -10,6 +10,7 @@ import java.util.Objects;
 
 import javax.swing.AbstractButton;
 import javax.swing.BoxLayout;
+import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -103,14 +104,25 @@ public class ReceiverWindow extends JFrame {
             JPanel featPanel = new JPanel();
             featPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
             compactPanel(featPanel);
-            FlowLayout flowLayout = (FlowLayout) featPanel.getLayout();
-            flowLayout.setAlignment(FlowLayout.LEFT);
             featPanel.setBorder(new TitledBorder(null, "Features", TitledBorder.LEADING, TitledBorder.TOP, null, null));
             fftCtlPanel.add(featPanel);
+            featPanel.setLayout(new BoxLayout(featPanel, BoxLayout.Y_AXIS));
+
+            JPanel panel = new JPanel();
+            panel.setAlignmentX(Component.LEFT_ALIGNMENT);
+            featPanel.add(panel);
+            panel.setLayout(new FlowLayout(FlowLayout.LEFT, 5, 5));
 
             JCheckBox bandplanCheck = new JCheckBox("Bandplan");
+            panel.add(bandplanCheck);
             bandplanCheck.setSelected(true);
-            featPanel.add(bandplanCheck);
+
+            bandplanCheck.addActionListener(e -> { fftPanel.setShowBandplan(bandplanCheck.isSelected()); });
+
+            confirmComponentState(bandplanCheck);
+
+            JCheckBox maxDrawCheck = new JCheckBox("Draw max");
+            panel.add(maxDrawCheck);
 
             JPanel levelsPanel = new JPanel();
             compactPanel(levelsPanel);
@@ -172,11 +184,12 @@ public class ReceiverWindow extends JFrame {
             JPanel filler = new JPanel();
             filler.setAlignmentX(Component.LEFT_ALIGNMENT);
             fftCtlPanel.add(filler);
-
-            bandplanCheck.addActionListener(e -> { fftPanel.setShowBandplan(bandplanCheck.isSelected()); });
             JCheckBox colorMixingCheck = new JCheckBox("Dynamic color mixing");
             colorMixingCheck.setSelected(true);
             stylePanel.add(colorMixingCheck);
+
+            JButton btnResetMax = new JButton("Reset max");
+            featPanel.add(btnResetMax);
 
             autoCheck.addActionListener(e -> {
                 boolean enabled = autoCheck.isSelected();
@@ -227,13 +240,20 @@ public class ReceiverWindow extends JFrame {
             });
 
             colorMixingCheck.addActionListener(e -> waterfallPanel.setColorMixing(colorMixingCheck.isSelected()));
-
             solidCheck.addActionListener(e -> fftPanel.setSolid(solidCheck.isSelected()));
 
-            confirmComponentState(bandplanCheck);
+            maxDrawCheck.addActionListener(e -> {
+                fftPanel.setDrawMaxValues(maxDrawCheck.isSelected());
+                btnResetMax.setEnabled(maxDrawCheck.isSelected());
+            });
+
+            btnResetMax.addActionListener(e -> fftPanel.resetMaxFFT());
+
+            confirmComponentState(maxDrawCheck);
             confirmComponentState(autoCheck);
             confirmComponentState(solidCheck);
             confirmComponentState(colorMixingCheck);
+
         }
     }
 
@@ -243,6 +263,10 @@ public class ReceiverWindow extends JFrame {
 
     public Bandplan getBandplan() {
         return bandplan;
+    }
+
+    public FFTPanel getFftPanel() {
+        return fftPanel;
     }
 
     public TuneablePanel[] getPanels() {

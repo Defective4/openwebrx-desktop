@@ -12,9 +12,11 @@ import io.github.defective4.sdr.owrxdesktop.bandplan.Bandplan;
 
 public class FFTPanel extends BandplanPanel {
     private static final Color FFT_COLOR = Color.white;
+    private static final Color FFT_MAX_COLOR = Color.yellow;
     private static final Color FREQ_BAR = Color.decode("#282525");
     private static final Color LINE = Color.decode("#3F3B3B");
     private static final Color LINE_CENTER = Color.white;
+    private boolean drawMaxValues;
     private float[] fft = new float[0];
 
     private final Object fftLock = new Object();
@@ -24,7 +26,10 @@ public class FFTPanel extends BandplanPanel {
     private float fftMin = -88;
 
     private int fftOffset;
+    private float[] fftValuesMax = new float[0];
+    private final Object fftValuesMaxLock = new Object();
     private boolean showBandplan = true;
+
     private boolean solid;
 
     public FFTPanel(Bandplan bandplan) {
@@ -36,6 +41,15 @@ public class FFTPanel extends BandplanPanel {
         fftOffset = offset;
         synchronized (fftLock) {
             this.fft = fft;
+        }
+        synchronized (fftValuesMaxLock) {
+            if (fftValuesMax.length != fft.length) {
+                fftValuesMax = new float[fft.length];
+                System.arraycopy(fft, 0, fftValuesMax, 0, fft.length);
+            }
+            for (int i = 0; i < fftValuesMax.length; i++) {
+                fftValuesMax[i] = Math.max(fftValuesMax[i], fft[i]);
+            }
         }
         repaint();
     }
@@ -55,12 +69,30 @@ public class FFTPanel extends BandplanPanel {
         return getHeight() - 24;
     }
 
+    public boolean isDrawMaxValues() {
+        return drawMaxValues;
+    }
+
     public boolean isShowBandplan() {
         return showBandplan;
     }
 
     public boolean isSolid() {
         return solid;
+    }
+
+    public void resetMaxFFT() {
+        synchronized (fftValuesMaxLock) {
+            fftValuesMax = new float[0];
+        }
+        repaint();
+    }
+
+    public void setDrawMaxValues(boolean drawMaxValues) {
+        this.drawMaxValues = drawMaxValues;
+        if (!drawMaxValues) {
+            fftValuesMax = new float[0];
+        }
     }
 
     @Override
@@ -125,6 +157,10 @@ public class FFTPanel extends BandplanPanel {
         synchronized (fftLock) {
             int prevX = 0;
             float prevVal = -1;
+            float prevMax = -1;
+
+            g2.setColor(FFT_COLOR);
+
             int fftLength = fft.length - fftOffset;
             if (fftLength > 0) for (int i = 0; i < fftLength; i++) {
                 int ix = (int) Math.round(i / (double) fftLength * getWidth());
@@ -134,6 +170,20 @@ public class FFTPanel extends BandplanPanel {
 
                 int y = (int) (getLineHeight() * r);
 
+                if (drawMaxValues && fft.length == fftValuesMax.length) {
+                    synchronized (fftValuesMaxLock) {
+                        float maxValue = calculateFFTValueInRange(fftValuesMax[i + fftOffset]);
+                        int maxY = (int) (getLineHeight() * (maxValue / range));
+
+                        g2.setColor(FFT_MAX_COLOR);
+                        if (maxValue != -1) {
+                            g2.drawLine(prevX, (int) prevMax, ix, maxY);
+                        }
+                        g2.setColor(FFT_COLOR);
+                        prevMax = maxY;
+                    }
+                }
+
                 if (solid) {
                     g2.drawLine(ix, getLineHeight(), ix, y);
                 } else {
@@ -141,8 +191,8 @@ public class FFTPanel extends BandplanPanel {
                         g2.drawLine(prevX, (int) prevVal, ix, y);
                     }
                     prevVal = y;
-                    prevX = ix;
                 }
+                prevX = ix;
             }
         }
 
