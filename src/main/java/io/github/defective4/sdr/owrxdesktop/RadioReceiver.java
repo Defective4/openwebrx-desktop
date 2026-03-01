@@ -89,6 +89,10 @@ public class RadioReceiver {
                     rxWindow.setWaterfallTheme(config.mappedWaterfallColors());
                 }
 
+                if(config.waterfallLevels()!=null) {
+                    rxWindow.setServerLevels(config.waterfallLevels());
+                }
+
                 rxWindow.setTuningReady(true);
             }
         });

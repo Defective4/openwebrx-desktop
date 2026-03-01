@@ -6,6 +6,7 @@ import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.event.ActionListener;
 import java.util.Arrays;
+import java.util.Objects;
 
 import javax.swing.AbstractButton;
 import javax.swing.BoxLayout;
@@ -21,6 +22,7 @@ import javax.swing.border.TitledBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import io.github.defective4.sdr.owrxclient.model.WaterfallLevels;
 import io.github.defective4.sdr.owrxdesktop.bandplan.Bandplan;
 import io.github.defective4.sdr.owrxdesktop.ui.component.FFTPanel;
 import io.github.defective4.sdr.owrxdesktop.ui.component.TuneablePanel;
@@ -29,9 +31,13 @@ import io.github.defective4.sdr.owrxdesktop.ui.event.TuningAdapter;
 
 public class ReceiverWindow extends JFrame {
 
+    private final JCheckBox autoCheck = new JCheckBox("Auto");
+
     private final Bandplan bandplan = new Bandplan();
 
     private final FFTPanel fftPanel;
+
+    private WaterfallLevels serverLevels = new WaterfallLevels(-88, -20);
 
     private final WaterfallPanel waterfallPanel;
 
@@ -113,7 +119,6 @@ public class ReceiverWindow extends JFrame {
             fftCtlPanel.add(levelsPanel);
             levelsPanel.setLayout(new BoxLayout(levelsPanel, BoxLayout.Y_AXIS));
 
-            JCheckBox autoCheck = new JCheckBox("Auto");
             autoCheck.setSelected(true);
             levelsPanel.add(autoCheck);
 
@@ -177,6 +182,15 @@ public class ReceiverWindow extends JFrame {
 
                 minField.setText(enabled ? "Auto" : Integer.toString(minSlider.getValue()));
                 maxField.setText(enabled ? "Auto" : Integer.toString(maxSlider.getValue()));
+
+                if (enabled) {
+                    setServerLevels(serverLevels);
+                } else {
+                    setFFTMax(maxSlider.getValue());
+                    setFFTMin(minSlider.getValue());
+                }
+
+                fftPanel.repaint();
             });
 
             minSlider.addChangeListener(new ChangeListener() {
@@ -189,6 +203,8 @@ public class ReceiverWindow extends JFrame {
 
                     setFFTMax(maxSlider.getValue());
                     setFFTMin(val);
+
+                    fftPanel.repaint();
                 }
             });
 
@@ -202,6 +218,8 @@ public class ReceiverWindow extends JFrame {
 
                     setFFTMin(minSlider.getValue());
                     setFFTMax(val);
+
+                    fftPanel.repaint();
                 }
             });
 
@@ -225,6 +243,10 @@ public class ReceiverWindow extends JFrame {
         return new TuneablePanel[] { waterfallPanel, fftPanel };
     }
 
+    public WaterfallLevels getServerLevels() {
+        return serverLevels;
+    }
+
     public void setBandwidth(int bandwidth) {
         for (TuneablePanel fftPanel : getPanels()) fftPanel.setBandwidth(bandwidth);
     }
@@ -233,12 +255,12 @@ public class ReceiverWindow extends JFrame {
         for (TuneablePanel fftPanel : getPanels()) fftPanel.setCenterFrequency(centerFrequency);
     }
 
-    public void setFFTMax(int max) {
-        for (TuneablePanel fftPanel : getPanels()) fftPanel.setFFTMax(max);
+    public void setFFTMax(float f) {
+        for (TuneablePanel fftPanel : getPanels()) fftPanel.setFFTMax(f);
     }
 
-    public void setFFTMin(int min) {
-        for (TuneablePanel fftPanel : getPanels()) fftPanel.setFFTMin(min);
+    public void setFFTMin(float f) {
+        for (TuneablePanel fftPanel : getPanels()) fftPanel.setFFTMin(f);
     }
 
     public void setScopeLower(int scopeLower) {
@@ -247,6 +269,15 @@ public class ReceiverWindow extends JFrame {
 
     public void setScopeUpper(int scopeUpper) {
         for (TuneablePanel fftPanel : getPanels()) fftPanel.setScopeUpper(scopeUpper);
+    }
+
+    public void setServerLevels(WaterfallLevels serverLevels) {
+        this.serverLevels = Objects.requireNonNull(serverLevels);
+        if (autoCheck.isSelected()) {
+            setFFTMax(serverLevels.max());
+            setFFTMin(serverLevels.min());
+        }
+        repaint();
     }
 
     public void setSolid(boolean solid) {
