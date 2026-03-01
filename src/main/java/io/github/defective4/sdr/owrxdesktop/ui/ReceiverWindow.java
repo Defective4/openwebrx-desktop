@@ -148,7 +148,7 @@ public class ReceiverWindow extends JFrame {
 
             JSlider minSlider = new JSlider();
             minSlider.setMinimum(-100);
-            minSlider.setMaximum(0);
+            minSlider.setMaximum(50);
             minSlider.setValue(-88);
             minPanel.add(minSlider);
 
@@ -166,7 +166,7 @@ public class ReceiverWindow extends JFrame {
 
             JSlider maxSlider = new JSlider();
             maxSlider.setMinimum(-100);
-            maxSlider.setMaximum(0);
+            maxSlider.setMaximum(50);
             maxSlider.setValue(-20);
             maxPanel.add(maxSlider);
 
