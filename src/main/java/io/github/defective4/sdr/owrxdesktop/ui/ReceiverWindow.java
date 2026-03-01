@@ -116,6 +116,10 @@ public class ReceiverWindow extends JFrame {
         for (TuneablePanel fftPanel : getPanels()) fftPanel.tune(offset, fireEvents);
     }
 
+    public void updateBandplan() {
+        fftPanel.updateVisibleBands();
+    }
+
     private TuneablePanel[] getPanels() {
         return new TuneablePanel[] { waterfallPanel, fftPanel };
     }

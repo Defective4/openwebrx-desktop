@@ -40,7 +40,7 @@ public abstract class BandplanPanel extends TuneablePanel {
         updateVisibleBands();
     }
 
-    private void updateVisibleBands() {
+    public void updateVisibleBands() {
         int lo = centerFrequency - bandwidth / 2;
         int hi = centerFrequency + bandwidth / 2;
         visibleBands = bandplan.getBandsInRange(lo, hi);

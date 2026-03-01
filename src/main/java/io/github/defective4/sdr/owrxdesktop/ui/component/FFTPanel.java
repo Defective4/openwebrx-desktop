@@ -147,7 +147,7 @@ public class FFTPanel extends BandplanPanel {
                 int startX = (int) Math.round(loDiff * pxPerHz);
                 int width = (int) (getWidth() - Math.round(hiDiff * pxPerHz) - startX);
                 g2.setColor(band.color());
-                g2.fillRect(startX, getHeight() - 23 - 16, width, 16);
+                g2.fillRect(startX, getHeight() - 24 - 16, width, 16);
 
                 String str = band.name();
 
@@ -163,7 +163,7 @@ public class FFTPanel extends BandplanPanel {
                 int strX = startX + width / 2 - strWidth / 2;
 
                 g2.setColor(Color.white);
-                g2.drawString(str, strX, getHeight() - 23 - 4);
+                g2.drawString(str, strX, getHeight() - 24 - 4);
             }
         }
 
