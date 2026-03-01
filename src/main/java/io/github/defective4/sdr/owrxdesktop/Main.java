@@ -18,8 +18,8 @@ public class Main {
         try {
             UIManager.setLookAndFeel(new FlatDarkLaf());
 
-            Bandplan bandplan = new Bandplan(
-                    Set.of(new Band((int) 88e6f, (int) 108e6f, new Color(55, 55, 255, 155), "Broadcast FM")));
+            Bandplan bandplan = new Bandplan();
+            bandplan.setBands(Set.of(new Band((int) 88e6f, (int) 108e6f, new Color(55, 55, 255, 155), "Broadcast FM")));
 
             ReceiverWindow rxWindow = new ReceiverWindow(bandplan);
             rxWindow.setVisible(true);
