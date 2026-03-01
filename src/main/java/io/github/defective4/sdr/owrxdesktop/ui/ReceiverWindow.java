@@ -18,7 +18,6 @@ import javax.swing.JPanel;
 import javax.swing.JSlider;
 import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
-import javax.swing.JTextField;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
@@ -141,16 +140,14 @@ public class ReceiverWindow extends JFrame {
             levelsPanel.add(minPanel);
             minPanel.setLayout(new BoxLayout(minPanel, BoxLayout.X_AXIS));
 
-            JTextField minField = new JTextField();
-            minField.setEditable(false);
-            minPanel.add(minField);
-            minField.setColumns(3);
+            JLabel minField = new JLabel();
 
             JSlider minSlider = new JSlider();
             minSlider.setMinimum(-100);
             minSlider.setMaximum(50);
             minSlider.setValue(-88);
             minPanel.add(minSlider);
+            minPanel.add(minField);
 
             levelsPanel.add(new JLabel("Max"));
 
@@ -159,16 +156,14 @@ public class ReceiverWindow extends JFrame {
             levelsPanel.add(maxPanel);
             maxPanel.setLayout(new BoxLayout(maxPanel, BoxLayout.X_AXIS));
 
-            JTextField maxField = new JTextField();
-            maxField.setEditable(false);
-            maxPanel.add(maxField);
-            maxField.setColumns(3);
+            JLabel maxField = new JLabel();
 
             JSlider maxSlider = new JSlider();
             maxSlider.setMinimum(-100);
             maxSlider.setMaximum(50);
             maxSlider.setValue(-20);
             maxPanel.add(maxSlider);
+            maxPanel.add(maxField);
 
             JPanel stylePanel = new JPanel();
             compactPanel(stylePanel);
