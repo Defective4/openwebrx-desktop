@@ -16,13 +16,12 @@ import io.github.defective4.sdr.owrxdesktop.ui.event.TuningAdapter;
 
 public class ReceiverWindow extends JFrame {
 
-    private final Bandplan bandplan;
+    private final Bandplan bandplan = new Bandplan();
     private final FFTPanel fftPanel;
 
     private final WaterfallPanel waterfallPanel;
 
-    public ReceiverWindow(Bandplan bandplan) {
-        this.bandplan = bandplan;
+    public ReceiverWindow() {
         setBounds(100, 100, 768, 468);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         getContentPane().setLayout(new BoxLayout(getContentPane(), BoxLayout.Y_AXIS));
