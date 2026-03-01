@@ -174,6 +174,9 @@ public class ReceiverWindow extends JFrame {
             fftCtlPanel.add(filler);
 
             bandplanCheck.addActionListener(e -> { fftPanel.setShowBandplan(bandplanCheck.isSelected()); });
+            JCheckBox colorMixingCheck = new JCheckBox("Dynamic color mixing");
+            colorMixingCheck.setSelected(true);
+            stylePanel.add(colorMixingCheck);
 
             autoCheck.addActionListener(e -> {
                 boolean enabled = autoCheck.isSelected();
@@ -223,11 +226,14 @@ public class ReceiverWindow extends JFrame {
                 }
             });
 
+            colorMixingCheck.addActionListener(e -> waterfallPanel.setColorMixing(colorMixingCheck.isSelected()));
+
             solidCheck.addActionListener(e -> fftPanel.setSolid(solidCheck.isSelected()));
 
             confirmComponentState(bandplanCheck);
             confirmComponentState(autoCheck);
             confirmComponentState(solidCheck);
+            confirmComponentState(colorMixingCheck);
         }
     }
 

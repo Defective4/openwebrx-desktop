@@ -11,8 +11,10 @@ import java.util.Objects;
 
 public class WaterfallPanel extends TuneablePanel {
 
+    private boolean colorMixing = true;
     private final Deque<BufferedImage> fftLines = new ArrayDeque<>();
     private float fftMax = -20;
+
     private float fftMin = -88;
 
     private Color[] theme = new Color[] { Color.black, Color.white };
@@ -31,8 +33,24 @@ public class WaterfallPanel extends TuneablePanel {
             double ratio = calculateFFTValueInRange(element) / calculateFFTRange();
             if (ratio > 1) ratio = 1;
             if (ratio < 0) ratio = 0;
-            int index = (int) Math.round((theme.length - 1) * ratio);
-            Color color = theme[index];
+            Color color;
+            if (colorMixing) {
+                double index = (theme.length - 1) * ratio;
+
+                Color upper = theme[(int) Math.ceil(index)];
+                Color lower = theme[(int) Math.floor(index)];
+
+                double gradientRatio = index - Math.floor(index);
+
+                int r = gradient(upper.getRed(), lower.getRed(), gradientRatio);
+                int g = gradient(upper.getGreen(), lower.getGreen(), gradientRatio);
+                int b = gradient(upper.getBlue(), lower.getBlue(), gradientRatio);
+
+                color = new Color(r, g, b);
+            } else {
+                int index = (int) Math.round((theme.length - 1) * ratio);
+                color = theme[index];
+            }
             image.setRGB(i, 0, color.getRGB());
         }
 
@@ -64,6 +82,14 @@ public class WaterfallPanel extends TuneablePanel {
 
     public Color[] getTheme() {
         return theme;
+    }
+
+    public boolean hasColorMixing() {
+        return colorMixing;
+    }
+
+    public void setColorMixing(boolean colorMixing) {
+        this.colorMixing = colorMixing;
     }
 
     @Override
@@ -99,6 +125,11 @@ public class WaterfallPanel extends TuneablePanel {
 
         graphics.setFont(graphics.getFont().deriveFont(12f));
         super.paintComponent(graphics);
+    }
+
+    private static int gradient(int a, int b, double ratio) {
+        int diff = Math.max(a, b) - Math.min(a, b);
+        return (int) Math.round(Math.min(a, b) + diff * ratio);
     }
 
 }
