@@ -232,7 +232,8 @@ public abstract class TuneablePanel extends JComponent implements FFTVisualizer 
                 g2.setColor(SCOPE);
                 int start = (int) Math.round(x - calculatePixelPerHerz() * -scopeLower);
 
-                g2.fillRect(start, 0, (int) (calculatePixelPerHerz() * (-scopeLower + scopeUpper)), getLineHeight());
+                g2.fillRect(start, 0, (int) (calculatePixelPerHerz() * (-scopeLower + scopeUpper)),
+                        getLineHeight() + 1);
 
                 g2.setColor(TUNE);
                 g2.drawLine(x, 0, x, getLineHeight());
