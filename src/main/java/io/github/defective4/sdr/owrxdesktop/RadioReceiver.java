@@ -10,6 +10,7 @@ import io.github.defective4.sdr.owrxclient.client.OpenWebRXClient;
 import io.github.defective4.sdr.owrxclient.event.OWRXAdapter;
 import io.github.defective4.sdr.owrxclient.model.Band;
 import io.github.defective4.sdr.owrxclient.model.Bandpass;
+import io.github.defective4.sdr.owrxclient.model.ReceiverMode;
 import io.github.defective4.sdr.owrxclient.model.ServerConfig;
 import io.github.defective4.sdr.owrxdesktop.bandplan.Bandplan;
 import io.github.defective4.sdr.owrxdesktop.ui.ReceiverWindow;
@@ -67,6 +68,15 @@ public class RadioReceiver {
             @Override
             public void handshakeReceived(String server, String version) {
                 // TODO start dsp
+            }
+
+            @Override
+            public void receiverModesUpdated(ReceiverMode[] modes) {
+                if (modulation != null) client.getModeByName(modulation).ifPresent(mode -> {
+                    Bandpass bandpass = mode.bandpass();
+                    rxWindow.setScopeLower(bandpass.lowCut());
+                    rxWindow.setScopeUpper(bandpass.highCut());
+                });
             }
 
             @Override
