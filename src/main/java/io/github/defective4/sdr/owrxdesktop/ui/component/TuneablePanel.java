@@ -83,17 +83,16 @@ public abstract class TuneablePanel extends JComponent implements FFTVisualizer 
 
             @Override
             public void mousePressed(MouseEvent e) {
-                if (e.getY() <= getLineHeight()) {
-                    mouseDown = true;
-                    tuneMode = e.getY() <= getLineHeight();
-                    if (tuneMode) {
-                        tune(calculateOffsetAtPoint(e.getX()));
-                    } else {
-                        dragX = e.getXOnScreen();
-                    }
+                mouseDown = true;
+                tuneMode = e.getY() <= getLineHeight();
+                if (tuneMode) {
+                    tune(calculateOffsetAtPoint(e.getX()));
                 } else {
-                    setBounds(0, getY(), getParent().getWidth(), getHeight());
-                    listeners.forEach(ls -> ls.zoomChanged(0, getParent().getWidth()));
+                    dragX = e.getXOnScreen();
+                    if (e.getButton() == MouseEvent.BUTTON3) {
+                        setBounds(0, getY(), getParent().getWidth(), getHeight());
+                        listeners.forEach(ls -> ls.zoomChanged(0, getParent().getWidth()));
+                    }
                 }
             }
 
