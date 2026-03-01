@@ -132,7 +132,7 @@ public class FFTPanel extends BandplanPanel {
                 float valueInRange = calculateFFTValueInRange(fft[i + fftOffset]);
                 double r = valueInRange / range;
 
-                int y = (int) Math.max(0, getLineHeight() * r);
+                int y = (int) (getLineHeight() * r);
 
                 if (solid) {
                     g2.drawLine(ix, getLineHeight(), ix, y);
