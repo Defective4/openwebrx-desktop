@@ -37,6 +37,9 @@ public class ReceiverWindow extends JFrame {
 
     private final FFTPanel fftPanel;
 
+    private long lastFFTDraw;
+
+    private int maxFPS = -1;
     private WaterfallLevels serverLevels = new WaterfallLevels(-88, -20);
 
     private final WaterfallPanel waterfallPanel;
@@ -106,7 +109,6 @@ public class ReceiverWindow extends JFrame {
             featPanel.setBorder(new TitledBorder(null, "Features", TitledBorder.LEADING, TitledBorder.TOP, null, null));
             fftCtlPanel.add(featPanel);
             featPanel.setLayout(new BoxLayout(featPanel, BoxLayout.Y_AXIS));
-
             JPanel panel = new JPanel();
             panel.setAlignmentX(Component.LEFT_ALIGNMENT);
             featPanel.add(panel);
@@ -234,25 +236,58 @@ public class ReceiverWindow extends JFrame {
                 }
             });
 
+            featPanel.add(new JLabel(" "));
+
+            JPanel maxFpsPanel = new JPanel();
+            maxFpsPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
+            featPanel.add(maxFpsPanel);
+            maxFpsPanel.setLayout(new BoxLayout(maxFpsPanel, BoxLayout.X_AXIS));
+
+            maxFpsPanel.add(new JLabel("Max FPS: "));
+
+            JLabel maxFpsLabel = new JLabel("-");
+            maxFpsPanel.add(maxFpsLabel);
+
+            JSlider maxFpsSlider = new JSlider();
+            featPanel.add(maxFpsSlider);
+            maxFpsSlider.setMaximum(61);
+            maxFpsSlider.setValue(maxFpsSlider.getMaximum());
+            maxFpsSlider.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+            maxFpsSlider.addChangeListener(new ChangeListener() {
+                @Override
+                public void stateChanged(ChangeEvent e) {
+                    int val = maxFpsSlider.getValue();
+                    if (val >= maxFpsSlider.getMaximum()) val = -1;
+                    maxFPS = val;
+                    maxFpsLabel.setText(val == -1 ? "Unlimited" : Integer.toString(val));
+                }
+            });
+            confirmComponentState(maxFpsSlider);
+            confirmComponentState(autoCheck);
+            confirmComponentState(solidCheck);
+            confirmComponentState(colorMixingCheck);
+
             colorMixingCheck.addActionListener(e -> waterfallPanel.setColorMixing(colorMixingCheck.isSelected()));
             solidCheck.addActionListener(e -> fftPanel.setSolid(solidCheck.isSelected()));
 
             maxDrawCheck.addActionListener(e -> {
                 fftPanel.setDrawMaxValues(maxDrawCheck.isSelected());
                 btnResetMax.setEnabled(maxDrawCheck.isSelected());
+                fftPanel.repaint();
             });
 
             btnResetMax.addActionListener(e -> fftPanel.resetMaxFFT());
 
             confirmComponentState(maxDrawCheck);
-            confirmComponentState(autoCheck);
-            confirmComponentState(solidCheck);
-            confirmComponentState(colorMixingCheck);
-
         }
     }
 
     public void drawFFT(float[] fft, int offset) {
+        if (maxFPS > 0) {
+            if (System.currentTimeMillis() - lastFFTDraw < 1000 / maxFPS) return;
+            lastFFTDraw = System.currentTimeMillis();
+        } else if (maxFPS == 0) return;
         for (TuneablePanel fftPanel : getPanels()) fftPanel.drawFFT(fft, offset);
     }
 
@@ -339,6 +374,10 @@ public class ReceiverWindow extends JFrame {
 
     private static void confirmComponentState(AbstractButton component) {
         for (ActionListener ls : component.getActionListeners()) ls.actionPerformed(null);
+    }
+
+    private static void confirmComponentState(JSlider component) {
+        for (ChangeListener ls : component.getChangeListeners()) ls.stateChanged(null);
     }
 
 }
