@@ -146,11 +146,14 @@ public class ReceiverWindow extends JFrame {
             levelsPanel.add(fftLevelModePanel);
 
             ftlServer.setSelected(true);
+            ftlServer.setToolTipText("Use waterfall levels provided by the server");
             fftLevelModePanel.add(ftlServer);
 
+            ftlAuto.setToolTipText("Automatically adjust waterfall levels based on signal");
             fftLevelModePanel.add(ftlAuto);
 
             JRadioButton ftlManual = new JRadioButton("Manual");
+            ftlManual.setToolTipText("Adjust waterfall levels manually");
             fftLevelModePanel.add(ftlManual);
 
             ButtonGroup ftl = new ButtonGroup();
