@@ -6,22 +6,28 @@ import java.util.Arrays;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import javax.sound.sampled.LineUnavailableException;
+
 import io.github.defective4.sdr.owrxclient.client.OpenWebRXClient;
 import io.github.defective4.sdr.owrxclient.event.OWRXAdapter;
 import io.github.defective4.sdr.owrxclient.model.Band;
 import io.github.defective4.sdr.owrxclient.model.Bandpass;
 import io.github.defective4.sdr.owrxclient.model.ReceiverMode;
 import io.github.defective4.sdr.owrxclient.model.ServerConfig;
+import io.github.defective4.sdr.owrxdesktop.audio.AudioSinkManager;
 import io.github.defective4.sdr.owrxdesktop.bandplan.Bandplan;
 import io.github.defective4.sdr.owrxdesktop.ui.ReceiverWindow;
 
 public class RadioReceiver {
 
+    private final AudioSinkManager audioSinkManager;
     private final OpenWebRXClient client;
     private final ReceiverWindow rxWindow;
+
     private final URI uri;
 
-    public RadioReceiver(URI uri) {
+    public RadioReceiver(URI uri) throws LineUnavailableException {
+        audioSinkManager = new AudioSinkManager();
         this.uri = uri;
         rxWindow = new ReceiverWindow();
         client = prepareClient();
@@ -67,7 +73,25 @@ public class RadioReceiver {
 
             @Override
             public void handshakeReceived(String server, String version) {
-                // TODO start dsp
+                client.startDSP();
+            }
+
+            @Override
+            public void highQualityAudioReceived(byte[] data) {
+                try {
+                    audioSinkManager.writeHighSamples(data);
+                } catch (LineUnavailableException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            @Override
+            public void lowQualityAudioReceived(byte[] data) {
+                try {
+                    audioSinkManager.writeLowSamples(data);
+                } catch (LineUnavailableException e) {
+                    e.printStackTrace();
+                }
             }
 
             @Override
@@ -91,6 +115,7 @@ public class RadioReceiver {
                 if (config.centerFrequency() != null) rxWindow.setCenterFrequency(config.centerFrequency());
                 if (config.startOffsetFrequency() != null) {
                     rxWindow.tune(config.startOffsetFrequency(), false);
+                    client.setOffsetFrequency(config.startOffsetFrequency());
                 }
                 if (config.startModulation() != null) {
                     modulation = config.startModulation();
