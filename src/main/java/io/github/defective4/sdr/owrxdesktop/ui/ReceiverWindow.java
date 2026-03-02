@@ -13,6 +13,7 @@ import javax.swing.BoxLayout;
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
+import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -24,22 +25,28 @@ import javax.swing.border.TitledBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import io.github.defective4.sdr.owrxclient.model.ReceiverMode;
 import io.github.defective4.sdr.owrxclient.model.WaterfallLevels;
 import io.github.defective4.sdr.owrxdesktop.bandplan.Bandplan;
 import io.github.defective4.sdr.owrxdesktop.ui.component.FFTPanel;
 import io.github.defective4.sdr.owrxdesktop.ui.component.TuneablePanel;
 import io.github.defective4.sdr.owrxdesktop.ui.component.WaterfallPanel;
 import io.github.defective4.sdr.owrxdesktop.ui.event.TuningAdapter;
+import io.github.defective4.sdr.owrxdesktop.ui.rendering.ReceiverModeRenderer;
 
 public class ReceiverWindow extends JFrame {
 
+    private final JComboBox<ReceiverMode> analogBox = new JComboBox<>();
+
     private final Bandplan bandplan = new Bandplan();
 
-    private final FFTPanel fftPanel;
+    private final JComboBox<ReceiverMode> digitalBox = new JComboBox<>();
 
+    private final FFTPanel fftPanel;
     private final JRadioButton ftlAuto = new JRadioButton("Auto");
 
     private final JRadioButton ftlServer = new JRadioButton("Server");
+
     private long lastFFTDraw;
 
     private int maxFPS = -1;
@@ -47,7 +54,6 @@ public class ReceiverWindow extends JFrame {
     private float minFFT, maxFFT;
 
     private WaterfallLevels serverLevels = new WaterfallLevels(-88, -20);
-
     private final WaterfallPanel waterfallPanel;
 
     public ReceiverWindow() {
@@ -55,6 +61,9 @@ public class ReceiverWindow extends JFrame {
         setBounds(100, 100, 768, 468);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         getContentPane().setLayout(new BoxLayout(getContentPane(), BoxLayout.Y_AXIS));
+
+        analogBox.setRenderer(new ReceiverModeRenderer());
+        digitalBox.setRenderer(new ReceiverModeRenderer());
 
         JSplitPane splitPane = new JSplitPane();
         splitPane.setResizeWeight(1);
@@ -103,6 +112,34 @@ public class ReceiverWindow extends JFrame {
                     waterfallPanel.invalidate();
                 }
             });
+        }
+
+        {
+            JPanel rxCtlPanel = new JPanel();
+            controlTabs.addTab("RX", null, rxCtlPanel, null);
+            rxCtlPanel.setLayout(new BoxLayout(rxCtlPanel, BoxLayout.Y_AXIS));
+
+            JPanel modePanel = new JPanel();
+            modePanel.setAlignmentX(Component.LEFT_ALIGNMENT);
+            compactPanel(modePanel);
+            modePanel.setBorder(new TitledBorder(null, "Mode", TitledBorder.LEADING, TitledBorder.TOP, null, null));
+            rxCtlPanel.add(modePanel);
+            modePanel.setLayout(new BoxLayout(modePanel, BoxLayout.Y_AXIS));
+
+            modePanel.add(new JLabel("Primary"));
+
+            analogBox.setAlignmentX(Component.LEFT_ALIGNMENT);
+            modePanel.add(analogBox);
+
+            JLabel lblDigital = new JLabel("Digital");
+            modePanel.add(lblDigital);
+
+            digitalBox.setAlignmentX(Component.LEFT_ALIGNMENT);
+            modePanel.add(digitalBox);
+
+            JPanel filler = new JPanel();
+            filler.setAlignmentX(Component.LEFT_ALIGNMENT);
+            rxCtlPanel.add(filler);
         }
 
         {
@@ -311,6 +348,41 @@ public class ReceiverWindow extends JFrame {
             btnResetMax.addActionListener(e -> fftPanel.resetMaxFFT());
 
             confirmComponentState(maxDrawCheck);
+
+            digitalBox.addActionListener(e -> {
+                ReceiverMode selected = (ReceiverMode) digitalBox.getSelectedItem();
+                if (selected != null) {
+                    int count = analogBox.getItemCount();
+                    for (int i = 0; i < count; i++) {
+                        ReceiverMode analogItem = analogBox.getItemAt(i);
+                        if (analogItem != null && analogItem.modulation().equals(selected.underlying()[0])) {
+                            analogBox.setSelectedIndex(i);
+                            break;
+                        }
+                    }
+                }
+            });
+
+            analogBox.addActionListener(e -> {
+                ReceiverMode selected = (ReceiverMode) analogBox.getSelectedItem();
+                if (selected != null) {
+                    if (digitalBox.getItemCount() > 0) {
+                        ReceiverMode digi = (ReceiverMode) digitalBox.getSelectedItem();
+                        if (digi != null) {
+                            boolean has = false;
+                            for (String mod : digi.underlying()) {
+                                if (mod.equals(selected.modulation())) {
+                                    has = true;
+                                    break;
+                                }
+                            }
+                            if (!has) {
+                                digitalBox.setSelectedIndex(0);
+                            }
+                        }
+                    }
+                }
+            });
         }
     }
 
@@ -396,6 +468,30 @@ public class ReceiverWindow extends JFrame {
         fftPanel.setSolid(solid);
     }
 
+    public void setStartingMode(ReceiverMode mode) {
+        int count = digitalBox.getItemCount();
+        boolean found = false;
+        for (int i = 0; i < count; i++) {
+            ReceiverMode m = digitalBox.getItemAt(i);
+            if (m != null && m.name().equals(mode.name())) {
+                found = true;
+                digitalBox.setSelectedIndex(i);
+                break;
+            }
+        }
+        if (!found) {
+            if (digitalBox.getItemCount() > 0) digitalBox.setSelectedIndex(0);
+            count = analogBox.getItemCount();
+            for (int i = 0; i < count; i++) {
+                ReceiverMode m = analogBox.getItemAt(i);
+                if (m != null && m.name().equals(mode.name())) {
+                    analogBox.setSelectedIndex(i);
+                    break;
+                }
+            }
+        }
+    }
+
     public void setTuningReady(boolean tuningReady) {
         for (TuneablePanel fftPanel : getPanels()) fftPanel.setTuningReady(tuningReady);
     }
@@ -418,6 +514,21 @@ public class ReceiverWindow extends JFrame {
 
     public void updateBandplan() {
         fftPanel.updateVisibleBands();
+    }
+
+    public void updateModes(ReceiverMode[] modes) {
+        analogBox.removeAllItems();
+        digitalBox.removeAllItems();
+
+        digitalBox.addItem(null);
+
+        for (ReceiverMode mode : modes) {
+            if (mode.underlying() != null && mode.underlying().length > 0) {
+                digitalBox.addItem(mode);
+            } else {
+                analogBox.addItem(mode);
+            }
+        }
     }
 
     private static void compactPanel(JPanel featPanel) {

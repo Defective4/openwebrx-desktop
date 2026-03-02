@@ -72,11 +72,16 @@ public class RadioReceiver {
 
             @Override
             public void receiverModesUpdated(ReceiverMode[] modes) {
+                rxWindow.updateModes(modes);
                 if (modulation != null) client.getModeByName(modulation).ifPresent(mode -> {
                     Bandpass bandpass = mode.bandpass();
-                    rxWindow.setScopeLower(bandpass.lowCut());
-                    rxWindow.setScopeUpper(bandpass.highCut());
+                    if (bandpass != null) {
+                        rxWindow.setScopeLower(bandpass.lowCut());
+                        rxWindow.setScopeUpper(bandpass.highCut());
+                    }
+                    rxWindow.setStartingMode(mode);
                 });
+
             }
 
             @Override
@@ -91,8 +96,11 @@ public class RadioReceiver {
                     modulation = config.startModulation();
                     client.getModeByName(modulation).ifPresent(mode -> {
                         Bandpass bandpass = mode.bandpass();
-                        rxWindow.setScopeLower(bandpass.lowCut());
-                        rxWindow.setScopeUpper(bandpass.highCut());
+                        if (bandpass != null) {
+                            rxWindow.setScopeLower(bandpass.lowCut());
+                            rxWindow.setScopeUpper(bandpass.highCut());
+                        }
+                        rxWindow.setStartingMode(mode);
                     });
                 }
                 if (config.waterfallColors() != null) {
