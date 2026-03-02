@@ -168,8 +168,8 @@ public class ReceiverWindow extends JFrame {
             JLabel minField = new JLabel();
 
             JSlider minSlider = new JSlider();
-            minSlider.setMinimum(-100);
-            minSlider.setMaximum(50);
+            minSlider.setMinimum(-200);
+            minSlider.setMaximum(100);
             minSlider.setValue(-88);
             minPanel.add(minSlider);
             minPanel.add(minField);
@@ -184,8 +184,8 @@ public class ReceiverWindow extends JFrame {
             JLabel maxField = new JLabel();
 
             JSlider maxSlider = new JSlider();
-            maxSlider.setMinimum(-100);
-            maxSlider.setMaximum(50);
+            maxSlider.setMinimum(-200);
+            maxSlider.setMaximum(100);
             maxSlider.setValue(-20);
             maxPanel.add(maxSlider);
             maxPanel.add(maxField);
@@ -329,7 +329,6 @@ public class ReceiverWindow extends JFrame {
                 float f = fft[i];
                 if (f > maxFFT) {
                     maxFFT = f;
-                    System.out.println(maxFFT);
                     setFFTMax(f);
                 }
             }
