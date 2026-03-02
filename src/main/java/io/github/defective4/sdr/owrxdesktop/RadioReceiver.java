@@ -17,6 +17,7 @@ import io.github.defective4.sdr.owrxclient.model.ServerConfig;
 import io.github.defective4.sdr.owrxdesktop.audio.AudioSinkManager;
 import io.github.defective4.sdr.owrxdesktop.bandplan.Bandplan;
 import io.github.defective4.sdr.owrxdesktop.ui.ReceiverWindow;
+import io.github.defective4.sdr.owrxdesktop.ui.event.UserInteractionListener;
 
 public class RadioReceiver {
 
@@ -31,6 +32,17 @@ public class RadioReceiver {
         this.uri = uri;
         rxWindow = new ReceiverWindow();
         client = prepareClient();
+        rxWindow.addListener(new UserInteractionListener() {
+            @Override
+            public void modeChanged(ReceiverMode primary, ReceiverMode underlying) {
+                client.setModulation(primary, underlying);
+            }
+
+            @Override
+            public void tuned(int offset) {
+                client.setOffsetFrequency(offset);
+            }
+        });
     }
 
     public void connect() throws InterruptedException {
@@ -114,8 +126,7 @@ public class RadioReceiver {
                 if (config.tuningStep() != null) rxWindow.setTuningStep(config.tuningStep());
                 if (config.centerFrequency() != null) rxWindow.setCenterFrequency(config.centerFrequency());
                 if (config.startOffsetFrequency() != null) {
-                    rxWindow.tune(config.startOffsetFrequency(), false);
-                    client.setOffsetFrequency(config.startOffsetFrequency());
+                    rxWindow.tune(config.startOffsetFrequency(), true);
                 }
                 if (config.startModulation() != null) {
                     modulation = config.startModulation();

@@ -6,7 +6,10 @@ import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.event.ActionListener;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import javax.swing.AbstractButton;
 import javax.swing.BoxLayout;
@@ -25,6 +28,7 @@ import javax.swing.border.TitledBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import io.github.defective4.sdr.owrxclient.model.Bandpass;
 import io.github.defective4.sdr.owrxclient.model.ReceiverMode;
 import io.github.defective4.sdr.owrxclient.model.WaterfallLevels;
 import io.github.defective4.sdr.owrxdesktop.bandplan.Bandplan;
@@ -32,6 +36,7 @@ import io.github.defective4.sdr.owrxdesktop.ui.component.FFTPanel;
 import io.github.defective4.sdr.owrxdesktop.ui.component.TuneablePanel;
 import io.github.defective4.sdr.owrxdesktop.ui.component.WaterfallPanel;
 import io.github.defective4.sdr.owrxdesktop.ui.event.TuningAdapter;
+import io.github.defective4.sdr.owrxdesktop.ui.event.UserInteractionListener;
 import io.github.defective4.sdr.owrxdesktop.ui.rendering.ReceiverModeRenderer;
 
 public class ReceiverWindow extends JFrame {
@@ -49,11 +54,13 @@ public class ReceiverWindow extends JFrame {
 
     private long lastFFTDraw;
 
+    private final List<UserInteractionListener> listeners = new CopyOnWriteArrayList<>();
+
     private int maxFPS = -1;
 
     private float minFFT, maxFFT;
-
     private WaterfallLevels serverLevels = new WaterfallLevels(-88, -20);
+
     private final WaterfallPanel waterfallPanel;
 
     public ReceiverWindow() {
@@ -97,6 +104,7 @@ public class ReceiverWindow extends JFrame {
                 @Override
                 public void tuned(int offset) {
                     fftPanel.tune(offset, false);
+                    listeners.forEach(ls -> ls.tuned(offset));
                 }
             });
 
@@ -104,6 +112,7 @@ public class ReceiverWindow extends JFrame {
                 @Override
                 public void tuned(int offset) {
                     waterfallPanel.tune(offset, false);
+                    listeners.forEach(ls -> ls.tuned(offset));
                 }
 
                 @Override
@@ -252,6 +261,7 @@ public class ReceiverWindow extends JFrame {
             featPanel.add(btnResetMax);
 
             minSlider.addChangeListener(new ChangeListener() {
+
                 @Override
                 public void stateChanged(ChangeEvent e) {
                     int val = minSlider.getValue();
@@ -361,6 +371,7 @@ public class ReceiverWindow extends JFrame {
                         }
                     }
                 }
+                updateMode();
             });
 
             analogBox.addActionListener(e -> {
@@ -382,8 +393,14 @@ public class ReceiverWindow extends JFrame {
                         }
                     }
                 }
+                updateMode();
             });
         }
+
+    }
+
+    public boolean addListener(UserInteractionListener listener) {
+        return listeners.add(Objects.requireNonNull(listener));
     }
 
     public void drawFFT(float[] fft, int offset) {
@@ -418,12 +435,20 @@ public class ReceiverWindow extends JFrame {
         return fftPanel;
     }
 
+    public List<UserInteractionListener> getListeners() {
+        return Collections.unmodifiableList(listeners);
+    }
+
     public TuneablePanel[] getPanels() {
         return new TuneablePanel[] { waterfallPanel, fftPanel };
     }
 
     public WaterfallLevels getServerLevels() {
         return serverLevels;
+    }
+
+    public boolean removeListener(UserInteractionListener listener) {
+        return listeners.remove(listener);
     }
 
     public void resetAutoFFT() {
@@ -521,6 +546,7 @@ public class ReceiverWindow extends JFrame {
         digitalBox.removeAllItems();
 
         digitalBox.addItem(null);
+        analogBox.addItem(ReceiverMode.EMPTY);
 
         for (ReceiverMode mode : modes) {
             if (mode.underlying() != null && mode.underlying().length > 0) {
@@ -528,6 +554,17 @@ public class ReceiverWindow extends JFrame {
             } else {
                 analogBox.addItem(mode);
             }
+        }
+    }
+
+    private void updateMode() {
+        ReceiverMode primary = (ReceiverMode) analogBox.getSelectedItem();
+        ReceiverMode secondary = (ReceiverMode) digitalBox.getSelectedItem();
+        listeners.forEach(ls -> ls.modeChanged(primary, secondary));
+        Bandpass bandpass = (secondary == null || secondary.bandpass() == null ? primary : secondary).bandpass();
+        if (bandpass != null) {
+            setScopeLower(bandpass.lowCut());
+            setScopeUpper(bandpass.highCut());
         }
     }
 
