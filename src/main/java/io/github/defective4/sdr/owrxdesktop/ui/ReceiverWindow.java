@@ -10,11 +10,13 @@ import java.util.Objects;
 
 import javax.swing.AbstractButton;
 import javax.swing.BoxLayout;
+import javax.swing.ButtonGroup;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JRadioButton;
 import javax.swing.JSlider;
 import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
@@ -31,20 +33,25 @@ import io.github.defective4.sdr.owrxdesktop.ui.event.TuningAdapter;
 
 public class ReceiverWindow extends JFrame {
 
-    private final JCheckBox autoCheck = new JCheckBox("Auto");
-
     private final Bandplan bandplan = new Bandplan();
 
     private final FFTPanel fftPanel;
 
+    private final JRadioButton ftlAuto = new JRadioButton("Auto");
+
+    private final JRadioButton ftlServer = new JRadioButton("Server");
     private long lastFFTDraw;
 
     private int maxFPS = -1;
+
+    private float minFFT, maxFFT;
+
     private WaterfallLevels serverLevels = new WaterfallLevels(-88, -20);
 
     private final WaterfallPanel waterfallPanel;
 
     public ReceiverWindow() {
+        resetAutoFFT();
         setBounds(100, 100, 768, 468);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         getContentPane().setLayout(new BoxLayout(getContentPane(), BoxLayout.Y_AXIS));
@@ -132,8 +139,24 @@ public class ReceiverWindow extends JFrame {
             fftCtlPanel.add(levelsPanel);
             levelsPanel.setLayout(new BoxLayout(levelsPanel, BoxLayout.Y_AXIS));
 
-            autoCheck.setSelected(true);
-            levelsPanel.add(autoCheck);
+            JPanel fftLevelModePanel = new JPanel();
+            FlowLayout flowLayout = (FlowLayout) fftLevelModePanel.getLayout();
+            flowLayout.setAlignment(FlowLayout.LEFT);
+            fftLevelModePanel.setAlignmentX(Component.LEFT_ALIGNMENT);
+            levelsPanel.add(fftLevelModePanel);
+
+            ftlServer.setSelected(true);
+            fftLevelModePanel.add(ftlServer);
+
+            fftLevelModePanel.add(ftlAuto);
+
+            JRadioButton ftlManual = new JRadioButton("Manual");
+            fftLevelModePanel.add(ftlManual);
+
+            ButtonGroup ftl = new ButtonGroup();
+            ftl.add(ftlServer);
+            ftl.add(ftlAuto);
+            ftl.add(ftlManual);
 
             levelsPanel.add(new JLabel("Min"));
 
@@ -187,24 +210,6 @@ public class ReceiverWindow extends JFrame {
 
             JButton btnResetMax = new JButton("Reset max");
             featPanel.add(btnResetMax);
-
-            autoCheck.addActionListener(e -> {
-                boolean enabled = autoCheck.isSelected();
-                minSlider.setEnabled(!enabled);
-                maxSlider.setEnabled(!enabled);
-
-                minField.setText(enabled ? "Auto" : Integer.toString(minSlider.getValue()));
-                maxField.setText(enabled ? "Auto" : Integer.toString(maxSlider.getValue()));
-
-                if (enabled) {
-                    setServerLevels(serverLevels);
-                } else {
-                    setFFTMax(maxSlider.getValue());
-                    setFFTMin(minSlider.getValue());
-                }
-
-                fftPanel.repaint();
-            });
 
             minSlider.addChangeListener(new ChangeListener() {
                 @Override
@@ -263,10 +268,33 @@ public class ReceiverWindow extends JFrame {
                     maxFpsLabel.setText(val == -1 ? "Unlimited" : Integer.toString(val));
                 }
             });
+
+            ActionListener ftlListener = e -> {
+                minSlider.setEnabled(ftlManual.isSelected());
+                maxSlider.setEnabled(ftlManual.isSelected());
+
+                if (ftlServer.isSelected() || ftlAuto.isSelected()) {
+                    setFFTMax(serverLevels.max());
+                    setFFTMin(serverLevels.min());
+
+                    resetAutoFFT();
+                } else {
+                    confirmComponentState(minSlider);
+                    confirmComponentState(maxSlider);
+                }
+            };
+
+            ftlManual.addActionListener(ftlListener);
+            ftlAuto.addActionListener(ftlListener);
+            ftlServer.addActionListener(ftlListener);
+
             confirmComponentState(maxFpsSlider);
-            confirmComponentState(autoCheck);
             confirmComponentState(solidCheck);
             confirmComponentState(colorMixingCheck);
+            confirmComponentState(ftlManual);
+
+            confirmComponentState(minSlider);
+            confirmComponentState(maxSlider);
 
             colorMixingCheck.addActionListener(e -> waterfallPanel.setColorMixing(colorMixingCheck.isSelected()));
             solidCheck.addActionListener(e -> fftPanel.setSolid(solidCheck.isSelected()));
@@ -289,6 +317,23 @@ public class ReceiverWindow extends JFrame {
             lastFFTDraw = System.currentTimeMillis();
         } else if (maxFPS == 0) return;
         for (TuneablePanel fftPanel : getPanels()) fftPanel.drawFFT(fft, offset);
+        if (ftlAuto.isSelected()) {
+            for (int i = offset; i < fft.length; i++) {
+                float f = fft[i];
+                if (f < minFFT) {
+                    minFFT = f;
+                    setFFTMin(f);
+                }
+            }
+            for (int i = offset; i < fft.length; i++) {
+                float f = fft[i];
+                if (f > maxFFT) {
+                    maxFFT = f;
+                    System.out.println(maxFFT);
+                    setFFTMax(f);
+                }
+            }
+        }
     }
 
     public Bandplan getBandplan() {
@@ -305,6 +350,11 @@ public class ReceiverWindow extends JFrame {
 
     public WaterfallLevels getServerLevels() {
         return serverLevels;
+    }
+
+    public void resetAutoFFT() {
+        minFFT = Integer.MAX_VALUE;
+        maxFFT = Integer.MIN_VALUE;
     }
 
     public void setBandwidth(int bandwidth) {
@@ -333,7 +383,7 @@ public class ReceiverWindow extends JFrame {
 
     public void setServerLevels(WaterfallLevels serverLevels) {
         this.serverLevels = Objects.requireNonNull(serverLevels);
-        if (autoCheck.isSelected()) {
+        if (ftlServer.isSelected()) {
             setFFTMax(serverLevels.max());
             setFFTMin(serverLevels.min());
         }

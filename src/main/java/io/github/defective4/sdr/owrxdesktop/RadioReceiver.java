@@ -106,6 +106,7 @@ public class RadioReceiver {
                 rxWindow.setTuningReady(true);
 
                 rxWindow.getFftPanel().resetMaxFFT();
+                rxWindow.resetAutoFFT();
             }
         });
 
