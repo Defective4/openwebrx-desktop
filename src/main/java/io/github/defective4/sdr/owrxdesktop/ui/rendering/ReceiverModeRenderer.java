@@ -6,8 +6,6 @@ import javax.swing.DefaultListCellRenderer;
 import javax.swing.JLabel;
 import javax.swing.JList;
 
-import io.github.defective4.sdr.owrxclient.model.ReceiverMode;
-
 public class ReceiverModeRenderer extends DefaultListCellRenderer {
 
     public ReceiverModeRenderer() {}
@@ -17,10 +15,7 @@ public class ReceiverModeRenderer extends DefaultListCellRenderer {
             boolean cellHasFocus) {
         Component cpt = super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
         if (cpt instanceof JLabel label) {
-            if (value != null) {
-                label.setText(((ReceiverMode) value).name());
-            } else
-                label.setText("<none>");
+            if (value == null) label.setText("<none>");
         }
         return cpt;
     }

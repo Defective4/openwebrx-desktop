@@ -11,7 +11,8 @@ public class Main {
         try {
             UIManager.setLookAndFeel(new FlatDarkLaf());
 
-            RadioReceiver radio = new RadioReceiver(URI.create("wss://radio.raspberry.local/ws/"));
+            RadioReceiver radio = new RadioReceiver(
+                    URI.create(args.length > 0 ? args[0] : "wss://radio.raspberry.local/ws/"));
             radio.setVisible(true);
 
             radio.connect();

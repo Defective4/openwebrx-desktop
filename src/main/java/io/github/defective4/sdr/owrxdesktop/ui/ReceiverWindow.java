@@ -9,6 +9,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import javax.swing.AbstractButton;
@@ -30,6 +31,7 @@ import javax.swing.event.ChangeListener;
 
 import io.github.defective4.sdr.owrxclient.model.Bandpass;
 import io.github.defective4.sdr.owrxclient.model.ReceiverMode;
+import io.github.defective4.sdr.owrxclient.model.ReceiverProfile;
 import io.github.defective4.sdr.owrxclient.model.WaterfallLevels;
 import io.github.defective4.sdr.owrxdesktop.bandplan.Bandplan;
 import io.github.defective4.sdr.owrxdesktop.ui.component.FFTPanel;
@@ -46,10 +48,9 @@ public class ReceiverWindow extends JFrame {
     private final Bandplan bandplan = new Bandplan();
 
     private final JComboBox<ReceiverMode> digitalBox = new JComboBox<>();
-
     private final FFTPanel fftPanel;
-    private final JRadioButton ftlAuto = new JRadioButton("Auto");
 
+    private final JRadioButton ftlAuto = new JRadioButton("Auto");
     private final JRadioButton ftlServer = new JRadioButton("Server");
 
     private long lastFFTDraw;
@@ -59,6 +60,10 @@ public class ReceiverWindow extends JFrame {
     private int maxFPS = -1;
 
     private float minFFT, maxFFT;
+
+    private final JComboBox<ReceiverProfile> profileBox = new JComboBox<>();
+    private boolean profileDebounce;
+
     private WaterfallLevels serverLevels = new WaterfallLevels(-88, -20);
 
     private final WaterfallPanel waterfallPanel;
@@ -68,9 +73,6 @@ public class ReceiverWindow extends JFrame {
         setBounds(100, 100, 768, 468);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         getContentPane().setLayout(new BoxLayout(getContentPane(), BoxLayout.Y_AXIS));
-
-        analogBox.setRenderer(new ReceiverModeRenderer());
-        digitalBox.setRenderer(new ReceiverModeRenderer());
 
         JSplitPane splitPane = new JSplitPane();
         splitPane.setResizeWeight(1);
@@ -82,6 +84,10 @@ public class ReceiverWindow extends JFrame {
 
         JTabbedPane controlTabs = new JTabbedPane(JTabbedPane.TOP);
         controlPanel.add(controlTabs);
+
+        ReceiverModeRenderer renderer = new ReceiverModeRenderer();
+        analogBox.setRenderer(renderer);
+        digitalBox.setRenderer(renderer);
 
         {
             JSplitPane fftPane = new JSplitPane();
@@ -127,6 +133,17 @@ public class ReceiverWindow extends JFrame {
             JPanel rxCtlPanel = new JPanel();
             controlTabs.addTab("RX", null, rxCtlPanel, null);
             rxCtlPanel.setLayout(new BoxLayout(rxCtlPanel, BoxLayout.Y_AXIS));
+
+            JPanel profilePanel = new JPanel();
+            compactPanel(profilePanel);
+            profilePanel.setAlignmentX(Component.LEFT_ALIGNMENT);
+            profilePanel
+                    .setBorder(new TitledBorder(null, "Profile", TitledBorder.LEADING, TitledBorder.TOP, null, null));
+            rxCtlPanel.add(profilePanel);
+            profilePanel.setLayout(new BoxLayout(profilePanel, BoxLayout.X_AXIS));
+
+            profileBox.setAlignmentX(Component.LEFT_ALIGNMENT);
+            profilePanel.add(profileBox);
 
             JPanel modePanel = new JPanel();
             modePanel.setAlignmentX(Component.LEFT_ALIGNMENT);
@@ -395,8 +412,13 @@ public class ReceiverWindow extends JFrame {
                 }
                 updateMode();
             });
-        }
 
+            profileBox.addActionListener(e -> {
+                if (profileDebounce) return;
+                ReceiverProfile profile = (ReceiverProfile) profileBox.getSelectedItem();
+                if (profile != null) listeners.forEach(ls -> ls.profileChanged(profile));
+            });
+        }
     }
 
     public boolean addListener(UserInteractionListener listener) {
@@ -441,6 +463,17 @@ public class ReceiverWindow extends JFrame {
 
     public TuneablePanel[] getPanels() {
         return new TuneablePanel[] { waterfallPanel, fftPanel };
+    }
+
+    public Optional<ReceiverProfile> getProfileById(String id) {
+        int count = profileBox.getItemCount();
+        for (int i = 0; i < count; i++) {
+            ReceiverProfile item = profileBox.getItemAt(i);
+            if (item.uuids()[1].toString().equals(id)) {
+                return Optional.of(item);
+            }
+        }
+        return Optional.empty();
     }
 
     public WaterfallLevels getServerLevels() {
@@ -555,6 +588,20 @@ public class ReceiverWindow extends JFrame {
                 analogBox.addItem(mode);
             }
         }
+    }
+
+    public void updateProfile(ReceiverProfile profile) {
+        profileDebounce = true;
+        profileBox.setSelectedItem(profile);
+        profileDebounce = false;
+    }
+
+    public void updateProfiles(ReceiverProfile[] profiles) {
+        profileDebounce = true;
+        profileBox.removeAllItems();
+        for (ReceiverProfile profile : profiles) profileBox.addItem(profile);
+        invalidate();
+        profileDebounce = false;
     }
 
     private void updateMode() {

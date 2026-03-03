@@ -13,6 +13,7 @@ import io.github.defective4.sdr.owrxclient.event.OWRXAdapter;
 import io.github.defective4.sdr.owrxclient.model.Band;
 import io.github.defective4.sdr.owrxclient.model.Bandpass;
 import io.github.defective4.sdr.owrxclient.model.ReceiverMode;
+import io.github.defective4.sdr.owrxclient.model.ReceiverProfile;
 import io.github.defective4.sdr.owrxclient.model.ServerConfig;
 import io.github.defective4.sdr.owrxdesktop.audio.AudioSinkManager;
 import io.github.defective4.sdr.owrxdesktop.bandplan.Bandplan;
@@ -39,6 +40,11 @@ public class RadioReceiver {
             }
 
             @Override
+            public void profileChanged(ReceiverProfile profile) {
+                client.switchProfile(profile);
+            }
+
+            @Override
             public void tuned(int offset) {
                 client.setOffsetFrequency(offset);
             }
@@ -58,7 +64,7 @@ public class RadioReceiver {
 
         client.addListener(new OWRXAdapter() {
 
-            private String modulation;
+            private String modulation, profileId;
 
             @Override
             public void bandsUpdated(Band[] bands) {
@@ -121,12 +127,30 @@ public class RadioReceiver {
             }
 
             @Override
+            public void receiverProfilesUpdated(ReceiverProfile[] profiles) {
+                rxWindow.updateProfiles(profiles);
+                if (profileId != null) {
+                    Optional<ReceiverProfile> profile = rxWindow.getProfileById(profileId);
+                    if (profile.isPresent()) {
+                        rxWindow.updateProfile(profile.get());
+                    }
+                }
+            }
+
+            @Override
             public void serverConfigChanged(ServerConfig config) {
                 if (config.sampleRate() != null) rxWindow.setBandwidth(config.sampleRate());
                 if (config.tuningStep() != null) rxWindow.setTuningStep(config.tuningStep());
                 if (config.centerFrequency() != null) rxWindow.setCenterFrequency(config.centerFrequency());
                 if (config.startOffsetFrequency() != null) {
                     rxWindow.tune(config.startOffsetFrequency(), true);
+                }
+                if (config.profileId() != null) {
+                    profileId = config.profileId();
+                    Optional<ReceiverProfile> profile = rxWindow.getProfileById(profileId);
+                    if (profile.isPresent()) {
+                        rxWindow.updateProfile(profile.get());
+                    }
                 }
                 if (config.startModulation() != null) {
                     modulation = config.startModulation();
