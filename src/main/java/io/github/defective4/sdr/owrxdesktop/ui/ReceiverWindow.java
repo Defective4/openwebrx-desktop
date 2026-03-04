@@ -172,33 +172,6 @@ public class ReceiverWindow extends JFrame {
             digitalBox.setAlignmentX(Component.LEFT_ALIGNMENT);
             modePanel.add(digitalBox);
 
-            JPanel audioPanel = new JPanel();
-            audioPanel.setBorder(new TitledBorder(null, "Audio", TitledBorder.LEADING, TitledBorder.TOP, null, null));
-            rxCtlPanel.add(audioPanel);
-            audioPanel.setLayout(new BoxLayout(audioPanel, BoxLayout.Y_AXIS));
-
-            audioPanel.add(new JLabel("Volume"));
-
-            JSlider volumeSlider = new JSlider();
-            volumeSlider.setLabelTable(volumeSlider.createStandardLabels(100));
-            volumeSlider.setPaintLabels(true);
-            volumeSlider.setAlignmentX(Component.LEFT_ALIGNMENT);
-            volumeSlider.setMinimum(0);
-            volumeSlider.setMaximum(100);
-            volumeSlider.setValue(100);
-            audioPanel.add(volumeSlider);
-
-            JCheckBox muteCheck = new JCheckBox("Mute");
-            audioPanel.add(muteCheck);
-            muteCheck.addActionListener(e -> {
-                boolean muted = muteCheck.isSelected();
-                volumeSlider.setEnabled(!muted);
-                listeners.forEach(ls -> ls.muteToggled(muted));
-            });
-
-            volumeSlider
-                    .addChangeListener(e -> listeners.forEach(ls -> ls.volumeChanged(volumeSlider.getValue() / 100f)));
-
             JPanel levelsPanel = new JPanel();
             compactPanel(levelsPanel);
             levelsPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
@@ -225,8 +198,6 @@ public class ReceiverWindow extends JFrame {
             JPanel filler = new JPanel();
             filler.setAlignmentX(Component.LEFT_ALIGNMENT);
             rxCtlPanel.add(filler);
-
-            confirmComponentState(muteCheck);
         }
 
         {
@@ -479,6 +450,47 @@ public class ReceiverWindow extends JFrame {
                 ReceiverProfile profile = (ReceiverProfile) profileBox.getSelectedItem();
                 if (profile != null) listeners.forEach(ls -> ls.profileChanged(profile));
             });
+        }
+
+        {
+
+
+            JPanel audioCtlPanel = new JPanel();
+            controlTabs.addTab("Audio", null, audioCtlPanel, null);
+            audioCtlPanel.setLayout(new BoxLayout(audioCtlPanel, BoxLayout.Y_AXIS));
+
+            JPanel audioPanel = new JPanel();
+            audioCtlPanel.add(audioPanel);
+            audioPanel.setBorder(new TitledBorder(null, "Audio", TitledBorder.LEADING, TitledBorder.TOP, null, null));
+            audioPanel.setLayout(new BoxLayout(audioPanel, BoxLayout.Y_AXIS));
+
+            audioPanel.add(new JLabel("Volume"));
+
+            JSlider volumeSlider = new JSlider();
+            volumeSlider.setLabelTable(volumeSlider.createStandardLabels(100));
+            volumeSlider.setPaintLabels(true);
+            volumeSlider.setAlignmentX(Component.LEFT_ALIGNMENT);
+            volumeSlider.setMinimum(0);
+            volumeSlider.setMaximum(100);
+            volumeSlider.setValue(100);
+            audioPanel.add(volumeSlider);
+
+            JCheckBox muteCheck = new JCheckBox("Mute");
+            audioPanel.add(muteCheck);
+            muteCheck.addActionListener(e -> {
+                boolean muted = muteCheck.isSelected();
+                volumeSlider.setEnabled(!muted);
+                listeners.forEach(ls -> ls.muteToggled(muted));
+            });
+
+            volumeSlider
+                    .addChangeListener(e -> listeners.forEach(ls -> ls.volumeChanged(volumeSlider.getValue() / 100f)));
+
+            confirmComponentState(muteCheck);
+
+            JPanel filler = new JPanel();
+            filler.setAlignmentX(0.0f);
+            audioCtlPanel.add(filler);
         }
     }
 
