@@ -122,9 +122,6 @@ public class FFTPanel extends BandplanPanel {
         g2.fillRect(0, 0, getWidth(), getHeight());
         g2.setFont(g2.getFont().deriveFont(12f));
 
-        g2.setColor(LINE);
-        g2.fillRect(0, getLineHeight() + 1, getWidth(), getHeight());
-
         double dy = 0;
         double dbStep = calculatePixelPerDb() * 10d;
 
@@ -132,24 +129,6 @@ public class FFTPanel extends BandplanPanel {
         while (dy < getLineHeight()) {
             drawSignalLine(g2, (int) Math.round(dy), LINE);
             dy += dbStep;
-        }
-
-        int center = getWidth() / 2;
-        drawFrequencyLine(g2, center, LINE_CENTER);
-
-        double pxPerHz = calculatePixelPerHerz();
-        int step = calculateDrawingStep(pxPerHz);
-
-        double x = center;
-        while (x < getWidth()) {
-            x += pxPerHz * step;
-            drawFrequencyLine(g2, (int) x, LINE);
-        }
-
-        x = center;
-        while (x > 0) {
-            x -= pxPerHz * step;
-            drawFrequencyLine(g2, (int) x, LINE);
         }
 
         g2.setColor(FFT_COLOR);
@@ -194,6 +173,27 @@ public class FFTPanel extends BandplanPanel {
                 }
                 prevX = ix;
             }
+        }
+
+        g2.setColor(LINE);
+        g2.fillRect(0, getLineHeight() + 1, getWidth(), getHeight());
+
+        int center = getWidth() / 2;
+        drawFrequencyLine(g2, center, LINE_CENTER);
+
+        double pxPerHz = calculatePixelPerHerz();
+        int step = calculateDrawingStep(pxPerHz);
+
+        double x = center;
+        while (x < getWidth()) {
+            x += pxPerHz * step;
+            drawFrequencyLine(g2, (int) x, LINE);
+        }
+
+        x = center;
+        while (x > 0) {
+            x -= pxPerHz * step;
+            drawFrequencyLine(g2, (int) x, LINE);
         }
 
         if (showBandplan) {
