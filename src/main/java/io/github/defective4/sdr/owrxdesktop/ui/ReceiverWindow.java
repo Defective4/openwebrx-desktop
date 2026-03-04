@@ -27,7 +27,6 @@ import javax.swing.JRadioButton;
 import javax.swing.JSlider;
 import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
-import javax.swing.JTextField;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
@@ -51,10 +50,8 @@ public class ReceiverWindow extends JFrame {
     private final Bandplan bandplan = new Bandplan();
 
     private final JProgressBar clientsBar = new JProgressBar();
-    private final JTextField clientsField = new JTextField("0 dB");
 
     private final JProgressBar cpuBar = new JProgressBar();
-    private final JTextField cpuField = new JTextField("0 %");
 
     private float cpuUsage = Integer.MIN_VALUE;
 
@@ -79,7 +76,6 @@ public class ReceiverWindow extends JFrame {
     private boolean profileDebounce;
     private WaterfallLevels serverLevels = new WaterfallLevels(-88, -20);
     private final JProgressBar signalBar = new JProgressBar();
-    private final JTextField signalLabel = new JTextField("0 dB");
 
     private int temperatureC = Integer.MIN_VALUE;
 
@@ -188,55 +184,24 @@ public class ReceiverWindow extends JFrame {
             levelsPanel.setLayout(new BoxLayout(levelsPanel, BoxLayout.Y_AXIS));
 
             levelsPanel.add(new JLabel("Signal"));
-
-            JPanel signalPanel = new JPanel();
-            levelsPanel.add(signalPanel);
-            signalPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
-            signalPanel.setLayout(new BoxLayout(signalPanel, BoxLayout.X_AXIS));
-            signalPanel.add(signalBar);
+            signalBar.setString(" ");
+            levelsPanel.add(signalBar);
+            signalBar.setStringPainted(true);
             signalBar.setAlignmentX(Component.LEFT_ALIGNMENT);
 
-            signalPanel.add(new JLabel(" "));
-            signalLabel.setColumns(5);
-            signalLabel.setEditable(false);
-            signalLabel.setMaximumSize(new Dimension(50, 20));
-            signalPanel.add(signalLabel);
-
             levelsPanel.add(new JLabel("Clients"));
-
-            JPanel clientsPanel = new JPanel();
-            clientsPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
-            levelsPanel.add(clientsPanel);
-            clientsPanel.setLayout(new BoxLayout(clientsPanel, BoxLayout.X_AXIS));
+            clientsBar.setString(" ");
+            levelsPanel.add(clientsBar);
+            clientsBar.setStringPainted(true);
 
             clientsBar.setAlignmentX(Component.LEFT_ALIGNMENT);
-            clientsPanel.add(clientsBar);
-
-            clientsPanel.add(new JLabel(" "));
-            clientsField.setEditable(false);
-
-            clientsField.setText("0");
-            clientsField.setMaximumSize(new Dimension(50, 20));
-            clientsPanel.add(clientsField);
-            clientsField.setColumns(5);
 
             levelsPanel.add(new JLabel("CPU"));
-
-            JPanel cpuPanel = new JPanel();
-            cpuPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
-            levelsPanel.add(cpuPanel);
-            cpuPanel.setLayout(new BoxLayout(cpuPanel, BoxLayout.X_AXIS));
+            cpuBar.setString(" ");
+            levelsPanel.add(cpuBar);
+            cpuBar.setStringPainted(true);
 
             cpuBar.setAlignmentX(Component.LEFT_ALIGNMENT);
-            cpuPanel.add(cpuBar);
-
-            cpuPanel.add(new JLabel(" "));
-            cpuField.setEditable(false);
-
-            cpuField.setText("0 %");
-            cpuField.setMaximumSize(new Dimension(50, 20));
-            cpuPanel.add(cpuField);
-            cpuField.setColumns(6);
 
             JPanel filler = new JPanel();
             filler.setAlignmentX(Component.LEFT_ALIGNMENT);
@@ -614,7 +579,7 @@ public class ReceiverWindow extends JFrame {
 
     public void setClients(int clients) {
         clientsBar.setValue(clients);
-        clientsField.setText(Integer.toString(clients));
+        clientsBar.setString(Integer.toString(clients) + "/" + clientsBar.getMaximum());
     }
 
     public void setCPUUsage(float cpuUsage) {
@@ -744,16 +709,16 @@ public class ReceiverWindow extends JFrame {
 
         double db = (int) (log * 10d) / 10d;
         signalBar.setValue((int) (percent * 100));
-        signalLabel.setText(String.format("%s dB", db));
+        signalBar.setString(String.format("%s dB", db));
     }
 
     private void updateCPU() {
         String str;
-        if(temperatureC > Integer.MIN_VALUE)
+        if (temperatureC > Integer.MIN_VALUE)
             str = String.format("%s% / %s°C", cpuUsage, temperatureC);
         else
             str = String.format("%s%", cpuUsage);
-        cpuField.setText(str);
+        cpuBar.setString(str);
     }
 
     private void updateMode() {
