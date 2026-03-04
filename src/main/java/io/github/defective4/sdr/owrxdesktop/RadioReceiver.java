@@ -186,6 +186,11 @@ public class RadioReceiver {
                 rxWindow.getFftPanel().resetMaxFFT();
                 rxWindow.resetAutoFFT();
             }
+
+            @Override
+            public void signalMeterUpdated(float signalLevel) {
+                rxWindow.updateSignal(signalLevel);
+            }
         });
 
         return client;

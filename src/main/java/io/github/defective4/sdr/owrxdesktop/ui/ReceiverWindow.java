@@ -18,13 +18,16 @@ import javax.swing.ButtonGroup;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
+import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JProgressBar;
 import javax.swing.JRadioButton;
 import javax.swing.JSlider;
 import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
+import javax.swing.JTextField;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
@@ -48,9 +51,13 @@ public class ReceiverWindow extends JFrame {
     private final Bandplan bandplan = new Bandplan();
 
     private final JComboBox<ReceiverMode> digitalBox = new JComboBox<>();
+    private final float fftMax = -20;
+
+    private final float fftMin = -88;
     private final FFTPanel fftPanel;
 
     private final JRadioButton ftlAuto = new JRadioButton("Auto");
+
     private final JRadioButton ftlServer = new JRadioButton("Server");
 
     private long lastFFTDraw;
@@ -58,13 +65,15 @@ public class ReceiverWindow extends JFrame {
     private final List<UserInteractionListener> listeners = new CopyOnWriteArrayList<>();
 
     private int maxFPS = -1;
-
     private float minFFT, maxFFT;
 
     private final JComboBox<ReceiverProfile> profileBox = new JComboBox<>();
-    private boolean profileDebounce;
 
+    private boolean profileDebounce;
     private WaterfallLevels serverLevels = new WaterfallLevels(-88, -20);
+    private final JProgressBar signalBar = new JProgressBar();
+
+    private final JTextField signalLabel = new JTextField(" 0 dB");
 
     private final WaterfallPanel waterfallPanel;
 
@@ -189,6 +198,29 @@ public class ReceiverWindow extends JFrame {
 
             volumeSlider
                     .addChangeListener(e -> listeners.forEach(ls -> ls.volumeChanged(volumeSlider.getValue() / 100f)));
+
+            JPanel levelsPanel = new JPanel();
+            compactPanel(levelsPanel);
+            levelsPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
+            levelsPanel.setBorder(new TitledBorder(null, "Levels", TitledBorder.LEADING, TitledBorder.TOP, null, null));
+            rxCtlPanel.add(levelsPanel);
+            levelsPanel.setLayout(new BoxLayout(levelsPanel, BoxLayout.Y_AXIS));
+
+            JLabel label = new JLabel("Signal");
+            levelsPanel.add(label);
+
+            JPanel signalPanel = new JPanel();
+            levelsPanel.add(signalPanel);
+            signalPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
+            signalPanel.setLayout(new BoxLayout(signalPanel, BoxLayout.X_AXIS));
+            signalPanel.add(signalBar);
+            signalBar.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+            signalPanel.add(new JLabel(" "));
+            signalLabel.setColumns(5);
+            signalLabel.setEditable(false);
+            signalLabel.setMaximumSize(new Dimension(50, 20));
+            signalPanel.add(signalLabel);
 
             JPanel filler = new JPanel();
             filler.setAlignmentX(Component.LEFT_ALIGNMENT);
@@ -633,6 +665,15 @@ public class ReceiverWindow extends JFrame {
         profileDebounce = false;
     }
 
+    public void updateSignal(double val) {
+        double log = 10 * Math.log10(val);
+        double percent = (log - (fftMin - 20)) / (fftMax + 20 - (fftMin - 20));
+
+        double db = (int) (log * 10d) / 10d;
+        signalBar.setValue((int) (percent * 100));
+        signalLabel.setText(String.format("%s dB", db));
+    }
+
     private void updateMode() {
         ReceiverMode primary = (ReceiverMode) analogBox.getSelectedItem();
         ReceiverMode secondary = (ReceiverMode) digitalBox.getSelectedItem();
@@ -644,7 +685,7 @@ public class ReceiverWindow extends JFrame {
         }
     }
 
-    private static void compactPanel(JPanel featPanel) {
+    private static void compactPanel(JComponent featPanel) {
         featPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 0));
     }
 
