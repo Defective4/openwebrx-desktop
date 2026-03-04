@@ -714,11 +714,13 @@ public class ReceiverWindow extends JFrame {
 
     private void updateCPU() {
         String str;
+        int cpuUsage = (int) Math.ceil(this.cpuUsage * 100d);
         if (temperatureC > Integer.MIN_VALUE)
-            str = String.format("%s% / %s°C", cpuUsage, temperatureC);
+            str = String.format("%s / %s°C", cpuUsage + "%", temperatureC);
         else
-            str = String.format("%s%", cpuUsage);
+            str = String.format("%s", cpuUsage + "%");
         cpuBar.setString(str);
+        cpuBar.setValue(cpuUsage);
     }
 
     private void updateMode() {
