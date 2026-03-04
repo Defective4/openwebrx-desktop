@@ -131,6 +131,24 @@ public class FFTPanel extends BandplanPanel {
             dy += dbStep;
         }
 
+        int center = getWidth() / 2;
+        drawFrequencyLine(g2, center, LINE_CENTER);
+
+        double pxPerHz = calculatePixelPerHerz();
+        int step = calculateDrawingStep(pxPerHz);
+
+        double x = center;
+        while (x < getWidth()) {
+            x += pxPerHz * step;
+            drawFrequencyLine(g2, (int) x, LINE);
+        }
+
+        x = center;
+        while (x > 0) {
+            x -= pxPerHz * step;
+            drawFrequencyLine(g2, (int) x, LINE);
+        }
+
         g2.setColor(FFT_COLOR);
 
         synchronized (fftLock) {
@@ -178,22 +196,18 @@ public class FFTPanel extends BandplanPanel {
         g2.setColor(LINE);
         g2.fillRect(0, getLineHeight() + 1, getWidth(), getHeight());
 
-        int center = getWidth() / 2;
-        drawFrequencyLine(g2, center, LINE_CENTER);
+        drawFrequencyLabel(g2, center);
 
-        double pxPerHz = calculatePixelPerHerz();
-        int step = calculateDrawingStep(pxPerHz);
-
-        double x = center;
+        x = center;
         while (x < getWidth()) {
             x += pxPerHz * step;
-            drawFrequencyLine(g2, (int) x, LINE);
+            drawFrequencyLabel(g2, (int) x);
         }
 
         x = center;
         while (x > 0) {
             x -= pxPerHz * step;
-            drawFrequencyLine(g2, (int) x, LINE);
+            drawFrequencyLabel(g2, (int) x);
         }
 
         if (showBandplan) {
@@ -231,10 +245,7 @@ public class FFTPanel extends BandplanPanel {
         super.paintComponent(graphics);
     }
 
-    private void drawFrequencyLine(Graphics2D g2, int x, Color color) {
-        g2.setColor(color);
-        g2.drawLine(x, 0, x, getLineHeight());
-
+    private void drawFrequencyLabel(Graphics2D g2, int x) {
         g2.setColor(TEXT_COLOR);
         String displayFreq = getDisplayFrequencyAt(x, 10, false);
 
@@ -244,6 +255,11 @@ public class FFTPanel extends BandplanPanel {
 
         if (textX > 0 && textX + width < getWidth())
             g2.drawString(displayFreq, textX, getLineHeight() + metrics.getHeight());
+    }
+
+    private void drawFrequencyLine(Graphics2D g2, int x, Color color) {
+        g2.setColor(color);
+        g2.drawLine(x, 0, x, getLineHeight());
 
         g2.setColor(BG);
     }
