@@ -40,6 +40,11 @@ public class RadioReceiver {
             }
 
             @Override
+            public void muteToggled(boolean muted) {
+                audioSinkManager.setMute(muted);
+            }
+
+            @Override
             public void profileChanged(ReceiverProfile profile) {
                 client.switchProfile(profile);
             }
@@ -47,6 +52,11 @@ public class RadioReceiver {
             @Override
             public void tuned(int offset) {
                 client.setOffsetFrequency(offset);
+            }
+
+            @Override
+            public void volumeChanged(float value) {
+                audioSinkManager.setVolume(value);
             }
         });
     }
