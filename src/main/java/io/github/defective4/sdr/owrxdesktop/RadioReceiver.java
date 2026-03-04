@@ -95,6 +95,11 @@ public class RadioReceiver {
             }
 
             @Override
+            public void cpuUsageUpdated(float cpuUsage) {
+                rxWindow.setCPUUsage(cpuUsage);
+            }
+
+            @Override
             public void fftUpdated(float[] fft) {
                 rxWindow.drawFFT(fft, 18);
             }
@@ -120,6 +125,11 @@ public class RadioReceiver {
                 } catch (LineUnavailableException e) {
                     e.printStackTrace();
                 }
+            }
+
+            @Override
+            public void numberOfClientsUpdated(int clients) {
+                rxWindow.setClients(clients);
             }
 
             @Override
@@ -185,11 +195,17 @@ public class RadioReceiver {
 
                 rxWindow.getFftPanel().resetMaxFFT();
                 rxWindow.resetAutoFFT();
+                if (config.maxClients() != null) rxWindow.setMaxClients(config.maxClients());
             }
 
             @Override
             public void signalMeterUpdated(float signalLevel) {
                 rxWindow.updateSignal(signalLevel);
+            }
+
+            @Override
+            public void temperatureUpdated(int temperatureC) {
+                rxWindow.setTemperature(temperatureC);
             }
         });
 

@@ -50,30 +50,38 @@ public class ReceiverWindow extends JFrame {
 
     private final Bandplan bandplan = new Bandplan();
 
+    private final JProgressBar clientsBar = new JProgressBar();
+    private final JTextField clientsField = new JTextField("0 dB");
+
+    private final JProgressBar cpuBar = new JProgressBar();
+    private final JTextField cpuField = new JTextField("0 %");
+
+    private float cpuUsage = Integer.MIN_VALUE;
+
     private final JComboBox<ReceiverMode> digitalBox = new JComboBox<>();
+
     private final float fftMax = -20;
 
     private final float fftMin = -88;
-    private final FFTPanel fftPanel;
 
+    private final FFTPanel fftPanel;
     private final JRadioButton ftlAuto = new JRadioButton("Auto");
 
     private final JRadioButton ftlServer = new JRadioButton("Server");
 
     private long lastFFTDraw;
-
     private final List<UserInteractionListener> listeners = new CopyOnWriteArrayList<>();
-
     private int maxFPS = -1;
+
     private float minFFT, maxFFT;
 
     private final JComboBox<ReceiverProfile> profileBox = new JComboBox<>();
-
     private boolean profileDebounce;
     private WaterfallLevels serverLevels = new WaterfallLevels(-88, -20);
     private final JProgressBar signalBar = new JProgressBar();
+    private final JTextField signalLabel = new JTextField("0 dB");
 
-    private final JTextField signalLabel = new JTextField(" 0 dB");
+    private int temperatureC = Integer.MIN_VALUE;
 
     private final WaterfallPanel waterfallPanel;
 
@@ -179,8 +187,7 @@ public class ReceiverWindow extends JFrame {
             rxCtlPanel.add(levelsPanel);
             levelsPanel.setLayout(new BoxLayout(levelsPanel, BoxLayout.Y_AXIS));
 
-            JLabel label = new JLabel("Signal");
-            levelsPanel.add(label);
+            levelsPanel.add(new JLabel("Signal"));
 
             JPanel signalPanel = new JPanel();
             levelsPanel.add(signalPanel);
@@ -194,6 +201,42 @@ public class ReceiverWindow extends JFrame {
             signalLabel.setEditable(false);
             signalLabel.setMaximumSize(new Dimension(50, 20));
             signalPanel.add(signalLabel);
+
+            levelsPanel.add(new JLabel("Clients"));
+
+            JPanel clientsPanel = new JPanel();
+            clientsPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
+            levelsPanel.add(clientsPanel);
+            clientsPanel.setLayout(new BoxLayout(clientsPanel, BoxLayout.X_AXIS));
+
+            clientsBar.setAlignmentX(Component.LEFT_ALIGNMENT);
+            clientsPanel.add(clientsBar);
+
+            clientsPanel.add(new JLabel(" "));
+            clientsField.setEditable(false);
+
+            clientsField.setText("0");
+            clientsField.setMaximumSize(new Dimension(50, 20));
+            clientsPanel.add(clientsField);
+            clientsField.setColumns(5);
+
+            levelsPanel.add(new JLabel("CPU"));
+
+            JPanel cpuPanel = new JPanel();
+            cpuPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
+            levelsPanel.add(cpuPanel);
+            cpuPanel.setLayout(new BoxLayout(cpuPanel, BoxLayout.X_AXIS));
+
+            cpuBar.setAlignmentX(Component.LEFT_ALIGNMENT);
+            cpuPanel.add(cpuBar);
+
+            cpuPanel.add(new JLabel(" "));
+            cpuField.setEditable(false);
+
+            cpuField.setText("0 %");
+            cpuField.setMaximumSize(new Dimension(50, 20));
+            cpuPanel.add(cpuField);
+            cpuField.setColumns(6);
 
             JPanel filler = new JPanel();
             filler.setAlignmentX(Component.LEFT_ALIGNMENT);
@@ -454,7 +497,6 @@ public class ReceiverWindow extends JFrame {
 
         {
 
-
             JPanel audioCtlPanel = new JPanel();
             controlTabs.addTab("Audio", null, audioCtlPanel, null);
             audioCtlPanel.setLayout(new BoxLayout(audioCtlPanel, BoxLayout.Y_AXIS));
@@ -570,12 +612,26 @@ public class ReceiverWindow extends JFrame {
         for (TuneablePanel fftPanel : getPanels()) fftPanel.setCenterFrequency(centerFrequency);
     }
 
+    public void setClients(int clients) {
+        clientsBar.setValue(clients);
+        clientsField.setText(Integer.toString(clients));
+    }
+
+    public void setCPUUsage(float cpuUsage) {
+        this.cpuUsage = cpuUsage;
+        updateCPU();
+    }
+
     public void setFFTMax(float f) {
         for (TuneablePanel fftPanel : getPanels()) fftPanel.setFFTMax(f);
     }
 
     public void setFFTMin(float f) {
         for (TuneablePanel fftPanel : getPanels()) fftPanel.setFFTMin(f);
+    }
+
+    public void setMaxClients(int maxClients) {
+        clientsBar.setMaximum(maxClients);
     }
 
     public void setScopeLower(int scopeLower) {
@@ -621,6 +677,11 @@ public class ReceiverWindow extends JFrame {
                 }
             }
         }
+    }
+
+    public void setTemperature(int temperatureC) {
+        this.temperatureC = temperatureC;
+        updateCPU();
     }
 
     public void setTuningReady(boolean tuningReady) {
@@ -686,6 +747,15 @@ public class ReceiverWindow extends JFrame {
         signalLabel.setText(String.format("%s dB", db));
     }
 
+    private void updateCPU() {
+        String str;
+        if(temperatureC > Integer.MIN_VALUE)
+            str = String.format("%s% / %s°C", cpuUsage, temperatureC);
+        else
+            str = String.format("%s%", cpuUsage);
+        cpuField.setText(str);
+    }
+
     private void updateMode() {
         ReceiverMode primary = (ReceiverMode) analogBox.getSelectedItem();
         ReceiverMode secondary = (ReceiverMode) digitalBox.getSelectedItem();
@@ -708,5 +778,4 @@ public class ReceiverWindow extends JFrame {
     private static void confirmComponentState(JSlider component) {
         for (ChangeListener ls : component.getChangeListeners()) ls.stateChanged(null);
     }
-
 }
