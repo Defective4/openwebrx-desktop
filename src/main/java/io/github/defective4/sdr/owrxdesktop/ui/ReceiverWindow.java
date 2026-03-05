@@ -52,7 +52,6 @@ public class ReceiverWindow extends JFrame {
     private final JProgressBar clientsBar = new JProgressBar();
 
     private final JProgressBar cpuBar = new JProgressBar();
-
     private float cpuUsage = Integer.MIN_VALUE;
 
     private final JComboBox<ReceiverMode> digitalBox = new JComboBox<>();
@@ -62,19 +61,25 @@ public class ReceiverWindow extends JFrame {
     private final float fftMin = -88;
 
     private final FFTPanel fftPanel;
-    private final JRadioButton ftlAuto = new JRadioButton("Auto");
 
+    private final JRadioButton ftlAuto = new JRadioButton("Auto");
     private final JRadioButton ftlServer = new JRadioButton("Server");
 
     private long lastFFTDraw;
+
     private final List<UserInteractionListener> listeners = new CopyOnWriteArrayList<>();
     private int maxFPS = -1;
-
     private float minFFT, maxFFT;
 
     private final JComboBox<ReceiverProfile> profileBox = new JComboBox<>();
+
     private boolean profileDebounce;
+    private final JButton resetScope = new JButton("Reset");
+    private int scopeLower;
+    private int scopeUpper;
+
     private WaterfallLevels serverLevels = new WaterfallLevels(-88, -20);
+
     private final JProgressBar signalBar = new JProgressBar();
 
     private int temperatureC = Integer.MIN_VALUE;
@@ -189,6 +194,30 @@ public class ReceiverWindow extends JFrame {
 
             digitalBox.setAlignmentX(Component.LEFT_ALIGNMENT);
             modePanel.add(digitalBox);
+
+            JPanel scopePanel = new JPanel();
+            compactPanel(scopePanel);
+            scopePanel.setAlignmentX(Component.LEFT_ALIGNMENT);
+            scopePanel.setBorder(new TitledBorder(null, "Scope", TitledBorder.LEADING, TitledBorder.TOP, null, null));
+            rxCtlPanel.add(scopePanel);
+            FlowLayout fl_scopePanel = new FlowLayout(FlowLayout.LEFT, 0, 0);
+            scopePanel.setLayout(fl_scopePanel);
+
+            resetScope.setEnabled(false);
+            resetScope.addActionListener(e -> {
+                setScopeLower(scopeLower);
+                setScopeUpper(scopeUpper);
+                listeners.forEach(ls -> ls.scopeChanged(scopeLower, scopeUpper));
+            });
+            scopePanel.add(resetScope);
+
+            JCheckBox symmetricalCheck = new JCheckBox("Symmetrical");
+            symmetricalCheck.addActionListener(e -> {
+                for (TuneablePanel panel : getPanels()) {
+                    panel.setSymmetricalScope(symmetricalCheck.isSelected());
+                }
+            });
+            scopePanel.add(symmetricalCheck);
 
             JPanel levelsPanel = new JPanel();
             compactPanel(levelsPanel);
@@ -614,10 +643,14 @@ public class ReceiverWindow extends JFrame {
     }
 
     public void setScopeLower(int scopeLower) {
+        this.scopeLower = scopeLower;
+        resetScope.setEnabled(true);
         for (TuneablePanel fftPanel : getPanels()) fftPanel.setScopeLower(scopeLower);
     }
 
     public void setScopeUpper(int scopeUpper) {
+        this.scopeUpper = scopeUpper;
+        resetScope.setEnabled(true);
         for (TuneablePanel fftPanel : getPanels()) fftPanel.setScopeUpper(scopeUpper);
     }
 

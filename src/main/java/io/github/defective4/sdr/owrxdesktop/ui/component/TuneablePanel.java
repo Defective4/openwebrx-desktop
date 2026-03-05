@@ -35,8 +35,9 @@ public abstract class TuneablePanel extends JComponent implements FFTVisualizer 
     protected boolean tuningReady;
 
     protected int tuningStep = (int) 1e3f;
-
     private final List<TuningListener> listeners = new CopyOnWriteArrayList<>();
+
+    private boolean symmetricalScope = false;
 
     public TuneablePanel() {
         MouseAdapter adapter = new MouseAdapter() {
@@ -59,10 +60,15 @@ public abstract class TuneablePanel extends JComponent implements FFTVisualizer 
                 else if (scopeMode != 0) {
                     int center = e.getX() - (int) (getWidth() / 2 + offset * calculatePixelPerHerz());
                     int hzMod = (int) (calculateHerzPerPixel() * center);
-                    if (scopeMode > 0)
+                    if (scopeMode > 0) {
                         scopeUpper = hzMod;
-                    else
+                        if(symmetricalScope)
+                            scopeLower = -hzMod;
+                    } else {
                         scopeLower = hzMod;
+                        if(symmetricalScope)
+                            scopeUpper = -hzMod;
+                    }
                     listeners.forEach(ls -> ls.scopeChanged(scopeLower, scopeUpper));
                     repaint();
                 } else {
@@ -177,6 +183,10 @@ public abstract class TuneablePanel extends JComponent implements FFTVisualizer 
         return tuningStep;
     }
 
+    public boolean isSymmetricalScope() {
+        return symmetricalScope;
+    }
+
     public boolean isTuningReady() {
         return tuningReady;
     }
@@ -203,6 +213,10 @@ public abstract class TuneablePanel extends JComponent implements FFTVisualizer 
     public void setScopeUpper(int scopeUpper) {
         this.scopeUpper = scopeUpper;
         repaint();
+    }
+
+    public void setSymmetricalScope(boolean symmetricalScope) {
+        this.symmetricalScope = symmetricalScope;
     }
 
     public void setTuningReady(boolean tuningReady) {
