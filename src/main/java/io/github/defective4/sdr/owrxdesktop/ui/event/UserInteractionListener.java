@@ -10,6 +10,8 @@ public interface UserInteractionListener {
 
     void profileChanged(ReceiverProfile profile);
 
+    void scopeChanged(int scopeLower, int scopeUpper);
+
     void tuned(int offset);
 
     void volumeChanged(float value);

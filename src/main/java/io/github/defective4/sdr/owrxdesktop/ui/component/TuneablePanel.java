@@ -45,15 +45,27 @@ public abstract class TuneablePanel extends JComponent implements FFTVisualizer 
 
             private int dragX = 0;
 
+            private final Cursor E_RESIZE = new Cursor(Cursor.W_RESIZE_CURSOR);
             private final Cursor RESIZE = new Cursor(Cursor.MOVE_CURSOR);
-
+            private int scopeMode = 0;
             private boolean tuneMode = false;
+
+            private final Cursor W_RESIZE = new Cursor(Cursor.E_RESIZE_CURSOR);
 
             @Override
             public void mouseDragged(MouseEvent e) {
                 if (tuneMode)
                     tune(calculateOffsetAtPoint(e.getX()));
-                else {
+                else if (scopeMode != 0) {
+                    int center = e.getX() - (int) (getWidth() / 2 + offset * calculatePixelPerHerz());
+                    int hzMod = (int) (calculateHerzPerPixel() * center);
+                    if (scopeMode > 0)
+                        scopeUpper = hzMod;
+                    else
+                        scopeLower = hzMod;
+                    listeners.forEach(ls -> ls.scopeChanged(scopeLower, scopeUpper));
+                    repaint();
+                } else {
                     int xMod = e.getXOnScreen() - dragX;
                     Rectangle bounds = getBounds();
                     setBounds(bounds.x + xMod, bounds.y, bounds.width, bounds.height);
@@ -76,7 +88,11 @@ public abstract class TuneablePanel extends JComponent implements FFTVisualizer 
                 if (e.getY() > getLineHeight()) {
                     setCursor(RESIZE);
                 } else {
-                    setCursor(DEFAULT);
+                    int scopeArea = getScopeArea(e.getX());
+                    if (scopeArea != 0) {
+                        setCursor(scopeArea > 0 ? W_RESIZE : E_RESIZE);
+                    } else
+                        setCursor(DEFAULT);
                 }
                 repaint();
             }
@@ -85,7 +101,11 @@ public abstract class TuneablePanel extends JComponent implements FFTVisualizer 
             public void mousePressed(MouseEvent e) {
                 mouseDown = true;
                 tuneMode = e.getY() <= getLineHeight();
-                if (tuneMode) {
+                scopeMode = getScopeArea(e.getX());
+                if (scopeMode != 0) {
+                    dragX = e.getXOnScreen();
+                    tuneMode = false;
+                } else if (tuneMode) {
                     tune(calculateOffsetAtPoint(e.getX()));
                 } else {
                     dragX = e.getXOnScreen();
@@ -118,6 +138,7 @@ public abstract class TuneablePanel extends JComponent implements FFTVisualizer 
                     listeners.forEach(ls -> ls.zoomChanged(fx, width));
                 }
             }
+
         };
 
         addMouseListener(adapter);
@@ -257,6 +278,24 @@ public abstract class TuneablePanel extends JComponent implements FFTVisualizer 
 
     private int calculateOffsetAtPoint(int x) {
         return (int) Math.round(x * calculateHerzPerPixel() - bandwidth / 2);
+    }
+
+    private int getScopeArea(int x) {
+        int center = x - (int) (getWidth() / 2 + offset * calculatePixelPerHerz());
+        boolean lower = false;
+        boolean upper = false;
+        if (Math.abs(center - scopeLower * calculatePixelPerHerz()) < 10) {
+            lower = true;
+        }
+        if (Math.abs(center - scopeUpper * calculatePixelPerHerz()) < 10) {
+            upper = true;
+        }
+        if (lower == upper)
+            return 0;
+        else if (lower)
+            return -1;
+        else
+            return 1;
     }
 
     private void updateMouseCoordinates(MouseEvent e) {

@@ -50,6 +50,11 @@ public class RadioReceiver {
             }
 
             @Override
+            public void scopeChanged(int scopeLower, int scopeUpper) {
+                client.setDemodulatorScope(scopeUpper, scopeLower);
+            }
+
+            @Override
             public void tuned(int offset) {
                 client.setOffsetFrequency(offset);
             }

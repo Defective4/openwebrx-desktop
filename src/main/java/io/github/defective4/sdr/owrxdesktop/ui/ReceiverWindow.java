@@ -121,6 +121,13 @@ public class ReceiverWindow extends JFrame {
 
             waterfallPanel.addListener(new TuningAdapter() {
                 @Override
+                public void scopeChanged(int scopeLower, int scopeUpper) {
+                    fftPanel.setScopeUpper(scopeUpper);
+                    fftPanel.setScopeLower(scopeLower);
+                    listeners.forEach(ls -> ls.scopeChanged(scopeLower, scopeUpper));
+                }
+
+                @Override
                 public void tuned(int offset) {
                     fftPanel.tune(offset, false);
                     listeners.forEach(ls -> ls.tuned(offset));
@@ -128,6 +135,13 @@ public class ReceiverWindow extends JFrame {
             });
 
             fftPanel.addListener(new TuningAdapter() {
+                @Override
+                public void scopeChanged(int scopeLower, int scopeUpper) {
+                    waterfallPanel.setScopeUpper(scopeUpper);
+                    waterfallPanel.setScopeLower(scopeLower);
+                    listeners.forEach(ls -> ls.scopeChanged(scopeLower, scopeUpper));
+                }
+
                 @Override
                 public void tuned(int offset) {
                     waterfallPanel.tune(offset, false);
