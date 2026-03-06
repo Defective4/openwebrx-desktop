@@ -12,12 +12,15 @@ import io.github.defective4.sdr.owrxclient.client.OpenWebRXClient;
 import io.github.defective4.sdr.owrxclient.event.OWRXAdapter;
 import io.github.defective4.sdr.owrxclient.model.Band;
 import io.github.defective4.sdr.owrxclient.model.Bandpass;
+import io.github.defective4.sdr.owrxclient.model.DialFrequency;
 import io.github.defective4.sdr.owrxclient.model.ReceiverMode;
 import io.github.defective4.sdr.owrxclient.model.ReceiverProfile;
 import io.github.defective4.sdr.owrxclient.model.ServerConfig;
 import io.github.defective4.sdr.owrxdesktop.audio.AudioSinkManager;
 import io.github.defective4.sdr.owrxdesktop.bandplan.Bandplan;
 import io.github.defective4.sdr.owrxdesktop.ui.ReceiverWindow;
+import io.github.defective4.sdr.owrxdesktop.ui.component.FFTLabel;
+import io.github.defective4.sdr.owrxdesktop.ui.component.FFTLabel.Type;
 import io.github.defective4.sdr.owrxdesktop.ui.event.UserInteractionListener;
 
 public class RadioReceiver {
@@ -102,6 +105,12 @@ public class RadioReceiver {
             @Override
             public void cpuUsageUpdated(float cpuUsage) {
                 rxWindow.setCPUUsage(cpuUsage);
+            }
+
+            @Override
+            public void dialFrequenciesUpdated(DialFrequency[] frequencies) {
+                for (DialFrequency freq : frequencies)
+                    rxWindow.addLabel(new FFTLabel(freq.frequency(), freq.mode(), Color.green, Type.DIAL));
             }
 
             @Override

@@ -36,6 +36,7 @@ import io.github.defective4.sdr.owrxclient.model.ReceiverMode;
 import io.github.defective4.sdr.owrxclient.model.ReceiverProfile;
 import io.github.defective4.sdr.owrxclient.model.WaterfallLevels;
 import io.github.defective4.sdr.owrxdesktop.bandplan.Bandplan;
+import io.github.defective4.sdr.owrxdesktop.ui.component.FFTLabel;
 import io.github.defective4.sdr.owrxdesktop.ui.component.FFTPanel;
 import io.github.defective4.sdr.owrxdesktop.ui.component.TuneablePanel;
 import io.github.defective4.sdr.owrxdesktop.ui.component.WaterfallPanel;
@@ -350,6 +351,20 @@ public class ReceiverWindow extends JFrame {
             JCheckBox solidCheck = new JCheckBox("Solid");
             stylePanel.add(solidCheck);
 
+            JPanel labelsPanel = new JPanel();
+            compactPanel(labelsPanel);
+            labelsPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
+            labelsPanel.setBorder(new TitledBorder(null, "Labels", TitledBorder.LEADING, TitledBorder.TOP, null, null));
+            fftCtlPanel.add(labelsPanel);
+            labelsPanel.setLayout(new FlowLayout(FlowLayout.LEFT, 0, 0));
+
+            JCheckBox dialCheck = new JCheckBox("Dial frequencies");
+            dialCheck.addActionListener(e -> fftPanel.setLabelRender(FFTLabel.Type.DIAL, dialCheck.isSelected()));
+            dialCheck.setSelected(true);
+            labelsPanel.add(dialCheck);
+
+            confirmComponentState(dialCheck);
+
             JPanel filler = new JPanel();
             filler.setAlignmentX(Component.LEFT_ALIGNMENT);
             fftCtlPanel.add(filler);
@@ -542,6 +557,10 @@ public class ReceiverWindow extends JFrame {
             filler.setAlignmentX(0.0f);
             audioCtlPanel.add(filler);
         }
+    }
+
+    public void addLabel(FFTLabel label) {
+        fftPanel.addLabel(label);
     }
 
     public boolean addListener(UserInteractionListener listener) {

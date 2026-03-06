@@ -4,7 +4,13 @@ import java.awt.Color;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.Rectangle;
 import java.awt.RenderingHints;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import io.github.defective4.sdr.owrxdesktop.bandplan.Band;
@@ -28,12 +34,20 @@ public class FFTPanel extends BandplanPanel {
     private int fftOffset;
     private float[] fftValuesMax = new float[0];
     private final Object fftValuesMaxLock = new Object();
+    private final Map<FFTLabel.Type, Boolean> labelRenderMode = new HashMap<>();
+    private final List<FFTLabel> labels = new ArrayList<>();
+
     private boolean showBandplan = true;
 
     private boolean solid;
 
     public FFTPanel(Bandplan bandplan) {
         super(bandplan);
+    }
+
+    public void addLabel(FFTLabel label) {
+        labels.removeAll(labels.stream().filter(l -> l.freq() == label.freq()).toList());
+        labels.add(label);
     }
 
     @Override
@@ -103,6 +117,10 @@ public class FFTPanel extends BandplanPanel {
     @Override
     public void setFFTMin(float fftMin) {
         this.fftMin = fftMin;
+    }
+
+    public void setLabelRender(FFTLabel.Type type, boolean render) {
+        labelRenderMode.put(type, render);
     }
 
     public void setShowBandplan(boolean showBandplan) {
@@ -210,6 +228,37 @@ public class FFTPanel extends BandplanPanel {
             drawFrequencyLabel(g2, (int) x);
         }
 
+        FontMetrics metrics = g2.getFontMetrics();
+        int labelHeight = metrics.getHeight();
+
+        Set<Rectangle> occupied = new HashSet<>();
+
+        for (FFTLabel label : labels) {
+            if (!labelRenderMode.getOrDefault(label.type(), true) || label.freq() < centerFrequency - bandwidth / 2 || label.freq() > centerFrequency + bandwidth / 2)
+                continue;
+            int offset = (int) Math.floor((label.freq() - centerFrequency) * pxPerHz) + center;
+            int width = metrics.stringWidth(label.name());
+
+            int y = labelHeight;
+
+            int from = offset - width / 2;
+            int to = offset + width / 2;
+
+            for (Rectangle rect : occupied) {
+                if (from < rect.x + rect.width + 16 && to > rect.x - 16) y += labelHeight * 1.5;
+            }
+
+            while (y > getLineHeight() && y > labelHeight) y -= labelHeight * 1.5;
+            if (y > getLineHeight()) continue;
+
+            g2.setColor(label.color());
+            g2.drawLine(offset, y, offset, getLineHeight());
+            g2.drawLine(from, y, to, y);
+
+            g2.drawString(label.name(), from, y - y / 8);
+            occupied.add(new Rectangle(from, 0, to - from, 0));
+        }
+
         if (showBandplan) {
             Set<Band> bands = getVisibleBands();
             if (!bands.isEmpty()) {
@@ -225,7 +274,6 @@ public class FFTPanel extends BandplanPanel {
 
                     String str = band.name();
 
-                    FontMetrics metrics = g2.getFontMetrics();
                     int strWidth = metrics.stringWidth(str);
                     if (strWidth > width) {
                         str = "...";
