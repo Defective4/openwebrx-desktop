@@ -57,17 +57,15 @@ public abstract class TuneablePanel extends JComponent implements FFTVisualizer 
             public void mouseDragged(MouseEvent e) {
                 if (tuneMode)
                     tune(calculateOffsetAtPoint(e.getX()));
-                else if (scopeMode != 0) {
+                else if (scopeMode != 0 && e.getY() <= getLineHeight()) {
                     int center = e.getX() - (int) (getWidth() / 2 + offset * calculatePixelPerHerz());
                     int hzMod = (int) (calculateHerzPerPixel() * center);
                     if (scopeMode > 0) {
                         scopeUpper = hzMod;
-                        if(symmetricalScope)
-                            scopeLower = -hzMod;
+                        if (symmetricalScope) scopeLower = -hzMod;
                     } else {
                         scopeLower = hzMod;
-                        if(symmetricalScope)
-                            scopeUpper = -hzMod;
+                        if (symmetricalScope) scopeUpper = -hzMod;
                     }
                     listeners.forEach(ls -> ls.scopeChanged(scopeLower, scopeUpper));
                     repaint();
@@ -108,7 +106,7 @@ public abstract class TuneablePanel extends JComponent implements FFTVisualizer 
                 mouseDown = true;
                 tuneMode = e.getY() <= getLineHeight();
                 scopeMode = getScopeArea(e.getX());
-                if (scopeMode != 0) {
+                if (tuneMode && scopeMode != 0) {
                     dragX = e.getXOnScreen();
                     tuneMode = false;
                 } else if (tuneMode) {
