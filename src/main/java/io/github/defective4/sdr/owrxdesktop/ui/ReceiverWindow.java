@@ -369,6 +369,12 @@ public class ReceiverWindow extends JFrame {
 
             confirmComponentState(dialCheck);
 
+            JCheckBox bookmarksCheck = new JCheckBox("Bookmarks");
+            bookmarksCheck.addActionListener(
+                    e -> fftPanel.setLabelRender(FFTLabel.Type.BOOKMARK, bookmarksCheck.isSelected()));
+            bookmarksCheck.setSelected(true);
+            labelsPanel.add(bookmarksCheck);
+
             JPanel filler = new JPanel();
             filler.setAlignmentX(Component.LEFT_ALIGNMENT);
             fftCtlPanel.add(filler);
@@ -658,7 +664,7 @@ public class ReceiverWindow extends JFrame {
 
     public void setClients(int clients) {
         clientsBar.setValue(clients);
-        clientsBar.setString(Integer.toString(clients) + "/" + clientsBar.getMaximum());
+        clientsBar.setString(clientsBar.getValue() + "/" + clientsBar.getMaximum());
     }
 
     public void setCPUUsage(float cpuUsage) {
@@ -680,6 +686,7 @@ public class ReceiverWindow extends JFrame {
 
     public void setMaxClients(int maxClients) {
         clientsBar.setMaximum(maxClients);
+        clientsBar.setString(clientsBar.getValue() + "/" + clientsBar.getMaximum());
     }
 
     public void setScopeLower(int scopeLower) {
