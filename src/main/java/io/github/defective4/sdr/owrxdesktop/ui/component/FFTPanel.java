@@ -1,14 +1,22 @@
 package io.github.defective4.sdr.owrxdesktop.ui.component;
 
+import static java.awt.Cursor.*;
+
 import java.awt.Color;
+import java.awt.Cursor;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.RenderingHints;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import io.github.defective4.sdr.owrxdesktop.bandplan.Band;
@@ -35,12 +43,24 @@ public class FFTPanel extends BandplanPanel {
     private final Set<FFTLabel.Type> labelRenderMode = new HashSet<>(Set.of(FFTLabel.Type.values()));
     private final List<FFTLabel> labels = new ArrayList<>();
 
-    private boolean showBandplan = true;
+    private final Map<FFTLabel, Rectangle> occupied = new HashMap<>();
 
+    private boolean showBandplan = true;
     private boolean solid;
 
     public FFTPanel(Bandplan bandplan) {
         super(bandplan);
+        MouseAdapter adapter = new MouseAdapter() {
+            Cursor def = new Cursor(DEFAULT_CURSOR);
+            Cursor pointer = new Cursor(HAND_CURSOR);
+
+            @Override
+            public void mouseMoved(MouseEvent e) {
+                FFTLabel label = getLabelAt(e.getX(), e.getY());
+                setCursor(label == null ? def : pointer);
+            }
+        };
+        addMouseMotionListener(adapter);
     }
 
     public void addLabel(FFTLabel label) {
@@ -234,7 +254,9 @@ public class FFTPanel extends BandplanPanel {
         FontMetrics metrics = g2.getFontMetrics();
         int labelHeight = metrics.getHeight();
 
-        Set<Rectangle> occupied = new HashSet<>();
+        synchronized (occupied) {
+            occupied.clear();
+        }
 
         for (FFTLabel label : labels) {
             if (!labelRenderMode.contains(label.type()) || label.freq() < centerFrequency - bandwidth / 2
@@ -248,22 +270,26 @@ public class FFTPanel extends BandplanPanel {
             int from = offset - width / 2;
             int to = offset + width / 2;
 
-            for (Rectangle rect : occupied) {
-                if (from < rect.x + rect.width + 16 && to > rect.x - 16) y += labelHeight * 1.5;
-                if (y > getLineHeight()) {
-                    y -= labelHeight * 1.5;
-                    break;
+            synchronized (occupied) {
+                for (Rectangle rect : occupied.values()) {
+                    if (from < rect.x + rect.width + 16 && to > rect.x - 16) y += labelHeight * 1.5;
+                    if (y > getLineHeight()) {
+                        y -= labelHeight * 1.5;
+                        break;
+                    }
                 }
+
+                if (y > getLineHeight()) continue;
+
+                g2.setColor(label.color());
+                g2.drawLine(offset, y, offset, getLineHeight());
+                g2.drawLine(from, y, to, y);
+
+                int ty = y - labelHeight / 8;
+
+                g2.drawString(label.name(), from, ty);
+                occupied.put(label, new Rectangle(from, ty - labelHeight / 2, to - from, labelHeight));
             }
-
-            if (y > getLineHeight()) continue;
-
-            g2.setColor(label.color());
-            g2.drawLine(offset, y, offset, getLineHeight());
-            g2.drawLine(from, y, to, y);
-
-            g2.drawString(label.name(), from, y - labelHeight / 8);
-            occupied.add(new Rectangle(from, 0, to - from, 0));
         }
 
         if (showBandplan) {
@@ -326,6 +352,18 @@ public class FFTPanel extends BandplanPanel {
         String signal = Integer.toString(calculateSignalAtPoint(y));
 
         if (y - 5 < getLineHeight()) g2.drawString(signal, 1, y - 5);
+    }
+
+    private FFTLabel getLabelAt(int x, int y) {
+        synchronized (occupied) {
+            for (Entry<FFTLabel, Rectangle> entry : occupied.entrySet()) {
+                Rectangle rect = entry.getValue();
+                if (x > rect.x && x < rect.x + rect.width && y > rect.y && y < rect.y + rect.height) {
+                    return entry.getKey();
+                }
+            }
+        }
+        return null;
     }
 
     private static int calculateDrawingStep(double pxPerHz) {
