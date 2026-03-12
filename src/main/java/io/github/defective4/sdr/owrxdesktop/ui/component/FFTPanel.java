@@ -12,23 +12,31 @@ import java.awt.RenderingHints;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import io.github.defective4.sdr.owrxdesktop.bandplan.Band;
 import io.github.defective4.sdr.owrxdesktop.bandplan.Bandplan;
 
 public class FFTPanel extends BandplanPanel {
+    public static interface FFTPanelListener {
+        void labelClicked(FFTLabel label);
+    }
+
     private static final Color FFT_COLOR = Color.white;
     private static final Color FFT_MAX_COLOR = Color.yellow;
     private static final Color FREQ_BAR = Color.decode("#282525");
     private static final Color LINE = Color.decode("#3F3B3B");
     private static final Color LINE_CENTER = Color.white;
     private boolean drawMaxValues;
+
     private float[] fft = new float[0];
 
     private final Object fftLock = new Object();
@@ -36,16 +44,18 @@ public class FFTPanel extends BandplanPanel {
     private float fftMax = -20;
 
     private float fftMin = -88;
-
     private int fftOffset;
     private float[] fftValuesMax = new float[0];
     private final Object fftValuesMaxLock = new Object();
     private final Set<FFTLabel.Type> labelRenderMode = new HashSet<>(Set.of(FFTLabel.Type.values()));
+
     private final List<FFTLabel> labels = new ArrayList<>();
 
     private final Map<FFTLabel, Rectangle> occupied = new HashMap<>();
+    private final List<FFTPanelListener> panelListeners = new CopyOnWriteArrayList<>();
 
     private boolean showBandplan = true;
+
     private boolean solid;
 
     public FFTPanel(Bandplan bandplan) {
@@ -59,13 +69,26 @@ public class FFTPanel extends BandplanPanel {
                 FFTLabel label = getLabelAt(e.getX(), e.getY());
                 setCursor(label == null ? def : pointer);
             }
+
+            @Override
+            public void mousePressed(MouseEvent e) {
+                FFTLabel label = getLabelAt(e.getX(), e.getY());
+                if (label != null) {
+                    panelListeners.forEach(ls -> ls.labelClicked(label));
+                }
+            }
         };
         addMouseMotionListener(adapter);
+        addMouseListener(adapter);
     }
 
     public void addLabel(FFTLabel label) {
         labels.removeAll(labels.stream().filter(l -> l.freq() == label.freq()).toList());
         labels.add(label);
+    }
+
+    public boolean addPanelListener(FFTPanelListener listener) {
+        return panelListeners.add(Objects.requireNonNull(listener));
     }
 
     @Override
@@ -101,6 +124,10 @@ public class FFTPanel extends BandplanPanel {
         return getHeight() - 24;
     }
 
+    public List<FFTPanelListener> getPanelListeners() {
+        return Collections.unmodifiableList(panelListeners);
+    }
+
     public boolean isDrawMaxValues() {
         return drawMaxValues;
     }
@@ -111,6 +138,10 @@ public class FFTPanel extends BandplanPanel {
 
     public boolean isSolid() {
         return solid;
+    }
+
+    public boolean removePanelListener(FFTPanelListener listener) {
+        return panelListeners.remove(listener);
     }
 
     public void resetMaxFFT() {

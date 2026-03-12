@@ -67,6 +67,15 @@ public class RadioReceiver {
                 audioSinkManager.setVolume(value);
             }
         });
+
+        rxWindow.addFFTPanelListener(label -> {
+            int offset = label.freq() - rxWindow.getCenterFrequency();
+            rxWindow.tune(offset);
+            client.getModeByName(label.mode()).ifPresent(mode -> {
+                client.setModulation(mode);
+                rxWindow.setStartingMode(mode);
+            });
+        });
     }
 
     public void connect() throws InterruptedException {
@@ -110,7 +119,7 @@ public class RadioReceiver {
             @Override
             public void dialFrequenciesUpdated(DialFrequency[] frequencies) {
                 for (DialFrequency freq : frequencies)
-                    rxWindow.addLabel(new FFTLabel(freq.frequency(), freq.mode(), Color.green, Type.DIAL));
+                    rxWindow.addLabel(new FFTLabel(freq.frequency(), freq.mode(), Color.green, Type.DIAL, freq.mode()));
             }
 
             @Override

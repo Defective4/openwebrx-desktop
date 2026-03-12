@@ -38,6 +38,7 @@ import io.github.defective4.sdr.owrxclient.model.WaterfallLevels;
 import io.github.defective4.sdr.owrxdesktop.bandplan.Bandplan;
 import io.github.defective4.sdr.owrxdesktop.ui.component.FFTLabel;
 import io.github.defective4.sdr.owrxdesktop.ui.component.FFTPanel;
+import io.github.defective4.sdr.owrxdesktop.ui.component.FFTPanel.FFTPanelListener;
 import io.github.defective4.sdr.owrxdesktop.ui.component.TuneablePanel;
 import io.github.defective4.sdr.owrxdesktop.ui.component.WaterfallPanel;
 import io.github.defective4.sdr.owrxdesktop.ui.event.TuningAdapter;
@@ -50,9 +51,11 @@ public class ReceiverWindow extends JFrame {
 
     private final Bandplan bandplan = new Bandplan();
 
-    private final JProgressBar clientsBar = new JProgressBar();
+    private int centerFrequency;
 
+    private final JProgressBar clientsBar = new JProgressBar();
     private final JProgressBar cpuBar = new JProgressBar();
+
     private float cpuUsage = Integer.MIN_VALUE;
 
     private final JComboBox<ReceiverMode> digitalBox = new JComboBox<>();
@@ -62,21 +65,21 @@ public class ReceiverWindow extends JFrame {
     private final float fftMin = -88;
 
     private final FFTPanel fftPanel;
-
     private final JRadioButton ftlAuto = new JRadioButton("Auto");
+
     private final JRadioButton ftlServer = new JRadioButton("Server");
 
     private long lastFFTDraw;
-
     private final List<UserInteractionListener> listeners = new CopyOnWriteArrayList<>();
     private int maxFPS = -1;
+
     private float minFFT, maxFFT;
 
     private final JComboBox<ReceiverProfile> profileBox = new JComboBox<>();
-
     private boolean profileDebounce;
     private final JButton resetScope = new JButton("Reset");
     private int scopeLower;
+
     private int scopeUpper;
 
     private WaterfallLevels serverLevels = new WaterfallLevels(-88, -20);
@@ -559,6 +562,10 @@ public class ReceiverWindow extends JFrame {
         }
     }
 
+    public boolean addFFTPanelListener(FFTPanelListener listener) {
+        return fftPanel.addPanelListener(listener);
+    }
+
     public void addLabel(FFTLabel label) {
         fftPanel.addLabel(label);
     }
@@ -595,6 +602,10 @@ public class ReceiverWindow extends JFrame {
         return bandplan;
     }
 
+    public int getCenterFrequency() {
+        return centerFrequency;
+    }
+
     public FFTPanel getFftPanel() {
         return fftPanel;
     }
@@ -607,6 +618,10 @@ public class ReceiverWindow extends JFrame {
         return new TuneablePanel[] { waterfallPanel, fftPanel };
     }
 
+    public ReceiverMode getPrimaryMode() {
+        return (ReceiverMode) analogBox.getSelectedItem();
+    }
+
     public Optional<ReceiverProfile> getProfileById(String id) {
         int count = profileBox.getItemCount();
         for (int i = 0; i < count; i++) {
@@ -616,6 +631,10 @@ public class ReceiverWindow extends JFrame {
             }
         }
         return Optional.empty();
+    }
+
+    public Optional<ReceiverMode> getSecondaryMode() {
+        return Optional.ofNullable((ReceiverMode) digitalBox.getSelectedItem());
     }
 
     public WaterfallLevels getServerLevels() {
@@ -636,6 +655,7 @@ public class ReceiverWindow extends JFrame {
     }
 
     public void setCenterFrequency(int centerFrequency) {
+        this.centerFrequency = centerFrequency;
         for (TuneablePanel fftPanel : getPanels()) fftPanel.setCenterFrequency(centerFrequency);
     }
 
