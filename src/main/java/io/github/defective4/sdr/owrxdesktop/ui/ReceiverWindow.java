@@ -6,6 +6,7 @@ import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.event.ActionListener;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -566,10 +567,6 @@ public class ReceiverWindow extends JFrame {
         return fftPanel.addPanelListener(listener);
     }
 
-    public void addLabel(FFTLabel label) {
-        fftPanel.addLabel(label);
-    }
-
     public boolean addListener(UserInteractionListener listener) {
         return listeners.add(Objects.requireNonNull(listener));
     }
@@ -675,6 +672,10 @@ public class ReceiverWindow extends JFrame {
 
     public void setFFTMin(float f) {
         for (TuneablePanel fftPanel : getPanels()) fftPanel.setFFTMin(f);
+    }
+
+    public void setLabels(Collection<FFTLabel> labels) {
+        fftPanel.setLabels(labels);
     }
 
     public void setMaxClients(int maxClients) {

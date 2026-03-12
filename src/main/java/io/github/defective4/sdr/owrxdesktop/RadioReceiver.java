@@ -122,10 +122,9 @@ public class RadioReceiver {
 
             @Override
             public void bookmarksUpdated(Bookmark[] bookmarks) {
-                for (Bookmark bookmark : bookmarks) {
-                    rxWindow.addLabel(new FFTLabel(bookmark.frequency(), bookmark.name(), Color.yellow, Type.BOOKMARK,
-                            bookmark.modulation(), bookmark.underlying()));
-                }
+                rxWindow.setLabels(
+                        Arrays.stream(bookmarks).map(bookmark -> new FFTLabel(bookmark.frequency(), bookmark.name(),
+                                Color.yellow, Type.BOOKMARK, bookmark.modulation(), bookmark.underlying())).toList());
             }
 
             @Override
@@ -135,8 +134,9 @@ public class RadioReceiver {
 
             @Override
             public void dialFrequenciesUpdated(DialFrequency[] frequencies) {
-                for (DialFrequency freq : frequencies) rxWindow.addLabel(
-                        new FFTLabel(freq.frequency(), freq.mode(), Color.green, Type.DIAL, freq.mode(), null));
+                rxWindow.setLabels(Arrays.stream(frequencies).map(
+                        freq -> new FFTLabel(freq.frequency(), freq.mode(), Color.green, Type.DIAL, freq.mode(), null))
+                        .toList());
             }
 
             @Override

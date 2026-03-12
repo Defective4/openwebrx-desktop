@@ -12,6 +12,7 @@ import java.awt.RenderingHints;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -24,6 +25,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 import io.github.defective4.sdr.owrxdesktop.bandplan.Band;
 import io.github.defective4.sdr.owrxdesktop.bandplan.Bandplan;
+import io.github.defective4.sdr.owrxdesktop.ui.component.FFTLabel.Type;
 
 public class FFTPanel extends BandplanPanel {
     public static interface FFTPanelListener {
@@ -80,11 +82,6 @@ public class FFTPanel extends BandplanPanel {
         };
         addMouseMotionListener(adapter);
         addMouseListener(adapter);
-    }
-
-    public void addLabel(FFTLabel label) {
-        labels.removeAll(labels.stream().filter(l -> l.freq() == label.freq()).toList());
-        labels.add(label);
     }
 
     public boolean addPanelListener(FFTPanelListener listener) {
@@ -175,6 +172,12 @@ public class FFTPanel extends BandplanPanel {
             }
         } else
             labelRenderMode.remove(type);
+    }
+
+    public void setLabels(Collection<FFTLabel> labels) {
+        List<Type> types = labels.stream().map(FFTLabel::type).toList();
+        this.labels.stream().filter(label -> types.contains(label.type())).toList().forEach(this.labels::remove);
+        this.labels.addAll(labels);
     }
 
     public void setShowBandplan(boolean showBandplan) {
