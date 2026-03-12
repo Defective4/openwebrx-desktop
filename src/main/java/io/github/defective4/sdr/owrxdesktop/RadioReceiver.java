@@ -12,6 +12,7 @@ import io.github.defective4.sdr.owrxclient.client.OpenWebRXClient;
 import io.github.defective4.sdr.owrxclient.event.OWRXAdapter;
 import io.github.defective4.sdr.owrxclient.model.Band;
 import io.github.defective4.sdr.owrxclient.model.Bandpass;
+import io.github.defective4.sdr.owrxclient.model.Bookmark;
 import io.github.defective4.sdr.owrxclient.model.DialFrequency;
 import io.github.defective4.sdr.owrxclient.model.ReceiverMode;
 import io.github.defective4.sdr.owrxclient.model.ReceiverProfile;
@@ -72,6 +73,14 @@ public class RadioReceiver {
             int offset = label.freq() - rxWindow.getCenterFrequency();
             rxWindow.tune(offset);
             client.getModeByName(label.mode()).ifPresent(mode -> {
+                if (label.underlying() != null) {
+                    Optional<ReceiverMode> uOpt = client.getModeByName(label.underlying());
+                    if (uOpt.isPresent()) {
+                        client.setModulation(mode, uOpt.get());
+                        rxWindow.setStartingMode(mode);
+                        return;
+                    }
+                }
                 client.setModulation(mode);
                 rxWindow.setStartingMode(mode);
             });
@@ -112,14 +121,22 @@ public class RadioReceiver {
             }
 
             @Override
+            public void bookmarksUpdated(Bookmark[] bookmarks) {
+                for (Bookmark bookmark : bookmarks) {
+                    rxWindow.addLabel(new FFTLabel(bookmark.frequency(), bookmark.name(), Color.yellow, Type.BOOKMARK,
+                            bookmark.modulation(), bookmark.underlying()));
+                }
+            }
+
+            @Override
             public void cpuUsageUpdated(float cpuUsage) {
                 rxWindow.setCPUUsage(cpuUsage);
             }
 
             @Override
             public void dialFrequenciesUpdated(DialFrequency[] frequencies) {
-                for (DialFrequency freq : frequencies)
-                    rxWindow.addLabel(new FFTLabel(freq.frequency(), freq.mode(), Color.green, Type.DIAL, freq.mode()));
+                for (DialFrequency freq : frequencies) rxWindow.addLabel(
+                        new FFTLabel(freq.frequency(), freq.mode(), Color.green, Type.DIAL, freq.mode(), null));
             }
 
             @Override
