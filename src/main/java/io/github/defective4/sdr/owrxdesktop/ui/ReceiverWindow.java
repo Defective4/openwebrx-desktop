@@ -498,13 +498,23 @@ public class ReceiverWindow extends JFrame {
         {
             JPanel fftCtlPanel = new JPanel();
             controlTabs.addTab("FFT", null, fftCtlPanel, null);
-            fftCtlPanel.setLayout(new BoxLayout(fftCtlPanel, BoxLayout.Y_AXIS));
+            GridBagLayout gbl_fftCtlPanel = new GridBagLayout();
+            gbl_fftCtlPanel.columnWidths = new int[] { 230, 0 };
+            gbl_fftCtlPanel.rowHeights = new int[] { 152, 148, 71, 61, 25, 0 };
+            gbl_fftCtlPanel.columnWeights = new double[] { 0.0, Double.MIN_VALUE };
+            gbl_fftCtlPanel.rowWeights = new double[] { 0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE };
+            fftCtlPanel.setLayout(gbl_fftCtlPanel);
 
             JPanel featPanel = new JPanel();
             featPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
             compactPanel(featPanel);
             featPanel.setBorder(new TitledBorder(null, "Features", TitledBorder.LEADING, TitledBorder.TOP, null, null));
-            fftCtlPanel.add(featPanel);
+            GridBagConstraints gbc_featPanel = new GridBagConstraints();
+            gbc_featPanel.fill = GridBagConstraints.HORIZONTAL;
+            gbc_featPanel.insets = new Insets(0, 0, 5, 0);
+            gbc_featPanel.gridx = 0;
+            gbc_featPanel.gridy = 0;
+            fftCtlPanel.add(featPanel, gbc_featPanel);
             featPanel.setLayout(new BoxLayout(featPanel, BoxLayout.Y_AXIS));
             JPanel panel = new JPanel();
             panel.setAlignmentX(Component.LEFT_ALIGNMENT);
@@ -522,11 +532,59 @@ public class ReceiverWindow extends JFrame {
             JCheckBox maxDrawCheck = new JCheckBox("Draw max");
             panel.add(maxDrawCheck);
 
+            JButton btnResetMax = new JButton("Reset max");
+            featPanel.add(btnResetMax);
+
+            featPanel.add(new JLabel(" "));
+
+            JPanel maxFpsPanel = new JPanel();
+            maxFpsPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
+            featPanel.add(maxFpsPanel);
+            maxFpsPanel.setLayout(new BoxLayout(maxFpsPanel, BoxLayout.X_AXIS));
+
+            maxFpsPanel.add(new JLabel("Max FPS: "));
+
+            JLabel maxFpsLabel = new JLabel("-");
+            maxFpsPanel.add(maxFpsLabel);
+
+            JSlider maxFpsSlider = new JSlider();
+            featPanel.add(maxFpsSlider);
+            maxFpsSlider.setMaximum(61);
+            maxFpsSlider.setValue(maxFpsSlider.getMaximum());
+            maxFpsSlider.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+            maxFpsSlider.addChangeListener(new ChangeListener() {
+                @Override
+                public void stateChanged(ChangeEvent e) {
+                    int val = maxFpsSlider.getValue();
+                    if (val >= maxFpsSlider.getMaximum()) val = -1;
+                    maxFPS = val;
+                    maxFpsLabel.setText(val == -1 ? "Unlimited" : Integer.toString(val));
+                }
+            });
+
+            confirmComponentState(maxFpsSlider);
+
+            maxDrawCheck.addActionListener(e -> {
+                fftPanel.setDrawMaxValues(maxDrawCheck.isSelected());
+                btnResetMax.setEnabled(maxDrawCheck.isSelected());
+                fftPanel.repaint();
+            });
+
+            btnResetMax.addActionListener(e -> fftPanel.resetMaxFFT());
+
+            confirmComponentState(maxDrawCheck);
+
             JPanel levelsPanel = new JPanel();
             compactPanel(levelsPanel);
             levelsPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
             levelsPanel.setBorder(new TitledBorder(null, "Levels", TitledBorder.LEADING, TitledBorder.TOP, null, null));
-            fftCtlPanel.add(levelsPanel);
+            GridBagConstraints gbc_levelsPanel = new GridBagConstraints();
+            gbc_levelsPanel.fill = GridBagConstraints.HORIZONTAL;
+            gbc_levelsPanel.insets = new Insets(0, 0, 5, 0);
+            gbc_levelsPanel.gridx = 0;
+            gbc_levelsPanel.gridy = 1;
+            fftCtlPanel.add(levelsPanel, gbc_levelsPanel);
             levelsPanel.setLayout(new BoxLayout(levelsPanel, BoxLayout.Y_AXIS));
 
             JPanel fftLevelModePanel = new JPanel();
@@ -545,7 +603,6 @@ public class ReceiverWindow extends JFrame {
             JRadioButton ftlManual = new JRadioButton("Manual");
             ftlManual.setToolTipText("Adjust waterfall levels manually");
             fftLevelModePanel.add(ftlManual);
-
             ButtonGroup ftl = new ButtonGroup();
             ftl.add(ftlServer);
             ftl.add(ftlAuto);
@@ -583,47 +640,6 @@ public class ReceiverWindow extends JFrame {
             maxPanel.add(maxSlider);
             maxPanel.add(maxField);
 
-            JPanel stylePanel = new JPanel();
-            compactPanel(stylePanel);
-            FlowLayout flowLayout_1 = (FlowLayout) stylePanel.getLayout();
-            flowLayout_1.setAlignment(FlowLayout.LEFT);
-            stylePanel.setAlignmentX(Component.LEFT_ALIGNMENT);
-            stylePanel.setBorder(new TitledBorder(null, "Style", TitledBorder.LEADING, TitledBorder.TOP, null, null));
-            fftCtlPanel.add(stylePanel);
-
-            JCheckBox solidCheck = new JCheckBox("Solid");
-            stylePanel.add(solidCheck);
-
-            JPanel labelsPanel = new JPanel();
-            compactPanel(labelsPanel);
-            labelsPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
-            labelsPanel.setBorder(new TitledBorder(null, "Labels", TitledBorder.LEADING, TitledBorder.TOP, null, null));
-            fftCtlPanel.add(labelsPanel);
-            labelsPanel.setLayout(new FlowLayout(FlowLayout.LEFT, 0, 0));
-
-            JCheckBox dialCheck = new JCheckBox("Dial frequencies");
-            dialCheck.addActionListener(e -> fftPanel.setLabelRender(FFTLabel.Type.DIAL, dialCheck.isSelected()));
-            dialCheck.setSelected(true);
-            labelsPanel.add(dialCheck);
-
-            confirmComponentState(dialCheck);
-
-            JCheckBox bookmarksCheck = new JCheckBox("Bookmarks");
-            bookmarksCheck.addActionListener(
-                    e -> fftPanel.setLabelRender(FFTLabel.Type.BOOKMARK, bookmarksCheck.isSelected()));
-            bookmarksCheck.setSelected(true);
-            labelsPanel.add(bookmarksCheck);
-
-            JPanel filler = new JPanel();
-            filler.setAlignmentX(Component.LEFT_ALIGNMENT);
-            fftCtlPanel.add(filler);
-            JCheckBox colorMixingCheck = new JCheckBox("Dynamic color mixing");
-            colorMixingCheck.setSelected(true);
-            stylePanel.add(colorMixingCheck);
-
-            JButton btnResetMax = new JButton("Reset max");
-            featPanel.add(btnResetMax);
-
             minSlider.addChangeListener(new ChangeListener() {
 
                 @Override
@@ -655,33 +671,54 @@ public class ReceiverWindow extends JFrame {
                 }
             });
 
-            featPanel.add(new JLabel(" "));
+            JPanel stylePanel = new JPanel();
+            compactPanel(stylePanel);
+            FlowLayout flowLayout_1 = (FlowLayout) stylePanel.getLayout();
+            flowLayout_1.setAlignment(FlowLayout.LEFT);
+            stylePanel.setAlignmentX(Component.LEFT_ALIGNMENT);
+            stylePanel.setBorder(new TitledBorder(null, "Style", TitledBorder.LEADING, TitledBorder.TOP, null, null));
+            GridBagConstraints gbc_stylePanel = new GridBagConstraints();
+            gbc_stylePanel.fill = GridBagConstraints.HORIZONTAL;
+            gbc_stylePanel.insets = new Insets(0, 0, 5, 0);
+            gbc_stylePanel.gridx = 0;
+            gbc_stylePanel.gridy = 2;
+            fftCtlPanel.add(stylePanel, gbc_stylePanel);
 
-            JPanel maxFpsPanel = new JPanel();
-            maxFpsPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
-            featPanel.add(maxFpsPanel);
-            maxFpsPanel.setLayout(new BoxLayout(maxFpsPanel, BoxLayout.X_AXIS));
+            JCheckBox solidCheck = new JCheckBox("Solid");
+            stylePanel.add(solidCheck);
+            JCheckBox colorMixingCheck = new JCheckBox("Dynamic color mixing");
+            colorMixingCheck.setSelected(true);
+            stylePanel.add(colorMixingCheck);
+            confirmComponentState(solidCheck);
+            confirmComponentState(colorMixingCheck);
 
-            maxFpsPanel.add(new JLabel("Max FPS: "));
+            colorMixingCheck.addActionListener(e -> waterfallPanel.setColorMixing(colorMixingCheck.isSelected()));
+            solidCheck.addActionListener(e -> fftPanel.setSolid(solidCheck.isSelected()));
 
-            JLabel maxFpsLabel = new JLabel("-");
-            maxFpsPanel.add(maxFpsLabel);
+            JPanel labelsPanel = new JPanel();
+            compactPanel(labelsPanel);
+            labelsPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
+            labelsPanel.setBorder(new TitledBorder(null, "Labels", TitledBorder.LEADING, TitledBorder.TOP, null, null));
+            GridBagConstraints gbc_labelsPanel = new GridBagConstraints();
+            gbc_labelsPanel.fill = GridBagConstraints.HORIZONTAL;
+            gbc_labelsPanel.insets = new Insets(0, 0, 5, 0);
+            gbc_labelsPanel.gridx = 0;
+            gbc_labelsPanel.gridy = 3;
+            fftCtlPanel.add(labelsPanel, gbc_labelsPanel);
+            labelsPanel.setLayout(new FlowLayout(FlowLayout.LEFT, 0, 0));
 
-            JSlider maxFpsSlider = new JSlider();
-            featPanel.add(maxFpsSlider);
-            maxFpsSlider.setMaximum(61);
-            maxFpsSlider.setValue(maxFpsSlider.getMaximum());
-            maxFpsSlider.setAlignmentX(Component.LEFT_ALIGNMENT);
+            JCheckBox dialCheck = new JCheckBox("Dial frequencies");
+            dialCheck.addActionListener(e -> fftPanel.setLabelRender(FFTLabel.Type.DIAL, dialCheck.isSelected()));
+            dialCheck.setSelected(true);
+            labelsPanel.add(dialCheck);
 
-            maxFpsSlider.addChangeListener(new ChangeListener() {
-                @Override
-                public void stateChanged(ChangeEvent e) {
-                    int val = maxFpsSlider.getValue();
-                    if (val >= maxFpsSlider.getMaximum()) val = -1;
-                    maxFPS = val;
-                    maxFpsLabel.setText(val == -1 ? "Unlimited" : Integer.toString(val));
-                }
-            });
+            confirmComponentState(dialCheck);
+
+            JCheckBox bookmarksCheck = new JCheckBox("Bookmarks");
+            bookmarksCheck.addActionListener(
+                    e -> fftPanel.setLabelRender(FFTLabel.Type.BOOKMARK, bookmarksCheck.isSelected()));
+            bookmarksCheck.setSelected(true);
+            labelsPanel.add(bookmarksCheck);
 
             ActionListener ftlListener = e -> {
                 minSlider.setEnabled(ftlManual.isSelected());
@@ -701,67 +738,56 @@ public class ReceiverWindow extends JFrame {
             ftlManual.addActionListener(ftlListener);
             ftlAuto.addActionListener(ftlListener);
             ftlServer.addActionListener(ftlListener);
-
-            confirmComponentState(maxFpsSlider);
-            confirmComponentState(solidCheck);
-            confirmComponentState(colorMixingCheck);
             confirmComponentState(ftlManual);
 
             confirmComponentState(minSlider);
             confirmComponentState(maxSlider);
-
-            colorMixingCheck.addActionListener(e -> waterfallPanel.setColorMixing(colorMixingCheck.isSelected()));
-            solidCheck.addActionListener(e -> fftPanel.setSolid(solidCheck.isSelected()));
-
-            maxDrawCheck.addActionListener(e -> {
-                fftPanel.setDrawMaxValues(maxDrawCheck.isSelected());
-                btnResetMax.setEnabled(maxDrawCheck.isSelected());
-                fftPanel.repaint();
-            });
-
-            btnResetMax.addActionListener(e -> fftPanel.resetMaxFFT());
-
-            confirmComponentState(maxDrawCheck);
         }
 
         {
 
             JPanel audioCtlPanel = new JPanel();
             controlTabs.addTab("Audio", null, audioCtlPanel, null);
-            audioCtlPanel.setLayout(new BoxLayout(audioCtlPanel, BoxLayout.Y_AXIS));
+            GridBagLayout gbl_audioCtlPanel = new GridBagLayout();
+            gbl_audioCtlPanel.columnWidths = new int[]{0, 0};
+            gbl_audioCtlPanel.rowHeights = new int[]{85, 376, 0};
+            gbl_audioCtlPanel.columnWeights = new double[]{0.0, Double.MIN_VALUE};
+            gbl_audioCtlPanel.rowWeights = new double[]{0.0, 0.0, Double.MIN_VALUE};
+            audioCtlPanel.setLayout(gbl_audioCtlPanel);
 
-            JPanel audioPanel = new JPanel();
-            audioCtlPanel.add(audioPanel);
-            audioPanel.setBorder(new TitledBorder(null, "Audio", TitledBorder.LEADING, TitledBorder.TOP, null, null));
-            audioPanel.setLayout(new BoxLayout(audioPanel, BoxLayout.Y_AXIS));
+                                    JPanel audioPanel = new JPanel();
+                                    GridBagConstraints gbc_audioPanel = new GridBagConstraints();
+                                    gbc_audioPanel.fill = GridBagConstraints.HORIZONTAL;
+                                    gbc_audioPanel.insets = new Insets(0, 0, 5, 0);
+                                    gbc_audioPanel.gridx = 0;
+                                    gbc_audioPanel.gridy = 0;
+                                    audioCtlPanel.add(audioPanel, gbc_audioPanel);
+                                    audioPanel.setBorder(new TitledBorder(null, "Audio", TitledBorder.LEADING, TitledBorder.TOP, null, null));
+                                    audioPanel.setLayout(new BoxLayout(audioPanel, BoxLayout.Y_AXIS));
 
-            audioPanel.add(new JLabel("Volume"));
+                                                audioPanel.add(new JLabel("Volume"));
 
-            JSlider volumeSlider = new JSlider();
-            volumeSlider.setLabelTable(volumeSlider.createStandardLabels(100));
-            volumeSlider.setPaintLabels(true);
-            volumeSlider.setAlignmentX(Component.LEFT_ALIGNMENT);
-            volumeSlider.setMinimum(0);
-            volumeSlider.setMaximum(100);
-            volumeSlider.setValue(100);
-            audioPanel.add(volumeSlider);
+                                                            JSlider volumeSlider = new JSlider();
+                                                            volumeSlider.setLabelTable(volumeSlider.createStandardLabels(100));
+                                                            volumeSlider.setPaintLabels(true);
+                                                            volumeSlider.setAlignmentX(Component.LEFT_ALIGNMENT);
+                                                            volumeSlider.setMinimum(0);
+                                                            volumeSlider.setMaximum(100);
+                                                            volumeSlider.setValue(100);
+                                                            audioPanel.add(volumeSlider);
 
-            JCheckBox muteCheck = new JCheckBox("Mute");
-            audioPanel.add(muteCheck);
-            muteCheck.addActionListener(e -> {
-                boolean muted = muteCheck.isSelected();
-                volumeSlider.setEnabled(!muted);
-                listeners.forEach(ls -> ls.muteToggled(muted));
-            });
+                                                                        JCheckBox muteCheck = new JCheckBox("Mute");
+                                                                        audioPanel.add(muteCheck);
+                                                                        muteCheck.addActionListener(e -> {
+                                                                            boolean muted = muteCheck.isSelected();
+                                                                            volumeSlider.setEnabled(!muted);
+                                                                            listeners.forEach(ls -> ls.muteToggled(muted));
+                                                                        });
 
-            volumeSlider
-                    .addChangeListener(e -> listeners.forEach(ls -> ls.volumeChanged(volumeSlider.getValue() / 100f)));
+                                                                                    volumeSlider
+                                                                                            .addChangeListener(e -> listeners.forEach(ls -> ls.volumeChanged(volumeSlider.getValue() / 100f)));
 
-            confirmComponentState(muteCheck);
-
-            JPanel filler = new JPanel();
-            filler.setAlignmentX(0.0f);
-            audioCtlPanel.add(filler);
+                                                                                                confirmComponentState(muteCheck);
         }
     }
 
