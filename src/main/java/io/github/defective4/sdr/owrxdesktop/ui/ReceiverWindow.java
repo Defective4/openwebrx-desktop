@@ -131,6 +131,16 @@ public class ReceiverWindow extends JFrame {
             mnFile.add(mntmQuit);
         }
 
+        {
+            JMenu mnWindow = new JMenu("Window");
+            menuBar.add(mnWindow);
+
+            JMenuItem mntmSettings = new JMenuItem("Settings...");
+            mntmSettings.addActionListener(e -> SettingsDialog.show(this));
+            mntmSettings.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_O, InputEvent.CTRL_DOWN_MASK));
+            mnWindow.add(mntmSettings);
+        }
+
         JSplitPane splitPane = new JSplitPane();
         splitPane.setResizeWeight(1);
 
