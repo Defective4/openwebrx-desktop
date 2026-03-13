@@ -95,7 +95,7 @@ public class RadioReceiver {
 
         rxWindow.addFFTPanelListener(label -> {
             int offset = label.freq() - rxWindow.getCenterFrequency();
-            rxWindow.tune(offset);
+            rxWindow.tune(offset, true, false);
             client.getModeByName(label.mode()).ifPresent(mode -> {
                 if (label.underlying() != null) {
                     Optional<ReceiverMode> uOpt = client.getModeByName(label.underlying());
