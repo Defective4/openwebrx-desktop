@@ -33,9 +33,11 @@ import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 import javax.swing.JRadioButton;
 import javax.swing.JSlider;
+import javax.swing.JSpinner;
 import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
 import javax.swing.KeyStroke;
+import javax.swing.SpinnerNumberModel;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
@@ -77,17 +79,19 @@ public class ReceiverWindow extends JFrame {
     private final float fftMin = -88;
     private final FFTPanel fftPanel;
 
-    private final JRadioButton ftlAuto = new JRadioButton("Auto");
+    private final JSpinner freqSpinner = new JSpinner();
 
+    private final JRadioButton ftlAuto = new JRadioButton("Auto");
     private final JRadioButton ftlServer = new JRadioButton("Server");
     private long lastFFTDraw;
+
     private final List<UserInteractionListener> listeners = new CopyOnWriteArrayList<>();
 
     private int maxFPS = -1;
-
     private float minFFT, maxFFT;
     private final JComboBox<ReceiverProfile> profileBox = new JComboBox<>();
     private boolean profileDebounce;
+
     private final JButton resetScope = new JButton("Reset");
 
     private int scopeLower;
@@ -106,7 +110,7 @@ public class ReceiverWindow extends JFrame {
     public ReceiverWindow(ReceiverUserSettings settings) {
         userSettings = settings;
         resetAutoFFT();
-        setBounds(100, 100, 768, 468);
+        setBounds(100, 100, 768, 500);
         setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
         addWindowListener(new WindowAdapter() {
             @Override
@@ -193,6 +197,7 @@ public class ReceiverWindow extends JFrame {
                 public void tuned(int offset) {
                     fftPanel.tune(offset, false);
                     listeners.forEach(ls -> ls.tuned(offset));
+                    updateFreqSpinnerValue(offset);
                 }
             });
 
@@ -208,6 +213,7 @@ public class ReceiverWindow extends JFrame {
                 public void tuned(int offset) {
                     waterfallPanel.tune(offset, false);
                     listeners.forEach(ls -> ls.tuned(offset));
+                    updateFreqSpinnerValue(offset);
                 }
 
                 @Override
@@ -222,6 +228,23 @@ public class ReceiverWindow extends JFrame {
             JPanel rxCtlPanel = new JPanel();
             controlTabs.addTab("RX", null, rxCtlPanel, null);
             rxCtlPanel.setLayout(new BoxLayout(rxCtlPanel, BoxLayout.Y_AXIS));
+
+            JPanel freqPanel = new JPanel();
+            compactPanel(freqPanel);
+            freqPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
+            freqPanel
+                    .setBorder(new TitledBorder(null, "Frequency", TitledBorder.LEADING, TitledBorder.TOP, null, null));
+            rxCtlPanel.add(freqPanel);
+            freqPanel.setLayout(new BoxLayout(freqPanel, BoxLayout.X_AXIS));
+            freqSpinner.setModel(new SpinnerNumberModel(Integer.valueOf(0), Integer.valueOf(0), null, Integer.valueOf(1)));
+
+            freqPanel.add(freqSpinner);
+
+            freqPanel.add(new JLabel(" Hz "));
+
+            JButton btnGo = new JButton("Go");
+            btnGo.setEnabled(false);
+            freqPanel.add(btnGo);
 
             JPanel profilePanel = new JPanel();
             compactPanel(profilePanel);
@@ -712,6 +735,7 @@ public class ReceiverWindow extends JFrame {
     public void setCenterFrequency(int centerFrequency) {
         this.centerFrequency = centerFrequency;
         for (TuneablePanel fftPanel : getPanels()) fftPanel.setCenterFrequency(centerFrequency);
+        updateFreqSpinnerValue(0);
     }
 
     public void setClients(int clients) {
@@ -809,10 +833,12 @@ public class ReceiverWindow extends JFrame {
 
     public void tune(int offset) {
         for (TuneablePanel fftPanel : getPanels()) fftPanel.tune(offset);
+        updateFreqSpinnerValue(offset);
     }
 
     public void tune(int offset, boolean fireEvents) {
         for (TuneablePanel fftPanel : getPanels()) fftPanel.tune(offset, fireEvents);
+        updateFreqSpinnerValue(offset);
     }
 
     public void updateBandplan() {
@@ -876,6 +902,10 @@ public class ReceiverWindow extends JFrame {
             str = String.format("%s", cpuUsage + "%");
         cpuBar.setString(str);
         cpuBar.setValue(cpuUsage);
+    }
+
+    private void updateFreqSpinnerValue(int offset) {
+        freqSpinner.setValue(centerFrequency + offset);
     }
 
     private void updateMode() {
