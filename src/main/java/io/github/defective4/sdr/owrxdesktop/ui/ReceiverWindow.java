@@ -6,6 +6,7 @@ import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.event.ActionListener;
 import java.awt.event.InputEvent;
+import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
@@ -34,6 +35,7 @@ import javax.swing.JProgressBar;
 import javax.swing.JRadioButton;
 import javax.swing.JSlider;
 import javax.swing.JSpinner;
+import javax.swing.JSpinner.NumberEditor;
 import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
 import javax.swing.KeyStroke;
@@ -63,9 +65,11 @@ public class ReceiverWindow extends JFrame {
 
     private final Bandplan bandplan = new Bandplan();
 
-    private int centerFrequency;
+    private int bandwidth;
 
+    private int centerFrequency;
     private final JProgressBar clientsBar = new JProgressBar();
+
     private final JProgressBar cpuBar = new JProgressBar();
 
     private float cpuUsage = Integer.MIN_VALUE;
@@ -75,21 +79,23 @@ public class ReceiverWindow extends JFrame {
     private boolean exiting;
 
     private final float fftMax = -20;
-
     private final float fftMin = -88;
+
     private final FFTPanel fftPanel;
 
     private final JSpinner freqSpinner = new JSpinner();
-
     private final JRadioButton ftlAuto = new JRadioButton("Auto");
     private final JRadioButton ftlServer = new JRadioButton("Server");
+
     private long lastFFTDraw;
 
     private final List<UserInteractionListener> listeners = new CopyOnWriteArrayList<>();
-
     private int maxFPS = -1;
     private float minFFT, maxFFT;
+    private int offset;
+
     private final JComboBox<ReceiverProfile> profileBox = new JComboBox<>();
+
     private boolean profileDebounce;
 
     private final JButton resetScope = new JButton("Reset");
@@ -101,10 +107,10 @@ public class ReceiverWindow extends JFrame {
     private WaterfallLevels serverLevels = new WaterfallLevels(-88, -20);
 
     private final JProgressBar signalBar = new JProgressBar();
-
     private int temperatureC = Integer.MIN_VALUE;
 
     private ReceiverUserSettings userSettings;
+
     private final WaterfallPanel waterfallPanel;
 
     public ReceiverWindow(ReceiverUserSettings settings) {
@@ -142,13 +148,7 @@ public class ReceiverWindow extends JFrame {
             menuBar.add(mnWindow);
 
             JMenuItem mntmSettings = new JMenuItem("Settings...");
-            mntmSettings.addActionListener(e -> {
-                ReceiverUserSettings uSettings = SettingsDialog.show(this, userSettings);
-                if (uSettings != null) {
-                    userSettings = uSettings;
-                    listeners.forEach(ls -> ls.settingsChanged(uSettings));
-                }
-            });
+            mntmSettings.addActionListener(e -> { showSettings(); });
             mntmSettings.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_O, InputEvent.CTRL_DOWN_MASK));
             mnWindow.add(mntmSettings);
         }
@@ -195,6 +195,7 @@ public class ReceiverWindow extends JFrame {
 
                 @Override
                 public void tuned(int offset) {
+                    ReceiverWindow.this.offset = offset;
                     fftPanel.tune(offset, false);
                     listeners.forEach(ls -> ls.tuned(offset));
                     updateFreqSpinnerValue(offset);
@@ -211,6 +212,7 @@ public class ReceiverWindow extends JFrame {
 
                 @Override
                 public void tuned(int offset) {
+                    ReceiverWindow.this.offset = offset;
                     waterfallPanel.tune(offset, false);
                     listeners.forEach(ls -> ls.tuned(offset));
                     updateFreqSpinnerValue(offset);
@@ -236,15 +238,39 @@ public class ReceiverWindow extends JFrame {
                     .setBorder(new TitledBorder(null, "Frequency", TitledBorder.LEADING, TitledBorder.TOP, null, null));
             rxCtlPanel.add(freqPanel);
             freqPanel.setLayout(new BoxLayout(freqPanel, BoxLayout.X_AXIS));
-            freqSpinner.setModel(new SpinnerNumberModel(Integer.valueOf(0), Integer.valueOf(0), null, Integer.valueOf(1)));
+            freqSpinner
+                    .setModel(new SpinnerNumberModel(Integer.valueOf(0), Integer.valueOf(0), null, Integer.valueOf(1)));
 
             freqPanel.add(freqSpinner);
 
             freqPanel.add(new JLabel(" Hz "));
 
-            JButton btnGo = new JButton("Go");
-            btnGo.setEnabled(false);
-            freqPanel.add(btnGo);
+            JButton goFreqBtn = new JButton("Go");
+            freqPanel.add(goFreqBtn);
+
+            ((NumberEditor) freqSpinner.getEditor()).getTextField().addKeyListener(new KeyAdapter() {
+                @Override
+                public void keyReleased(KeyEvent e) {
+                    if (e.getKeyCode() == KeyEvent.VK_ENTER) goFreqBtn.doClick();
+                }
+            });
+
+            goFreqBtn.addActionListener(e -> {
+                int freq = (int) freqSpinner.getValue();
+                int offset = freq - centerFrequency;
+                if (Math.abs(offset) > bandwidth / 2) {
+//                    if (JOptionPane.showOptionDialog(this,
+//                            new String[] { "You are trying to tune outside of the current profile's frequency range.",
+//                                    "This requires free tuning mode to be enabled in Settings > Receiver" },
+//                            "Can't tune", JOptionPane.OK_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE, null,
+//                            new String[] { "Take me there", "Cancel" }, null) == 0) {
+//                        showSettings();
+//                    }
+                    updateFreqSpinnerValue(this.offset);
+                    return;
+                }
+                tune(offset, true);
+            });
 
             JPanel profilePanel = new JPanel();
             compactPanel(profilePanel);
@@ -729,6 +755,7 @@ public class ReceiverWindow extends JFrame {
     }
 
     public void setBandwidth(int bandwidth) {
+        this.bandwidth = bandwidth;
         for (TuneablePanel fftPanel : getPanels()) fftPanel.setBandwidth(bandwidth);
     }
 
@@ -831,12 +858,22 @@ public class ReceiverWindow extends JFrame {
         waterfallPanel.setTheme(theme);
     }
 
+    public void showSettings() {
+        ReceiverUserSettings uSettings = SettingsDialog.show(this, userSettings);
+        if (uSettings != null) {
+            userSettings = uSettings;
+            listeners.forEach(ls -> ls.settingsChanged(uSettings));
+        }
+    }
+
     public void tune(int offset) {
+        this.offset = offset;
         for (TuneablePanel fftPanel : getPanels()) fftPanel.tune(offset);
         updateFreqSpinnerValue(offset);
     }
 
     public void tune(int offset, boolean fireEvents) {
+        this.offset = offset;
         for (TuneablePanel fftPanel : getPanels()) fftPanel.tune(offset, fireEvents);
         updateFreqSpinnerValue(offset);
     }
