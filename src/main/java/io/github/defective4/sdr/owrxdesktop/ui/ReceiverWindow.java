@@ -9,7 +9,6 @@ import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -178,10 +177,7 @@ public class ReceiverWindow extends JFrame {
             fftPane.setLeftComponent(fftPanel);
 
             waterfallPanel = new WaterfallPanel();
-            waterfallPanel.setTheme(Arrays.stream(
-                    "0x000020, 0x000030, 0x000050, 0x000091, 0x1E90FF, 0xFFFFFF, 0xFFFF00, 0xFE6D16, 0xFF0000, 0xC60000, 0x9F0000, 0x750000, 0x4A0000"
-                            .replace("0x", "#").split(", "))
-                    .map(Color::decode).toArray(Color[]::new));
+            waterfallPanel.setTheme(new Color[] { Color.black, Color.white });
 
             fftPane.setRightComponent(waterfallPanel);
 
