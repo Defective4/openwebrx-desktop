@@ -5,6 +5,9 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
 import java.awt.Window;
 import java.awt.event.ActionListener;
 import java.util.List;
@@ -12,16 +15,20 @@ import java.util.List;
 import javax.swing.BoxLayout;
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JDialog;
+import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JPasswordField;
 import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextArea;
 import javax.swing.border.EmptyBorder;
+import javax.swing.border.TitledBorder;
 
 import io.github.defective4.sdr.owrxdesktop.ui.settings.ReceiverUserSettings;
 import io.github.defective4.sdr.owrxdesktop.ui.settings.waterfall.BuiltinWaterfallTheme;
@@ -29,6 +36,8 @@ import io.github.defective4.sdr.owrxdesktop.ui.settings.waterfall.WaterfallTheme
 
 public class SettingsDialog extends JDialog {
 
+    private final JCheckBox freeTuningCheck = new JCheckBox("Enable free tuning");
+    private final JPasswordField magicKeyField = new JPasswordField();
     private final JRadioButton rdbtnBuiltin = new JRadioButton("Built-in: ");
     private final JRadioButton rdbtnCustom = new JRadioButton("Custom (One hex color per line, each starting with #):");
     private final JRadioButton rdbtnServerprovidedConfiguration = new JRadioButton("Server-provided configuration");
@@ -51,6 +60,71 @@ public class SettingsDialog extends JDialog {
         {
             JTabbedPane tabbedPane = new JTabbedPane(JTabbedPane.TOP);
             contentPanel.add(tabbedPane);
+            {
+                JTabbedPane rxTabs = new JTabbedPane(JTabbedPane.TOP);
+                tabbedPane.addTab("Receiver", null, rxTabs, null);
+                {
+                    JPanel mainPanel = new JPanel();
+                    rxTabs.addTab("Main", null, mainPanel, null);
+                    GridBagLayout gbl_mainPanel = new GridBagLayout();
+                    gbl_mainPanel.columnWidths = new int[] { 0, 0 };
+                    gbl_mainPanel.rowHeights = new int[] { 0, 0 };
+                    gbl_mainPanel.columnWeights = new double[] { 1.0, Double.MIN_VALUE };
+                    gbl_mainPanel.rowWeights = new double[] { 0.0, Double.MIN_VALUE };
+                    mainPanel.setLayout(gbl_mainPanel);
+                    {
+                        JPanel panel = new JPanel();
+                        panel.setBorder(new TitledBorder(null, "Free tuning", TitledBorder.LEADING, TitledBorder.TOP,
+                                null, null));
+                        GridBagConstraints gbc_panel = new GridBagConstraints();
+                        gbc_panel.anchor = GridBagConstraints.NORTH;
+                        gbc_panel.fill = GridBagConstraints.HORIZONTAL;
+                        gbc_panel.gridx = 0;
+                        gbc_panel.gridy = 0;
+                        mainPanel.add(panel, gbc_panel);
+                        GridBagLayout gbl_panel = new GridBagLayout();
+                        gbl_panel.columnWidths = new int[] { 0, 0 };
+                        gbl_panel.rowHeights = new int[] { 0, 0, 0, 0 };
+                        gbl_panel.columnWeights = new double[] { 1.0, Double.MIN_VALUE };
+                        gbl_panel.rowWeights = new double[] { 0.0, 0.0, 0.0, Double.MIN_VALUE };
+                        panel.setLayout(gbl_panel);
+                        {
+                            GridBagConstraints gbc_chckbxEnableFreeTuning = new GridBagConstraints();
+                            gbc_chckbxEnableFreeTuning.anchor = GridBagConstraints.WEST;
+                            gbc_chckbxEnableFreeTuning.insets = new Insets(0, 0, 5, 0);
+                            gbc_chckbxEnableFreeTuning.gridx = 0;
+                            gbc_chckbxEnableFreeTuning.gridy = 0;
+                            panel.add(freeTuningCheck, gbc_chckbxEnableFreeTuning);
+                        }
+                        {
+                            JLabel lblMagicKeyoptional = new JLabel("Magic key (Optional):");
+                            GridBagConstraints gbc_lblMagicKeyoptional = new GridBagConstraints();
+                            gbc_lblMagicKeyoptional.anchor = GridBagConstraints.WEST;
+                            gbc_lblMagicKeyoptional.insets = new Insets(0, 0, 5, 0);
+                            gbc_lblMagicKeyoptional.gridx = 0;
+                            gbc_lblMagicKeyoptional.gridy = 1;
+                            panel.add(lblMagicKeyoptional, gbc_lblMagicKeyoptional);
+                        }
+                        {
+                            magicKeyField.setColumns(16);
+                            GridBagConstraints gbc_passwordField = new GridBagConstraints();
+                            gbc_passwordField.anchor = GridBagConstraints.WEST;
+                            gbc_passwordField.gridx = 0;
+                            gbc_passwordField.gridy = 2;
+                            panel.add(magicKeyField, gbc_passwordField);
+                        }
+
+                        freeTuningCheck.setSelected(settings.isEnableFreeTuning());
+                        magicKeyField.setText(settings.getMagicKey());
+
+                        ActionListener a = e -> magicKeyField.setEnabled(freeTuningCheck.isSelected());
+
+                        freeTuningCheck.addActionListener(a);
+
+                        a.actionPerformed(null);
+                    }
+                }
+            }
             {
                 JTabbedPane fftTabs = new JTabbedPane(JTabbedPane.TOP);
                 tabbedPane.addTab("FFT", null, fftTabs, null);
@@ -120,6 +194,8 @@ public class SettingsDialog extends JDialog {
                     settings.setSelectedBuiltinWaterfallTheme((BuiltinWaterfallTheme) themesBox.getSelectedItem());
                     settings.setWaterfallCustomTheme(List.of(themeArea.getText().split("\n")));
                     settings.setWaterfallThemeMode(mode);
+                    settings.setMagicKey(new String(magicKeyField.getPassword()));
+                    settings.setEnableFreeTuning(freeTuningCheck.isSelected());
                     dispose();
                 });
                 buttonPane.add(okButton);

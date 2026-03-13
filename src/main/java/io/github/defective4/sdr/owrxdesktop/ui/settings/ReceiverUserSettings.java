@@ -38,21 +38,19 @@ public class ReceiverUserSettings {
         }
     }
 
+    private boolean enableFreeTuning;
+    private String magicKey;
+
     private BuiltinWaterfallTheme selectedBuiltinWaterfallTheme = BuiltinWaterfallTheme.TURBO;
     private List<String> waterfallCustomTheme = List.of("#000000", "#ffffff");
-
     private WaterfallThemeMode waterfallThemeMode = WaterfallThemeMode.SERVER;
 
     public ReceiverUserSettings() {
 
     }
 
-    public ReceiverUserSettings(BuiltinWaterfallTheme selectedBuiltinWaterfallTheme, List<String> waterfallCustomTheme,
-            WaterfallThemeMode waterfallThemeMode) {
-        super();
-        this.selectedBuiltinWaterfallTheme = selectedBuiltinWaterfallTheme;
-        this.waterfallCustomTheme = waterfallCustomTheme;
-        this.waterfallThemeMode = waterfallThemeMode;
+    public String getMagicKey() {
+        return magicKey == null ? "" : magicKey;
     }
 
     public BuiltinWaterfallTheme getSelectedBuiltinWaterfallTheme() {
@@ -65,6 +63,18 @@ public class ReceiverUserSettings {
 
     public WaterfallThemeMode getWaterfallThemeMode() {
         return waterfallThemeMode;
+    }
+
+    public boolean isEnableFreeTuning() {
+        return enableFreeTuning;
+    }
+
+    public void setEnableFreeTuning(boolean enableFreeTuning) {
+        this.enableFreeTuning = enableFreeTuning;
+    }
+
+    public void setMagicKey(String magicKey) {
+        this.magicKey = magicKey;
     }
 
     public void setSelectedBuiltinWaterfallTheme(BuiltinWaterfallTheme selectedBuiltinWaterfallTheme) {
