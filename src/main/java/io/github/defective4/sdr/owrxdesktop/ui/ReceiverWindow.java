@@ -4,6 +4,9 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
 import java.awt.event.ActionListener;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyAdapter;
@@ -116,7 +119,7 @@ public class ReceiverWindow extends JFrame {
     public ReceiverWindow(ReceiverUserSettings settings) {
         userSettings = settings;
         resetAutoFFT();
-        setBounds(100, 100, 768, 500);
+        setBounds(100, 100, 768, 550);
         setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
         addWindowListener(new WindowAdapter() {
             @Override
@@ -168,8 +171,6 @@ public class ReceiverWindow extends JFrame {
         controlPanel.add(controlTabs);
 
         ReceiverModeRenderer renderer = new ReceiverModeRenderer();
-        analogBox.setRenderer(renderer);
-        digitalBox.setRenderer(renderer);
 
         {
             JSplitPane fftPane = new JSplitPane();
@@ -229,22 +230,52 @@ public class ReceiverWindow extends JFrame {
         {
             JPanel rxCtlPanel = new JPanel();
             controlTabs.addTab("RX", null, rxCtlPanel, null);
-            rxCtlPanel.setLayout(new BoxLayout(rxCtlPanel, BoxLayout.Y_AXIS));
+            GridBagLayout gbl_rxCtlPanel = new GridBagLayout();
+            gbl_rxCtlPanel.columnWidths = new int[] { 225, 0 };
+            gbl_rxCtlPanel.rowHeights = new int[] { 49, 52, 116, 52, 124, 13, 0 };
+            gbl_rxCtlPanel.columnWeights = new double[] { 0.0, Double.MIN_VALUE };
+            gbl_rxCtlPanel.rowWeights = new double[] { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE };
+            rxCtlPanel.setLayout(gbl_rxCtlPanel);
 
             JPanel freqPanel = new JPanel();
             compactPanel(freqPanel);
             freqPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
             freqPanel
                     .setBorder(new TitledBorder(null, "Frequency", TitledBorder.LEADING, TitledBorder.TOP, null, null));
-            rxCtlPanel.add(freqPanel);
-            freqPanel.setLayout(new BoxLayout(freqPanel, BoxLayout.X_AXIS));
+            GridBagConstraints gbc_freqPanel = new GridBagConstraints();
+            gbc_freqPanel.fill = GridBagConstraints.HORIZONTAL;
+            gbc_freqPanel.insets = new Insets(0, 0, 5, 0);
+            gbc_freqPanel.gridx = 0;
+            gbc_freqPanel.gridy = 0;
+            rxCtlPanel.add(freqPanel, gbc_freqPanel);
+            GridBagLayout gbl_freqPanel = new GridBagLayout();
+            gbl_freqPanel.columnWidths = new int[] { 139, 4, 72, 0 };
+            gbl_freqPanel.rowHeights = new int[] { 24, 0 };
+            gbl_freqPanel.columnWeights = new double[] { 0.0, 0.0, 0.0, Double.MIN_VALUE };
+            gbl_freqPanel.rowWeights = new double[] { 0.0, Double.MIN_VALUE };
+            freqPanel.setLayout(gbl_freqPanel);
 
-            freqPanel.add(freqSpinner);
+            GridBagConstraints gbc_freqSpinner = new GridBagConstraints();
+            gbc_freqSpinner.fill = GridBagConstraints.HORIZONTAL;
+            gbc_freqSpinner.insets = new Insets(0, 0, 0, 5);
+            gbc_freqSpinner.gridx = 0;
+            gbc_freqSpinner.gridy = 0;
+            freqPanel.add(freqSpinner, gbc_freqSpinner);
 
-            freqPanel.add(new JLabel(" "));
+            GridBagConstraints gbc = new GridBagConstraints();
+            gbc.anchor = GridBagConstraints.WEST;
+            gbc.insets = new Insets(0, 0, 0, 5);
+            gbc.gridx = 1;
+            gbc.gridy = 0;
+            JLabel label = new JLabel(" ");
+            freqPanel.add(label, gbc);
 
             JButton goFreqBtn = new JButton("Go");
-            freqPanel.add(goFreqBtn);
+            GridBagConstraints gbc_goFreqBtn = new GridBagConstraints();
+            gbc_goFreqBtn.anchor = GridBagConstraints.WEST;
+            gbc_goFreqBtn.gridx = 2;
+            gbc_goFreqBtn.gridy = 0;
+            freqPanel.add(goFreqBtn, gbc_goFreqBtn);
 
             ((NumberEditor) freqSpinner.getEditor()).getTextField().addKeyListener(new KeyAdapter() {
                 @Override
@@ -281,35 +312,129 @@ public class ReceiverWindow extends JFrame {
             profilePanel.setAlignmentX(Component.LEFT_ALIGNMENT);
             profilePanel
                     .setBorder(new TitledBorder(null, "Profile", TitledBorder.LEADING, TitledBorder.TOP, null, null));
-            rxCtlPanel.add(profilePanel);
-            profilePanel.setLayout(new BoxLayout(profilePanel, BoxLayout.X_AXIS));
+            GridBagConstraints gbc_profilePanel = new GridBagConstraints();
+            gbc_profilePanel.fill = GridBagConstraints.HORIZONTAL;
+            gbc_profilePanel.insets = new Insets(0, 0, 5, 0);
+            gbc_profilePanel.gridx = 0;
+            gbc_profilePanel.gridy = 1;
+            rxCtlPanel.add(profilePanel, gbc_profilePanel);
+            GridBagLayout gbl_profilePanel = new GridBagLayout();
+            gbl_profilePanel.columnWidths = new int[] { 220, 0 };
+            gbl_profilePanel.rowHeights = new int[] { 24, 0 };
+            gbl_profilePanel.columnWeights = new double[] { 0.0, Double.MIN_VALUE };
+            gbl_profilePanel.rowWeights = new double[] { 0.0, Double.MIN_VALUE };
+            profilePanel.setLayout(gbl_profilePanel);
 
             profileBox.setAlignmentX(Component.LEFT_ALIGNMENT);
-            profilePanel.add(profileBox);
+            GridBagConstraints gbc_profileBox = new GridBagConstraints();
+            gbc_profileBox.fill = GridBagConstraints.HORIZONTAL;
+            gbc_profileBox.gridx = 0;
+            gbc_profileBox.gridy = 0;
+            profilePanel.add(profileBox, gbc_profileBox);
+
+            profileBox.addActionListener(e -> {
+                if (profileDebounce) return;
+                ReceiverProfile profile = (ReceiverProfile) profileBox.getSelectedItem();
+                if (profile != null) listeners.forEach(ls -> ls.profileChanged(profile));
+            });
 
             JPanel modePanel = new JPanel();
             modePanel.setAlignmentX(Component.LEFT_ALIGNMENT);
             compactPanel(modePanel);
             modePanel.setBorder(new TitledBorder(null, "Mode", TitledBorder.LEADING, TitledBorder.TOP, null, null));
-            rxCtlPanel.add(modePanel);
-            modePanel.setLayout(new BoxLayout(modePanel, BoxLayout.Y_AXIS));
+            GridBagConstraints gbc_modePanel = new GridBagConstraints();
+            gbc_modePanel.fill = GridBagConstraints.HORIZONTAL;
+            gbc_modePanel.insets = new Insets(0, 0, 5, 0);
+            gbc_modePanel.gridx = 0;
+            gbc_modePanel.gridy = 2;
+            rxCtlPanel.add(modePanel, gbc_modePanel);
+            GridBagLayout gbl_modePanel = new GridBagLayout();
+            gbl_modePanel.columnWidths = new int[] { 220, 0 };
+            gbl_modePanel.rowHeights = new int[] { 18, 24, 18, 24, 0 };
+            gbl_modePanel.columnWeights = new double[] { 0.0, Double.MIN_VALUE };
+            gbl_modePanel.rowWeights = new double[] { 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE };
+            modePanel.setLayout(gbl_modePanel);
 
-            modePanel.add(new JLabel("Primary"));
+            GridBagConstraints gbc_1 = new GridBagConstraints();
+            gbc_1.anchor = GridBagConstraints.WEST;
+            gbc_1.insets = new Insets(0, 0, 5, 0);
+            gbc_1.gridx = 0;
+            gbc_1.gridy = 0;
+            JLabel label_1 = new JLabel("Primary");
+            modePanel.add(label_1, gbc_1);
+            analogBox.setRenderer(renderer);
 
             analogBox.setAlignmentX(Component.LEFT_ALIGNMENT);
-            modePanel.add(analogBox);
+            GridBagConstraints gbc_analogBox = new GridBagConstraints();
+            gbc_analogBox.fill = GridBagConstraints.HORIZONTAL;
+            gbc_analogBox.insets = new Insets(0, 0, 5, 0);
+            gbc_analogBox.gridx = 0;
+            gbc_analogBox.gridy = 1;
+            modePanel.add(analogBox, gbc_analogBox);
+
+            analogBox.addActionListener(e -> {
+                ReceiverMode selected = (ReceiverMode) analogBox.getSelectedItem();
+                if (selected != null) {
+                    if (digitalBox.getItemCount() > 0) {
+                        ReceiverMode digi = (ReceiverMode) digitalBox.getSelectedItem();
+                        if (digi != null) {
+                            boolean has = false;
+                            for (String mod : digi.underlying()) {
+                                if (mod.equals(selected.modulation())) {
+                                    has = true;
+                                    break;
+                                }
+                            }
+                            if (!has) {
+                                digitalBox.setSelectedIndex(0);
+                            }
+                        }
+                    }
+                }
+                updateMode();
+            });
 
             JLabel lblDigital = new JLabel("Digital");
-            modePanel.add(lblDigital);
+            GridBagConstraints gbc_lblDigital = new GridBagConstraints();
+            gbc_lblDigital.anchor = GridBagConstraints.WEST;
+            gbc_lblDigital.insets = new Insets(0, 0, 5, 0);
+            gbc_lblDigital.gridx = 0;
+            gbc_lblDigital.gridy = 2;
+            modePanel.add(lblDigital, gbc_lblDigital);
+            digitalBox.setRenderer(renderer);
 
             digitalBox.setAlignmentX(Component.LEFT_ALIGNMENT);
-            modePanel.add(digitalBox);
+            GridBagConstraints gbc_digitalBox = new GridBagConstraints();
+            gbc_digitalBox.fill = GridBagConstraints.HORIZONTAL;
+            gbc_digitalBox.gridx = 0;
+            gbc_digitalBox.gridy = 3;
+            modePanel.add(digitalBox, gbc_digitalBox);
+
+            digitalBox.addActionListener(e -> {
+                ReceiverMode selected = (ReceiverMode) digitalBox.getSelectedItem();
+                if (selected != null) {
+                    int count = analogBox.getItemCount();
+                    for (int i = 0; i < count; i++) {
+                        ReceiverMode analogItem = analogBox.getItemAt(i);
+                        if (analogItem != null && analogItem.modulation().equals(selected.underlying()[0])) {
+                            analogBox.setSelectedIndex(i);
+                            break;
+                        }
+                    }
+                }
+                updateMode();
+            });
 
             JPanel scopePanel = new JPanel();
             compactPanel(scopePanel);
             scopePanel.setAlignmentX(Component.LEFT_ALIGNMENT);
             scopePanel.setBorder(new TitledBorder(null, "Scope", TitledBorder.LEADING, TitledBorder.TOP, null, null));
-            rxCtlPanel.add(scopePanel);
+            GridBagConstraints gbc_scopePanel = new GridBagConstraints();
+            gbc_scopePanel.fill = GridBagConstraints.HORIZONTAL;
+            gbc_scopePanel.insets = new Insets(0, 0, 5, 0);
+            gbc_scopePanel.gridx = 0;
+            gbc_scopePanel.gridy = 3;
+            rxCtlPanel.add(scopePanel, gbc_scopePanel);
             FlowLayout fl_scopePanel = new FlowLayout(FlowLayout.LEFT, 0, 0);
             scopePanel.setLayout(fl_scopePanel);
 
@@ -333,7 +458,12 @@ public class ReceiverWindow extends JFrame {
             compactPanel(levelsPanel);
             levelsPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
             levelsPanel.setBorder(new TitledBorder(null, "Levels", TitledBorder.LEADING, TitledBorder.TOP, null, null));
-            rxCtlPanel.add(levelsPanel);
+            GridBagConstraints gbc_levelsPanel = new GridBagConstraints();
+            gbc_levelsPanel.fill = GridBagConstraints.HORIZONTAL;
+            gbc_levelsPanel.insets = new Insets(0, 0, 5, 0);
+            gbc_levelsPanel.gridx = 0;
+            gbc_levelsPanel.gridy = 4;
+            rxCtlPanel.add(levelsPanel, gbc_levelsPanel);
             levelsPanel.setLayout(new BoxLayout(levelsPanel, BoxLayout.Y_AXIS));
 
             levelsPanel.add(new JLabel("Signal"));
@@ -358,7 +488,11 @@ public class ReceiverWindow extends JFrame {
 
             JPanel filler = new JPanel();
             filler.setAlignmentX(Component.LEFT_ALIGNMENT);
-            rxCtlPanel.add(filler);
+            GridBagConstraints gbc_filler = new GridBagConstraints();
+            gbc_filler.fill = GridBagConstraints.HORIZONTAL;
+            gbc_filler.gridx = 0;
+            gbc_filler.gridy = 5;
+            rxCtlPanel.add(filler, gbc_filler);
         }
 
         {
@@ -588,49 +722,6 @@ public class ReceiverWindow extends JFrame {
             btnResetMax.addActionListener(e -> fftPanel.resetMaxFFT());
 
             confirmComponentState(maxDrawCheck);
-
-            digitalBox.addActionListener(e -> {
-                ReceiverMode selected = (ReceiverMode) digitalBox.getSelectedItem();
-                if (selected != null) {
-                    int count = analogBox.getItemCount();
-                    for (int i = 0; i < count; i++) {
-                        ReceiverMode analogItem = analogBox.getItemAt(i);
-                        if (analogItem != null && analogItem.modulation().equals(selected.underlying()[0])) {
-                            analogBox.setSelectedIndex(i);
-                            break;
-                        }
-                    }
-                }
-                updateMode();
-            });
-
-            analogBox.addActionListener(e -> {
-                ReceiverMode selected = (ReceiverMode) analogBox.getSelectedItem();
-                if (selected != null) {
-                    if (digitalBox.getItemCount() > 0) {
-                        ReceiverMode digi = (ReceiverMode) digitalBox.getSelectedItem();
-                        if (digi != null) {
-                            boolean has = false;
-                            for (String mod : digi.underlying()) {
-                                if (mod.equals(selected.modulation())) {
-                                    has = true;
-                                    break;
-                                }
-                            }
-                            if (!has) {
-                                digitalBox.setSelectedIndex(0);
-                            }
-                        }
-                    }
-                }
-                updateMode();
-            });
-
-            profileBox.addActionListener(e -> {
-                if (profileDebounce) return;
-                ReceiverProfile profile = (ReceiverProfile) profileBox.getSelectedItem();
-                if (profile != null) listeners.forEach(ls -> ls.profileChanged(profile));
-            });
         }
 
         {
