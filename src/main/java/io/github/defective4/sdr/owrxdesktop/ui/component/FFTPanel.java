@@ -33,6 +33,7 @@ public class FFTPanel extends BandplanPanel {
 
     private static record LabelSpace(Rectangle rect, FFTLabel label) {
     }
+
     private static final Color FFT_COLOR = Color.white;
     private static final Color FFT_MAX_COLOR = Color.yellow;
     private static final Color FREQ_BAR = Color.decode("#282525");
@@ -324,7 +325,8 @@ public class FFTPanel extends BandplanPanel {
 
                 if (y > getLineHeight()) continue;
 
-                g2.setColor(label == selectedLabel ? label.activeColor() : label.inactiveColor());
+                g2.setColor(label == selectedLabel || label.freq() == centerFrequency + super.offset ? label.activeColor()
+                        : label.inactiveColor());
                 g2.drawLine(offset, y, offset, getLineHeight());
                 g2.drawLine(from, y, to, y);
 
