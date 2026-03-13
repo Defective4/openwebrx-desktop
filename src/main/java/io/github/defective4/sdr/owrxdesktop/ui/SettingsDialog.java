@@ -3,8 +3,8 @@ package io.github.defective4.sdr.owrxdesktop.ui;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Dimension;
 import java.awt.FlowLayout;
-import java.awt.GridLayout;
 import java.awt.Window;
 import java.awt.event.ActionListener;
 import java.util.List;
@@ -41,6 +41,7 @@ public class SettingsDialog extends JDialog {
         setTitle("Receiver settings");
         setModal(true);
         setSize(450, 500);
+        setMinimumSize(new Dimension(450, 500));
         setLocationRelativeTo(parent);
         getContentPane().setLayout(new BorderLayout());
         JPanel contentPanel = new JPanel();
@@ -66,7 +67,7 @@ public class SettingsDialog extends JDialog {
                         builtin.setAlignmentX(Component.LEFT_ALIGNMENT);
                         fftThemePanel.add(rdbtnServerprovidedConfiguration);
                         fftThemePanel.add(builtin);
-                        builtin.setLayout(new GridLayout(0, 3, 0, 0));
+                        builtin.setLayout(new FlowLayout(FlowLayout.LEFT, 0, 5));
                         builtin.add(rdbtnBuiltin);
                         for (BuiltinWaterfallTheme theme : BuiltinWaterfallTheme.values()) themesBox.addItem(theme);
                         builtin.add(themesBox);
