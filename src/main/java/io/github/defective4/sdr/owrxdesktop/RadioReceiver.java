@@ -23,19 +23,24 @@ import io.github.defective4.sdr.owrxdesktop.ui.ReceiverWindow;
 import io.github.defective4.sdr.owrxdesktop.ui.component.FFTLabel;
 import io.github.defective4.sdr.owrxdesktop.ui.component.FFTLabel.Type;
 import io.github.defective4.sdr.owrxdesktop.ui.event.UserInteractionListener;
+import io.github.defective4.sdr.owrxdesktop.ui.settings.ReceiverUserSettings;
+import io.github.defective4.sdr.owrxdesktop.ui.settings.waterfall.WaterfallThemeMode;
 
 public class RadioReceiver {
 
+    protected Color[] waterfallTheme = { Color.black, Color.white };
     private final AudioSinkManager audioSinkManager;
     private final OpenWebRXClient client;
-    private final ReceiverWindow rxWindow;
 
+    private final ReceiverWindow rxWindow;
+    private ReceiverUserSettings settings;
     private final URI uri;
 
-    public RadioReceiver(URI uri) throws LineUnavailableException {
+    public RadioReceiver(URI uri, ReceiverUserSettings settings) throws LineUnavailableException {
+        this.settings = settings;
         audioSinkManager = new AudioSinkManager();
         this.uri = uri;
-        rxWindow = new ReceiverWindow();
+        rxWindow = new ReceiverWindow(settings);
         client = prepareClient();
         rxWindow.addListener(new UserInteractionListener() {
             @Override
@@ -59,6 +64,19 @@ public class RadioReceiver {
             }
 
             @Override
+            public void settingsChanged(ReceiverUserSettings settings) {
+                RadioReceiver.this.settings = settings;
+                Color[] theme = switch (settings.getWaterfallThemeMode()) {
+                    default -> waterfallTheme;
+                    case BUILTIN ->
+                        ReceiverUserSettings.getTheme(settings.getSelectedBuiltinWaterfallTheme().getReference())
+                                .orElse(waterfallTheme);
+                    case CUSTOM -> settings.getWaterfallCustomTheme().stream().map(Color::decode).toArray(Color[]::new);
+                };
+                rxWindow.setWaterfallTheme(theme);
+            }
+
+            @Override
             public void tuned(int offset) {
                 client.setOffsetFrequency(offset);
             }
@@ -68,6 +86,8 @@ public class RadioReceiver {
                 audioSinkManager.setVolume(value);
             }
         });
+
+        rxWindow.getListeners().forEach(ls -> ls.settingsChanged(settings));
 
         rxWindow.addFFTPanelListener(label -> {
             int offset = label.freq() - rxWindow.getCenterFrequency();
@@ -224,7 +244,9 @@ public class RadioReceiver {
                     });
                 }
                 if (config.waterfallColors() != null) {
-                    rxWindow.setWaterfallTheme(config.mappedWaterfallColors());
+                    waterfallTheme = config.mappedWaterfallColors();
+                    if (settings.getWaterfallThemeMode() == WaterfallThemeMode.SERVER)
+                        rxWindow.setWaterfallTheme(config.mappedWaterfallColors());
                 }
 
                 if (config.waterfallLevels() != null) {
