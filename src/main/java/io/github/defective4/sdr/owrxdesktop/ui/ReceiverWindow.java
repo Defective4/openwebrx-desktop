@@ -54,6 +54,7 @@ import io.github.defective4.sdr.owrxdesktop.ui.component.WaterfallPanel;
 import io.github.defective4.sdr.owrxdesktop.ui.event.TuningAdapter;
 import io.github.defective4.sdr.owrxdesktop.ui.event.UserInteractionListener;
 import io.github.defective4.sdr.owrxdesktop.ui.rendering.ReceiverModeRenderer;
+import io.github.defective4.sdr.owrxdesktop.ui.settings.ReceiverUserSettings;
 
 public class ReceiverWindow extends JFrame {
 
@@ -100,6 +101,7 @@ public class ReceiverWindow extends JFrame {
 
     private int temperatureC = Integer.MIN_VALUE;
 
+    private final ReceiverUserSettings userSettings = new ReceiverUserSettings();
     private final WaterfallPanel waterfallPanel;
 
     public ReceiverWindow() {
@@ -136,7 +138,7 @@ public class ReceiverWindow extends JFrame {
             menuBar.add(mnWindow);
 
             JMenuItem mntmSettings = new JMenuItem("Settings...");
-            mntmSettings.addActionListener(e -> SettingsDialog.show(this));
+            mntmSettings.addActionListener(e -> SettingsDialog.show(this, userSettings));
             mntmSettings.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_O, InputEvent.CTRL_DOWN_MASK));
             mnWindow.add(mntmSettings);
         }

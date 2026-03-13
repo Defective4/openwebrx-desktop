@@ -12,7 +12,6 @@ import javax.swing.ButtonGroup;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JDialog;
-import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
@@ -20,9 +19,12 @@ import javax.swing.JTabbedPane;
 import javax.swing.JTextArea;
 import javax.swing.border.EmptyBorder;
 
+import io.github.defective4.sdr.owrxdesktop.ui.settings.ReceiverUserSettings;
+import io.github.defective4.sdr.owrxdesktop.ui.settings.waterfall.BuiltinWaterfallTheme;
+
 public class SettingsDialog extends JDialog {
 
-    private SettingsDialog(Window parent) {
+    private SettingsDialog(Window parent, ReceiverUserSettings settings) {
         super(parent);
         setTitle("Receiver settings");
         setModal(true);
@@ -56,17 +58,13 @@ public class SettingsDialog extends JDialog {
                         builtin.setLayout(new GridLayout(0, 3, 0, 0));
                         JRadioButton rdbtnBuiltin = new JRadioButton("Built-in: ");
                         builtin.add(rdbtnBuiltin);
-                        JComboBox themesBox = new JComboBox();
+                        JComboBox<BuiltinWaterfallTheme> themesBox = new JComboBox<>();
+                        for (BuiltinWaterfallTheme theme : BuiltinWaterfallTheme.values()) themesBox.addItem(theme);
                         builtin.add(themesBox);
-                        JPanel custom = new JPanel();
-                        custom.setAlignmentX(Component.LEFT_ALIGNMENT);
-                        fftThemePanel.add(custom);
-                        custom.setLayout(new BoxLayout(custom, BoxLayout.X_AXIS));
-                        JRadioButton rdbtnCustom = new JRadioButton("Custom");
-                        custom.add(rdbtnCustom);
-                        custom.add(new JLabel("(One hex color per line, each starting with #):"));
+                        JRadioButton rdbtnCustom = new JRadioButton(
+                                "Custom (One hex color per line, each starting with #):");
+                        fftThemePanel.add(rdbtnCustom);
                         JTextArea themeArea = new JTextArea();
-                        themeArea.setText("#000000\n#ffffff");
                         themeArea.setAlignmentX(Component.LEFT_ALIGNMENT);
                         fftThemePanel.add(themeArea);
 
@@ -79,6 +77,15 @@ public class SettingsDialog extends JDialog {
                             themeArea.setEnabled(rdbtnCustom.isSelected());
                             themesBox.setEnabled(rdbtnBuiltin.isSelected());
                         };
+
+                        (switch (settings.getWaterfallThemeMode()) {
+                            default -> rdbtnServerprovidedConfiguration;
+                            case CUSTOM -> rdbtnCustom;
+                            case BUILTIN -> rdbtnBuiltin;
+                        }).setSelected(true);
+
+                        themesBox.setSelectedItem(settings.getSelectedBuiltinWaterfallTheme());
+                        themeArea.setText(String.join("\n", settings.getWaterfallCustomTheme().toArray(new String[0])));
 
                         rdbtnServerprovidedConfiguration.addActionListener(ls);
                         rdbtnBuiltin.addActionListener(ls);
@@ -109,8 +116,8 @@ public class SettingsDialog extends JDialog {
         }
     }
 
-    public static void show(Window parent) {
-        SettingsDialog dialog = new SettingsDialog(parent);
+    public static void show(Window parent, ReceiverUserSettings initialSettings) {
+        SettingsDialog dialog = new SettingsDialog(parent, initialSettings);
         dialog.setVisible(true);
     }
 }
