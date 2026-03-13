@@ -5,6 +5,10 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.event.ActionListener;
+import java.awt.event.InputEvent;
+import java.awt.event.KeyEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -22,12 +26,17 @@ import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 import javax.swing.JRadioButton;
 import javax.swing.JSlider;
 import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
+import javax.swing.KeyStroke;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
@@ -61,24 +70,26 @@ public class ReceiverWindow extends JFrame {
 
     private final JComboBox<ReceiverMode> digitalBox = new JComboBox<>();
 
+    private boolean exiting;
+
     private final float fftMax = -20;
 
     private final float fftMin = -88;
-
     private final FFTPanel fftPanel;
+
     private final JRadioButton ftlAuto = new JRadioButton("Auto");
 
     private final JRadioButton ftlServer = new JRadioButton("Server");
-
     private long lastFFTDraw;
     private final List<UserInteractionListener> listeners = new CopyOnWriteArrayList<>();
+
     private int maxFPS = -1;
 
     private float minFFT, maxFFT;
-
     private final JComboBox<ReceiverProfile> profileBox = new JComboBox<>();
     private boolean profileDebounce;
     private final JButton resetScope = new JButton("Reset");
+
     private int scopeLower;
 
     private int scopeUpper;
@@ -94,12 +105,38 @@ public class ReceiverWindow extends JFrame {
     public ReceiverWindow() {
         resetAutoFFT();
         setBounds(100, 100, 768, 468);
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+        addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent e) {
+                exit();
+            }
+        });
         getContentPane().setLayout(new BoxLayout(getContentPane(), BoxLayout.Y_AXIS));
+
+        JPanel mainPanel = new JPanel();
+        mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
+
+        JMenuBar menuBar = new JMenuBar();
+        menuBar.setAlignmentX(Component.LEFT_ALIGNMENT);
+        mainPanel.add(menuBar);
+
+        {
+            JMenu mnFile = new JMenu("File");
+            menuBar.add(mnFile);
+
+            JMenuItem mntmQuit = new JMenuItem("Quit");
+            mntmQuit.addActionListener(e -> exit());
+            mntmQuit.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_Q, InputEvent.CTRL_DOWN_MASK));
+            mnFile.add(mntmQuit);
+        }
 
         JSplitPane splitPane = new JSplitPane();
         splitPane.setResizeWeight(1);
-        getContentPane().add(splitPane);
+
+        mainPanel.add(splitPane);
+
+        getContentPane().add(mainPanel);
 
         JPanel controlPanel = new JPanel();
         splitPane.setRightComponent(controlPanel);
@@ -804,6 +841,15 @@ public class ReceiverWindow extends JFrame {
         double db = (int) (log * 10d) / 10d;
         signalBar.setValue((int) (percent * 100));
         signalBar.setString(String.format("%s dB", db));
+    }
+
+    private void exit() {
+        if (exiting) return;
+        if (JOptionPane.showOptionDialog(this, "Are you sure you want to close the receiver?", "Exiting",
+                JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, null, null) == JOptionPane.YES_OPTION) {
+            exiting = true;
+            System.exit(0);
+        }
     }
 
     private void updateCPU() {
