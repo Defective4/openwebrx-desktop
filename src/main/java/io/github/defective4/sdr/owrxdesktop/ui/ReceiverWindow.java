@@ -39,7 +39,6 @@ import javax.swing.JSpinner.NumberEditor;
 import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
 import javax.swing.KeyStroke;
-import javax.swing.SpinnerNumberModel;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
@@ -52,6 +51,7 @@ import io.github.defective4.sdr.owrxdesktop.bandplan.Bandplan;
 import io.github.defective4.sdr.owrxdesktop.ui.component.FFTLabel;
 import io.github.defective4.sdr.owrxdesktop.ui.component.FFTPanel;
 import io.github.defective4.sdr.owrxdesktop.ui.component.FFTPanel.FFTPanelListener;
+import io.github.defective4.sdr.owrxdesktop.ui.component.JFrequencySpinner;
 import io.github.defective4.sdr.owrxdesktop.ui.component.TuneablePanel;
 import io.github.defective4.sdr.owrxdesktop.ui.component.WaterfallPanel;
 import io.github.defective4.sdr.owrxdesktop.ui.event.TuningAdapter;
@@ -83,7 +83,7 @@ public class ReceiverWindow extends JFrame {
 
     private final FFTPanel fftPanel;
 
-    private final JSpinner freqSpinner = new JSpinner();
+    private final JSpinner freqSpinner = new JFrequencySpinner();
     private final JRadioButton ftlAuto = new JRadioButton("Auto");
     private final JRadioButton ftlServer = new JRadioButton("Server");
 
@@ -238,12 +238,10 @@ public class ReceiverWindow extends JFrame {
                     .setBorder(new TitledBorder(null, "Frequency", TitledBorder.LEADING, TitledBorder.TOP, null, null));
             rxCtlPanel.add(freqPanel);
             freqPanel.setLayout(new BoxLayout(freqPanel, BoxLayout.X_AXIS));
-            freqSpinner
-                    .setModel(new SpinnerNumberModel(Integer.valueOf(0), Integer.valueOf(0), null, Integer.valueOf(1)));
 
             freqPanel.add(freqSpinner);
 
-            freqPanel.add(new JLabel(" Hz "));
+            freqPanel.add(new JLabel(" "));
 
             JButton goFreqBtn = new JButton("Go");
             freqPanel.add(goFreqBtn);
