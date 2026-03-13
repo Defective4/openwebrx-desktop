@@ -18,6 +18,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
+import javax.swing.JSeparator;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextArea;
 import javax.swing.border.EmptyBorder;
@@ -72,6 +73,7 @@ public class SettingsDialog extends JDialog {
                         for (BuiltinWaterfallTheme theme : BuiltinWaterfallTheme.values()) themesBox.addItem(theme);
                         builtin.add(themesBox);
                         fftThemePanel.add(rdbtnCustom);
+                        fftThemePanel.add(new JSeparator());
                         themeArea.setAlignmentX(Component.LEFT_ALIGNMENT);
                         fftThemePanel.add(themeArea);
 
@@ -139,7 +141,8 @@ public class SettingsDialog extends JDialog {
                 try {
                     Color.decode(line);
                 } catch (Exception e) {
-                    JOptionPane.showMessageDialog(this, "Some color lines in the custom theme are invalid.", "Invalid theem", JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.showMessageDialog(this, "Some color lines in the custom theme are invalid.",
+                            "Invalid theem", JOptionPane.ERROR_MESSAGE);
                     return false;
                 }
             }
