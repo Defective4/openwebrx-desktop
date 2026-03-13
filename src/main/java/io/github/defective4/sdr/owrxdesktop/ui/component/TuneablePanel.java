@@ -237,15 +237,18 @@ public abstract class TuneablePanel extends JComponent implements FFTVisualizer 
     }
 
     public void tune(int offset) {
-        tune(offset, true);
+        tune(offset, true, true);
     }
 
-    public void tune(int offset, boolean fireEvents) {
+    public void tune(int offset, boolean fireEvents, boolean snap) {
         if (!tuningReady) {
             repaint();
             return;
         }
-        this.offset = (int) Math.round(offset / (double) tuningStep) * tuningStep;
+        if (snap)
+            this.offset = (int) Math.round(offset / (double) tuningStep) * tuningStep;
+        else
+            this.offset = offset;
         int bound = bandwidth / 2;
         if (this.offset > bound) this.offset = (int) (Math.floor(bound / (double) tuningStep) * tuningStep);
         if (this.offset < -bound) this.offset = (int) (Math.ceil(-bound / (double) tuningStep) * tuningStep);

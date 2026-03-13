@@ -196,7 +196,7 @@ public class ReceiverWindow extends JFrame {
                 @Override
                 public void tuned(int offset) {
                     ReceiverWindow.this.offset = offset;
-                    fftPanel.tune(offset, false);
+                    fftPanel.tune(offset, false, false);
                     listeners.forEach(ls -> ls.tuned(offset));
                     updateFreqSpinnerValue(offset);
                 }
@@ -213,7 +213,7 @@ public class ReceiverWindow extends JFrame {
                 @Override
                 public void tuned(int offset) {
                     ReceiverWindow.this.offset = offset;
-                    waterfallPanel.tune(offset, false);
+                    waterfallPanel.tune(offset, false, false);
                     listeners.forEach(ls -> ls.tuned(offset));
                     updateFreqSpinnerValue(offset);
                 }
@@ -269,7 +269,7 @@ public class ReceiverWindow extends JFrame {
                     updateFreqSpinnerValue(this.offset);
                     return;
                 }
-                tune(offset, true);
+                tune(offset, true, false);
             });
 
             JPanel profilePanel = new JPanel();
@@ -872,9 +872,9 @@ public class ReceiverWindow extends JFrame {
         updateFreqSpinnerValue(offset);
     }
 
-    public void tune(int offset, boolean fireEvents) {
+    public void tune(int offset, boolean fireEvents, boolean snap) {
         this.offset = offset;
-        for (TuneablePanel fftPanel : getPanels()) fftPanel.tune(offset, fireEvents);
+        for (TuneablePanel fftPanel : getPanels()) fftPanel.tune(offset, fireEvents, snap);
         updateFreqSpinnerValue(offset);
     }
 

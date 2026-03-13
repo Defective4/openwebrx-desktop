@@ -223,7 +223,7 @@ public class RadioReceiver {
                 if (config.tuningStep() != null) rxWindow.setTuningStep(config.tuningStep());
                 if (config.centerFrequency() != null) rxWindow.setCenterFrequency(config.centerFrequency());
                 if (config.startOffsetFrequency() != null) {
-                    rxWindow.tune(config.startOffsetFrequency(), true);
+                    rxWindow.tune(config.startOffsetFrequency(), true, false);
                 }
                 if (config.profileId() != null) {
                     profileId = config.profileId();

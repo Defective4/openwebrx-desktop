@@ -35,8 +35,8 @@ public abstract class BandplanPanel extends TuneablePanel {
     }
 
     @Override
-    public void tune(int offset, boolean fireEvents) {
-        super.tune(offset, fireEvents);
+    public void tune(int offset, boolean fireEvents, boolean snap) {
+        super.tune(offset, fireEvents, snap);
         updateVisibleBands();
     }
 
