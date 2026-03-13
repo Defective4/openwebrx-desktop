@@ -232,9 +232,9 @@ public class ReceiverWindow extends JFrame {
             controlTabs.addTab("RX", null, rxCtlPanel, null);
             GridBagLayout gbl_rxCtlPanel = new GridBagLayout();
             gbl_rxCtlPanel.columnWidths = new int[] { 225, 0 };
-            gbl_rxCtlPanel.rowHeights = new int[] { 49, 52, 116, 52, 124, 13, 0 };
+            gbl_rxCtlPanel.rowHeights = new int[] { 0, 0, 0, 0, 0, 0 };
             gbl_rxCtlPanel.columnWeights = new double[] { 0.0, Double.MIN_VALUE };
-            gbl_rxCtlPanel.rowWeights = new double[] { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE };
+            gbl_rxCtlPanel.rowWeights = new double[] { 0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE };
             rxCtlPanel.setLayout(gbl_rxCtlPanel);
 
             JPanel freqPanel = new JPanel();
@@ -460,7 +460,6 @@ public class ReceiverWindow extends JFrame {
             levelsPanel.setBorder(new TitledBorder(null, "Levels", TitledBorder.LEADING, TitledBorder.TOP, null, null));
             GridBagConstraints gbc_levelsPanel = new GridBagConstraints();
             gbc_levelsPanel.fill = GridBagConstraints.HORIZONTAL;
-            gbc_levelsPanel.insets = new Insets(0, 0, 5, 0);
             gbc_levelsPanel.gridx = 0;
             gbc_levelsPanel.gridy = 4;
             rxCtlPanel.add(levelsPanel, gbc_levelsPanel);
@@ -485,14 +484,6 @@ public class ReceiverWindow extends JFrame {
             cpuBar.setStringPainted(true);
 
             cpuBar.setAlignmentX(Component.LEFT_ALIGNMENT);
-
-            JPanel filler = new JPanel();
-            filler.setAlignmentX(Component.LEFT_ALIGNMENT);
-            GridBagConstraints gbc_filler = new GridBagConstraints();
-            gbc_filler.fill = GridBagConstraints.HORIZONTAL;
-            gbc_filler.gridx = 0;
-            gbc_filler.gridy = 5;
-            rxCtlPanel.add(filler, gbc_filler);
         }
 
         {
@@ -500,9 +491,9 @@ public class ReceiverWindow extends JFrame {
             controlTabs.addTab("FFT", null, fftCtlPanel, null);
             GridBagLayout gbl_fftCtlPanel = new GridBagLayout();
             gbl_fftCtlPanel.columnWidths = new int[] { 230, 0 };
-            gbl_fftCtlPanel.rowHeights = new int[] { 152, 148, 71, 61, 25, 0 };
+            gbl_fftCtlPanel.rowHeights = new int[] { 0, 0, 0, 0 };
             gbl_fftCtlPanel.columnWeights = new double[] { 0.0, Double.MIN_VALUE };
-            gbl_fftCtlPanel.rowWeights = new double[] { 0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE };
+            gbl_fftCtlPanel.rowWeights = new double[] { 0.0, 0.0, 0.0, Double.MIN_VALUE };
             fftCtlPanel.setLayout(gbl_fftCtlPanel);
 
             JPanel featPanel = new JPanel();
@@ -671,55 +662,6 @@ public class ReceiverWindow extends JFrame {
                 }
             });
 
-            JPanel stylePanel = new JPanel();
-            compactPanel(stylePanel);
-            FlowLayout flowLayout_1 = (FlowLayout) stylePanel.getLayout();
-            flowLayout_1.setAlignment(FlowLayout.LEFT);
-            stylePanel.setAlignmentX(Component.LEFT_ALIGNMENT);
-            stylePanel.setBorder(new TitledBorder(null, "Style", TitledBorder.LEADING, TitledBorder.TOP, null, null));
-            GridBagConstraints gbc_stylePanel = new GridBagConstraints();
-            gbc_stylePanel.fill = GridBagConstraints.HORIZONTAL;
-            gbc_stylePanel.insets = new Insets(0, 0, 5, 0);
-            gbc_stylePanel.gridx = 0;
-            gbc_stylePanel.gridy = 2;
-            fftCtlPanel.add(stylePanel, gbc_stylePanel);
-
-            JCheckBox solidCheck = new JCheckBox("Solid");
-            stylePanel.add(solidCheck);
-            JCheckBox colorMixingCheck = new JCheckBox("Dynamic color mixing");
-            colorMixingCheck.setSelected(true);
-            stylePanel.add(colorMixingCheck);
-            confirmComponentState(solidCheck);
-            confirmComponentState(colorMixingCheck);
-
-            colorMixingCheck.addActionListener(e -> waterfallPanel.setColorMixing(colorMixingCheck.isSelected()));
-            solidCheck.addActionListener(e -> fftPanel.setSolid(solidCheck.isSelected()));
-
-            JPanel labelsPanel = new JPanel();
-            compactPanel(labelsPanel);
-            labelsPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
-            labelsPanel.setBorder(new TitledBorder(null, "Labels", TitledBorder.LEADING, TitledBorder.TOP, null, null));
-            GridBagConstraints gbc_labelsPanel = new GridBagConstraints();
-            gbc_labelsPanel.fill = GridBagConstraints.HORIZONTAL;
-            gbc_labelsPanel.insets = new Insets(0, 0, 5, 0);
-            gbc_labelsPanel.gridx = 0;
-            gbc_labelsPanel.gridy = 3;
-            fftCtlPanel.add(labelsPanel, gbc_labelsPanel);
-            labelsPanel.setLayout(new FlowLayout(FlowLayout.LEFT, 0, 0));
-
-            JCheckBox dialCheck = new JCheckBox("Dial frequencies");
-            dialCheck.addActionListener(e -> fftPanel.setLabelRender(FFTLabel.Type.DIAL, dialCheck.isSelected()));
-            dialCheck.setSelected(true);
-            labelsPanel.add(dialCheck);
-
-            confirmComponentState(dialCheck);
-
-            JCheckBox bookmarksCheck = new JCheckBox("Bookmarks");
-            bookmarksCheck.addActionListener(
-                    e -> fftPanel.setLabelRender(FFTLabel.Type.BOOKMARK, bookmarksCheck.isSelected()));
-            bookmarksCheck.setSelected(true);
-            labelsPanel.add(bookmarksCheck);
-
             ActionListener ftlListener = e -> {
                 minSlider.setEnabled(ftlManual.isSelected());
                 maxSlider.setEnabled(ftlManual.isSelected());
@@ -742,6 +684,30 @@ public class ReceiverWindow extends JFrame {
 
             confirmComponentState(minSlider);
             confirmComponentState(maxSlider);
+
+            JPanel labelsPanel = new JPanel();
+            compactPanel(labelsPanel);
+            labelsPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
+            labelsPanel.setBorder(new TitledBorder(null, "Labels", TitledBorder.LEADING, TitledBorder.TOP, null, null));
+            GridBagConstraints gbc_labelsPanel = new GridBagConstraints();
+            gbc_labelsPanel.fill = GridBagConstraints.HORIZONTAL;
+            gbc_labelsPanel.gridx = 0;
+            gbc_labelsPanel.gridy = 2;
+            fftCtlPanel.add(labelsPanel, gbc_labelsPanel);
+            labelsPanel.setLayout(new FlowLayout(FlowLayout.LEFT, 0, 0));
+
+            JCheckBox dialCheck = new JCheckBox("Dial frequencies");
+            dialCheck.addActionListener(e -> fftPanel.setLabelRender(FFTLabel.Type.DIAL, dialCheck.isSelected()));
+            dialCheck.setSelected(true);
+            labelsPanel.add(dialCheck);
+
+            confirmComponentState(dialCheck);
+
+            JCheckBox bookmarksCheck = new JCheckBox("Bookmarks");
+            bookmarksCheck.addActionListener(
+                    e -> fftPanel.setLabelRender(FFTLabel.Type.BOOKMARK, bookmarksCheck.isSelected()));
+            bookmarksCheck.setSelected(true);
+            labelsPanel.add(bookmarksCheck);
         }
 
         {
@@ -749,45 +715,44 @@ public class ReceiverWindow extends JFrame {
             JPanel audioCtlPanel = new JPanel();
             controlTabs.addTab("Audio", null, audioCtlPanel, null);
             GridBagLayout gbl_audioCtlPanel = new GridBagLayout();
-            gbl_audioCtlPanel.columnWidths = new int[]{0, 0};
-            gbl_audioCtlPanel.rowHeights = new int[]{85, 376, 0};
-            gbl_audioCtlPanel.columnWeights = new double[]{0.0, Double.MIN_VALUE};
-            gbl_audioCtlPanel.rowWeights = new double[]{0.0, 0.0, Double.MIN_VALUE};
+            gbl_audioCtlPanel.columnWidths = new int[] { 0, 0 };
+            gbl_audioCtlPanel.rowHeights = new int[] { 0, 0 };
+            gbl_audioCtlPanel.columnWeights = new double[] { 0.0, Double.MIN_VALUE };
+            gbl_audioCtlPanel.rowWeights = new double[] { 0.0, Double.MIN_VALUE };
             audioCtlPanel.setLayout(gbl_audioCtlPanel);
 
-                                    JPanel audioPanel = new JPanel();
-                                    GridBagConstraints gbc_audioPanel = new GridBagConstraints();
-                                    gbc_audioPanel.fill = GridBagConstraints.HORIZONTAL;
-                                    gbc_audioPanel.insets = new Insets(0, 0, 5, 0);
-                                    gbc_audioPanel.gridx = 0;
-                                    gbc_audioPanel.gridy = 0;
-                                    audioCtlPanel.add(audioPanel, gbc_audioPanel);
-                                    audioPanel.setBorder(new TitledBorder(null, "Audio", TitledBorder.LEADING, TitledBorder.TOP, null, null));
-                                    audioPanel.setLayout(new BoxLayout(audioPanel, BoxLayout.Y_AXIS));
+            JPanel audioPanel = new JPanel();
+            GridBagConstraints gbc_audioPanel = new GridBagConstraints();
+            gbc_audioPanel.fill = GridBagConstraints.HORIZONTAL;
+            gbc_audioPanel.gridx = 0;
+            gbc_audioPanel.gridy = 0;
+            audioCtlPanel.add(audioPanel, gbc_audioPanel);
+            audioPanel.setBorder(new TitledBorder(null, "Audio", TitledBorder.LEADING, TitledBorder.TOP, null, null));
+            audioPanel.setLayout(new BoxLayout(audioPanel, BoxLayout.Y_AXIS));
 
-                                                audioPanel.add(new JLabel("Volume"));
+            audioPanel.add(new JLabel("Volume"));
 
-                                                            JSlider volumeSlider = new JSlider();
-                                                            volumeSlider.setLabelTable(volumeSlider.createStandardLabels(100));
-                                                            volumeSlider.setPaintLabels(true);
-                                                            volumeSlider.setAlignmentX(Component.LEFT_ALIGNMENT);
-                                                            volumeSlider.setMinimum(0);
-                                                            volumeSlider.setMaximum(100);
-                                                            volumeSlider.setValue(100);
-                                                            audioPanel.add(volumeSlider);
+            JSlider volumeSlider = new JSlider();
+            volumeSlider.setLabelTable(volumeSlider.createStandardLabels(100));
+            volumeSlider.setPaintLabels(true);
+            volumeSlider.setAlignmentX(Component.LEFT_ALIGNMENT);
+            volumeSlider.setMinimum(0);
+            volumeSlider.setMaximum(100);
+            volumeSlider.setValue(100);
+            audioPanel.add(volumeSlider);
 
-                                                                        JCheckBox muteCheck = new JCheckBox("Mute");
-                                                                        audioPanel.add(muteCheck);
-                                                                        muteCheck.addActionListener(e -> {
-                                                                            boolean muted = muteCheck.isSelected();
-                                                                            volumeSlider.setEnabled(!muted);
-                                                                            listeners.forEach(ls -> ls.muteToggled(muted));
-                                                                        });
+            JCheckBox muteCheck = new JCheckBox("Mute");
+            audioPanel.add(muteCheck);
+            muteCheck.addActionListener(e -> {
+                boolean muted = muteCheck.isSelected();
+                volumeSlider.setEnabled(!muted);
+                listeners.forEach(ls -> ls.muteToggled(muted));
+            });
 
-                                                                                    volumeSlider
-                                                                                            .addChangeListener(e -> listeners.forEach(ls -> ls.volumeChanged(volumeSlider.getValue() / 100f)));
+            volumeSlider
+                    .addChangeListener(e -> listeners.forEach(ls -> ls.volumeChanged(volumeSlider.getValue() / 100f)));
 
-                                                                                                confirmComponentState(muteCheck);
+            confirmComponentState(muteCheck);
         }
     }
 
@@ -889,6 +854,10 @@ public class ReceiverWindow extends JFrame {
     public void setClients(int clients) {
         clientsBar.setValue(clients);
         clientsBar.setString(clientsBar.getValue() + "/" + clientsBar.getMaximum());
+    }
+
+    public void setColorMixing(boolean colorMixing) {
+        waterfallPanel.setColorMixing(colorMixing);
     }
 
     public void setCPUUsage(float cpuUsage) {

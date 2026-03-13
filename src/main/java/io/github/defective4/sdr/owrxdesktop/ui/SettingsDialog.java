@@ -36,6 +36,7 @@ import io.github.defective4.sdr.owrxdesktop.ui.settings.waterfall.WaterfallTheme
 
 public class SettingsDialog extends JDialog {
 
+    private final JCheckBox dynamicColorMixingCheck = new JCheckBox("Dynamic color mixing");
     private final JCheckBox freeTuningCheck = new JCheckBox("Enable free tuning");
     private final JPasswordField magicKeyField = new JPasswordField();
     private final JRadioButton rdbtnBuiltin = new JRadioButton("Built-in: ");
@@ -65,6 +66,7 @@ public class SettingsDialog extends JDialog {
                 tabbedPane.addTab("Receiver", null, rxTabs, null);
                 {
                     JPanel mainPanel = new JPanel();
+                    mainPanel.setBorder(new EmptyBorder(16, 8, 0, 8));
                     rxTabs.addTab("Main", null, mainPanel, null);
                     GridBagLayout gbl_mainPanel = new GridBagLayout();
                     gbl_mainPanel.columnWidths = new int[] { 0, 0 };
@@ -133,44 +135,117 @@ public class SettingsDialog extends JDialog {
                     fftTabs.addTab("Waterfall theme", null, scrollPane, null);
                     {
                         JPanel fftThemePanel = new JPanel();
-                        fftThemePanel.setBorder(new EmptyBorder(0, 8, 8, 8));
+                        fftThemePanel.setBorder(new EmptyBorder(16, 8, 8, 8));
                         scrollPane.setViewportView(fftThemePanel);
-                        fftThemePanel.setLayout(new BoxLayout(fftThemePanel, BoxLayout.Y_AXIS));
+                        GridBagLayout gbl_fftThemePanel = new GridBagLayout();
+                        gbl_fftThemePanel.columnWidths = new int[] { 412, 0 };
+                        gbl_fftThemePanel.rowHeights = new int[] { 0, 0, 0, 3, 0, 0 };
+                        gbl_fftThemePanel.columnWeights = new double[] { 0.0, Double.MIN_VALUE };
+                        gbl_fftThemePanel.rowWeights = new double[] { 0.0, 0.0, 0.0, 0.0, 1.0, Double.MIN_VALUE };
+                        fftThemePanel.setLayout(gbl_fftThemePanel);
+                        GridBagConstraints gbc_rdbtnServerprovidedConfiguration = new GridBagConstraints();
+                        gbc_rdbtnServerprovidedConfiguration.fill = GridBagConstraints.HORIZONTAL;
+                        gbc_rdbtnServerprovidedConfiguration.insets = new Insets(0, 0, 5, 0);
+                        gbc_rdbtnServerprovidedConfiguration.gridx = 0;
+                        gbc_rdbtnServerprovidedConfiguration.gridy = 0;
+                        fftThemePanel.add(rdbtnServerprovidedConfiguration, gbc_rdbtnServerprovidedConfiguration);
                         JPanel builtin = new JPanel();
                         builtin.setAlignmentX(Component.LEFT_ALIGNMENT);
-                        fftThemePanel.add(rdbtnServerprovidedConfiguration);
-                        fftThemePanel.add(builtin);
+                        GridBagConstraints gbc_builtin = new GridBagConstraints();
+                        gbc_builtin.fill = GridBagConstraints.HORIZONTAL;
+                        gbc_builtin.insets = new Insets(0, 0, 5, 0);
+                        gbc_builtin.gridx = 0;
+                        gbc_builtin.gridy = 1;
+                        fftThemePanel.add(builtin, gbc_builtin);
                         builtin.setLayout(new FlowLayout(FlowLayout.LEFT, 0, 5));
                         builtin.add(rdbtnBuiltin);
-                        for (BuiltinWaterfallTheme theme : BuiltinWaterfallTheme.values()) themesBox.addItem(theme);
                         builtin.add(themesBox);
-                        fftThemePanel.add(rdbtnCustom);
-                        fftThemePanel.add(new JSeparator());
+
+                        themesBox.setSelectedItem(settings.getSelectedBuiltinWaterfallTheme());
+                        GridBagConstraints gbc_rdbtnCustom = new GridBagConstraints();
+                        gbc_rdbtnCustom.fill = GridBagConstraints.HORIZONTAL;
+                        gbc_rdbtnCustom.insets = new Insets(0, 0, 5, 0);
+                        gbc_rdbtnCustom.gridx = 0;
+                        gbc_rdbtnCustom.gridy = 2;
+                        fftThemePanel.add(rdbtnCustom, gbc_rdbtnCustom);
+                        GridBagConstraints gbc = new GridBagConstraints();
+                        gbc.fill = GridBagConstraints.HORIZONTAL;
+                        gbc.insets = new Insets(0, 0, 5, 0);
+                        gbc.gridx = 0;
+                        gbc.gridy = 3;
+                        JSeparator separator = new JSeparator();
+                        fftThemePanel.add(separator, gbc);
                         themeArea.setAlignmentX(Component.LEFT_ALIGNMENT);
-                        fftThemePanel.add(themeArea);
+                        GridBagConstraints gbc_themeArea = new GridBagConstraints();
+                        gbc_themeArea.fill = GridBagConstraints.BOTH;
+                        gbc_themeArea.gridx = 0;
+                        gbc_themeArea.gridy = 4;
+                        fftThemePanel.add(themeArea, gbc_themeArea);
+                        themeArea.setText(String.join("\n", settings.getWaterfallCustomTheme().toArray(new String[0])));
+                        for (BuiltinWaterfallTheme theme : BuiltinWaterfallTheme.values()) themesBox.addItem(theme);
 
                         ButtonGroup themeGroup = new ButtonGroup();
-                        themeGroup.add(rdbtnServerprovidedConfiguration);
-                        themeGroup.add(rdbtnBuiltin);
-                        themeGroup.add(rdbtnCustom);
 
                         ActionListener ls = e -> {
                             themeArea.setEnabled(rdbtnCustom.isSelected());
                             themesBox.setEnabled(rdbtnBuiltin.isSelected());
                         };
+                        themeGroup.add(rdbtnCustom);
+                        rdbtnCustom.addActionListener(ls);
+                        rdbtnBuiltin.addActionListener(ls);
+                        themeGroup.add(rdbtnBuiltin);
+                        themeGroup.add(rdbtnServerprovidedConfiguration);
+                        {
+                            JPanel panel = new JPanel();
+                            panel.setBorder(new EmptyBorder(16, 16, 0, 16));
+                            fftTabs.addTab("Style", null, panel, null);
+                            GridBagLayout gbl_panel = new GridBagLayout();
+                            gbl_panel.columnWidths = new int[] { 0, 0 };
+                            gbl_panel.rowHeights = new int[] { 0, 0, 0, 0 };
+                            gbl_panel.columnWeights = new double[] { 1.0, Double.MIN_VALUE };
+                            gbl_panel.rowWeights = new double[] { 0.0, 0.0, 0.0, Double.MIN_VALUE };
+                            panel.setLayout(gbl_panel);
+                            {
+                                dynamicColorMixingCheck.setSelected(settings.isDynamicColorMixing());
+                                GridBagConstraints gbc_chckbxDynamicColorMixing = new GridBagConstraints();
+                                gbc_chckbxDynamicColorMixing.fill = GridBagConstraints.HORIZONTAL;
+                                gbc_chckbxDynamicColorMixing.insets = new Insets(0, 0, 5, 0);
+                                gbc_chckbxDynamicColorMixing.gridx = 0;
+                                gbc_chckbxDynamicColorMixing.gridy = 0;
+                                panel.add(dynamicColorMixingCheck, gbc_chckbxDynamicColorMixing);
+                            }
+                            {
+                                JTextArea dynamicColorsText = new JTextArea();
+                                dynamicColorsText.setEnabled(false);
+                                dynamicColorsText.setEditable(false);
+                                dynamicColorsText.setWrapStyleWord(true);
+                                dynamicColorsText.setLineWrap(true);
+                                dynamicColorsText.setText(
+                                        "This option enables color mixing, making the waterfall image smoother, especially when using themes with few colors");
+                                GridBagConstraints gbc_txtrThisOptionEnables = new GridBagConstraints();
+                                gbc_txtrThisOptionEnables.insets = new Insets(0, 0, 5, 0);
+                                gbc_txtrThisOptionEnables.anchor = GridBagConstraints.NORTH;
+                                gbc_txtrThisOptionEnables.fill = GridBagConstraints.HORIZONTAL;
+                                gbc_txtrThisOptionEnables.gridx = 0;
+                                gbc_txtrThisOptionEnables.gridy = 1;
+                                panel.add(dynamicColorsText, gbc_txtrThisOptionEnables);
+                            }
+                            {
+                                JSeparator separator_1 = new JSeparator();
+                                GridBagConstraints gbc_separator_1 = new GridBagConstraints();
+                                gbc_separator_1.fill = GridBagConstraints.HORIZONTAL;
+                                gbc_separator_1.gridx = 0;
+                                gbc_separator_1.gridy = 2;
+                                panel.add(separator_1, gbc_separator_1);
+                            }
+                        }
+                        rdbtnServerprovidedConfiguration.addActionListener(ls);
 
                         (switch (settings.getWaterfallThemeMode()) {
                             default -> rdbtnServerprovidedConfiguration;
                             case CUSTOM -> rdbtnCustom;
                             case BUILTIN -> rdbtnBuiltin;
                         }).setSelected(true);
-
-                        themesBox.setSelectedItem(settings.getSelectedBuiltinWaterfallTheme());
-                        themeArea.setText(String.join("\n", settings.getWaterfallCustomTheme().toArray(new String[0])));
-
-                        rdbtnServerprovidedConfiguration.addActionListener(ls);
-                        rdbtnBuiltin.addActionListener(ls);
-                        rdbtnCustom.addActionListener(ls);
 
                         ls.actionPerformed(null);
                     }
@@ -196,6 +271,7 @@ public class SettingsDialog extends JDialog {
                     settings.setWaterfallThemeMode(mode);
                     settings.setMagicKey(new String(magicKeyField.getPassword()));
                     settings.setEnableFreeTuning(freeTuningCheck.isSelected());
+                    settings.setDynamicColorMixing(dynamicColorMixingCheck.isSelected());
                     dispose();
                 });
                 buttonPane.add(okButton);

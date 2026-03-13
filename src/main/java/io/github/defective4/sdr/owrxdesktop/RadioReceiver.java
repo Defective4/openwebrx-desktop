@@ -78,6 +78,7 @@ public class RadioReceiver {
                     case CUSTOM -> settings.getWaterfallCustomTheme().stream().map(Color::decode).toArray(Color[]::new);
                 };
                 rxWindow.setWaterfallTheme(theme);
+                rxWindow.setColorMixing(settings.isDynamicColorMixing());
             }
 
             @Override

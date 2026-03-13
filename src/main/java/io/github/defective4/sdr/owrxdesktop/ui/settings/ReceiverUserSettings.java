@@ -38,11 +38,13 @@ public class ReceiverUserSettings {
         }
     }
 
+    private boolean dynamicColorMixing = true;
     private boolean enableFreeTuning;
-    private String magicKey;
 
+    private String magicKey;
     private BuiltinWaterfallTheme selectedBuiltinWaterfallTheme = BuiltinWaterfallTheme.TURBO;
     private List<String> waterfallCustomTheme = List.of("#000000", "#ffffff");
+
     private WaterfallThemeMode waterfallThemeMode = WaterfallThemeMode.SERVER;
 
     public ReceiverUserSettings() {
@@ -65,8 +67,16 @@ public class ReceiverUserSettings {
         return waterfallThemeMode;
     }
 
+    public boolean isDynamicColorMixing() {
+        return dynamicColorMixing;
+    }
+
     public boolean isEnableFreeTuning() {
         return enableFreeTuning;
+    }
+
+    public void setDynamicColorMixing(boolean dynamicColorMixing) {
+        this.dynamicColorMixing = dynamicColorMixing;
     }
 
     public void setEnableFreeTuning(boolean enableFreeTuning) {
