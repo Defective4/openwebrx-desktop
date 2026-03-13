@@ -69,7 +69,13 @@ public class FFTPanel extends BandplanPanel {
             @Override
             public void mouseMoved(MouseEvent e) {
                 FFTLabel label = getLabelAt(e.getX(), e.getY());
-                setCursor(label == null ? def : pointer);
+                if (label != null) {
+                    setDrawFrequencyLabel(false);
+                    setCursor(pointer);
+                } else {
+                    setDrawFrequencyLabel(true);
+                    setCursor(def);
+                }
             }
 
             @Override

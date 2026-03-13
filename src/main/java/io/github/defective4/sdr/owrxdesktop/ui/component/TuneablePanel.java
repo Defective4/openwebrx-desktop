@@ -35,8 +35,9 @@ public abstract class TuneablePanel extends JComponent implements FFTVisualizer 
     protected boolean tuningReady;
 
     protected int tuningStep = (int) 1e3f;
-    private final List<TuningListener> listeners = new CopyOnWriteArrayList<>();
+    private boolean drawFrequencyLabel = true;
 
+    private final List<TuningListener> listeners = new CopyOnWriteArrayList<>();
     private boolean symmetricalScope = false;
 
     public TuneablePanel() {
@@ -181,6 +182,10 @@ public abstract class TuneablePanel extends JComponent implements FFTVisualizer 
         return tuningStep;
     }
 
+    public boolean isDrawFrequencyLabel() {
+        return drawFrequencyLabel;
+    }
+
     public boolean isSymmetricalScope() {
         return symmetricalScope;
     }
@@ -201,6 +206,10 @@ public abstract class TuneablePanel extends JComponent implements FFTVisualizer 
     public void setCenterFrequency(int centerFrequency) {
         this.centerFrequency = centerFrequency;
         repaint();
+    }
+
+    public void setDrawFrequencyLabel(boolean drawFrequencyLabel) {
+        this.drawFrequencyLabel = drawFrequencyLabel;
     }
 
     public void setScopeLower(int scopeLower) {
@@ -276,10 +285,12 @@ public abstract class TuneablePanel extends JComponent implements FFTVisualizer 
                 g2.drawLine(x, 0, x, getLineHeight());
             }
 
-            g2.setColor(TEXT_COLOR);
-            if (mouseX != -1 && mouseY != -1 && (!drawScope || !mouseDown) && mouseY < getLineHeight()) {
-                String freq = getDisplayFrequencyAt(mouseX, 100, true);
-                g2.drawString(freq, mouseX + 5, mouseY - 5);
+            if (drawFrequencyLabel) {
+                g2.setColor(TEXT_COLOR);
+                if (mouseX != -1 && mouseY != -1 && (!drawScope || !mouseDown) && mouseY < getLineHeight()) {
+                    String freq = getDisplayFrequencyAt(mouseX, 100, true);
+                    g2.drawString(freq, mouseX + 5, mouseY - 5);
+                }
             }
         }
     }
