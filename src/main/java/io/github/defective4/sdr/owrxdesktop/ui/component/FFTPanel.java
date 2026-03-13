@@ -14,11 +14,10 @@ import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
+import java.util.Deque;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -32,11 +31,14 @@ public class FFTPanel extends BandplanPanel {
         void labelClicked(FFTLabel label);
     }
 
+    private static record LabelSpace(Rectangle rect, FFTLabel label) {
+    }
     private static final Color FFT_COLOR = Color.white;
     private static final Color FFT_MAX_COLOR = Color.yellow;
     private static final Color FREQ_BAR = Color.decode("#282525");
     private static final Color LINE = Color.decode("#3F3B3B");
     private static final Color LINE_CENTER = Color.white;
+
     private boolean drawMaxValues;
 
     private float[] fft = new float[0];
@@ -44,20 +46,21 @@ public class FFTPanel extends BandplanPanel {
     private final Object fftLock = new Object();
 
     private float fftMax = -20;
-
     private float fftMin = -88;
     private int fftOffset;
     private float[] fftValuesMax = new float[0];
     private final Object fftValuesMaxLock = new Object();
+
     private final Set<FFTLabel.Type> labelRenderMode = new HashSet<>(Set.of(FFTLabel.Type.values()));
 
     private final List<FFTLabel> labels = new ArrayList<>();
+    private final Deque<LabelSpace> occupied = new LinkedList<>();
 
-    private final Map<FFTLabel, Rectangle> occupied = new HashMap<>();
     private final List<FFTPanelListener> panelListeners = new CopyOnWriteArrayList<>();
 
-    private boolean showBandplan = true;
+    private FFTLabel selectedLabel;
 
+    private boolean showBandplan = true;
     private boolean solid;
 
     public FFTPanel(Bandplan bandplan) {
@@ -68,8 +71,8 @@ public class FFTPanel extends BandplanPanel {
 
             @Override
             public void mouseMoved(MouseEvent e) {
-                FFTLabel label = getLabelAt(e.getX(), e.getY());
-                if (label != null) {
+                selectedLabel = getLabelAt(e.getX(), e.getY());
+                if (selectedLabel != null) {
                     setDrawFrequencyLabel(false);
                     setCursor(pointer);
                 } else {
@@ -311,7 +314,8 @@ public class FFTPanel extends BandplanPanel {
             int to = offset + width / 2;
 
             synchronized (occupied) {
-                for (Rectangle rect : occupied.values()) {
+                for (LabelSpace lab : occupied) {
+                    Rectangle rect = lab.rect;
                     if (from < rect.x + rect.width + 16 && to > rect.x - 16) y += labelHeight * 1.5;
                     if (y > getLineHeight()) {
                         y -= labelHeight * 1.5;
@@ -321,14 +325,15 @@ public class FFTPanel extends BandplanPanel {
 
                 if (y > getLineHeight()) continue;
 
-                g2.setColor(label.color());
+                g2.setColor(label == selectedLabel ? label.activeColor() : label.inactiveColor());
                 g2.drawLine(offset, y, offset, getLineHeight());
                 g2.drawLine(from, y, to, y);
 
                 int ty = y - labelHeight / 8;
 
                 g2.drawString(label.name(), from, ty);
-                occupied.put(label, new Rectangle(from, ty - labelHeight / 2, to - from, labelHeight));
+                occupied.addFirst(
+                        new LabelSpace(new Rectangle(from, ty - labelHeight / 2, to - from, labelHeight), label));
             }
         }
 
@@ -396,10 +401,10 @@ public class FFTPanel extends BandplanPanel {
 
     private FFTLabel getLabelAt(int x, int y) {
         synchronized (occupied) {
-            for (Entry<FFTLabel, Rectangle> entry : occupied.entrySet()) {
-                Rectangle rect = entry.getValue();
+            for (LabelSpace entry : occupied) {
+                Rectangle rect = entry.rect;
                 if (x > rect.x && x < rect.x + rect.width && y > rect.y && y < rect.y + rect.height) {
-                    return entry.getKey();
+                    return entry.label;
                 }
             }
         }
