@@ -101,7 +101,7 @@ public class ReceiverWindow extends JFrame {
 
     private int temperatureC = Integer.MIN_VALUE;
 
-    private final ReceiverUserSettings userSettings = new ReceiverUserSettings();
+    private ReceiverUserSettings userSettings = new ReceiverUserSettings();
     private final WaterfallPanel waterfallPanel;
 
     public ReceiverWindow() {
@@ -138,7 +138,10 @@ public class ReceiverWindow extends JFrame {
             menuBar.add(mnWindow);
 
             JMenuItem mntmSettings = new JMenuItem("Settings...");
-            mntmSettings.addActionListener(e -> SettingsDialog.show(this, userSettings));
+            mntmSettings.addActionListener(e -> {
+                ReceiverUserSettings settings = SettingsDialog.show(this, userSettings);
+                if (settings != null) userSettings = settings;
+            });
             mntmSettings.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_O, InputEvent.CTRL_DOWN_MASK));
             mnWindow.add(mntmSettings);
         }

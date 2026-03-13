@@ -4,11 +4,11 @@ import java.awt.Color;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.Set;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -20,15 +20,10 @@ import io.github.defective4.sdr.owrxdesktop.ui.settings.waterfall.WaterfallTheme
 
 public class ReceiverUserSettings {
 
-    private BuiltinWaterfallTheme selectedBuiltinWaterfallTheme = BuiltinWaterfallTheme.TURBO;
+    private static final Map<String, Color[]> themeIndex = new HashMap<>();
 
-    private final Map<String, Color[]> themeIndex = new HashMap<>();
-
-    private Set<String> waterfallCustomTheme = Set.of("#000000", "#ffffff");
-    private WaterfallThemeMode waterfallThemeMode = WaterfallThemeMode.SERVER;
-
-    public ReceiverUserSettings() {
-        try (Reader reader = new InputStreamReader(getClass().getResourceAsStream("/themes.json"))) {
+    static {
+        try (Reader reader = new InputStreamReader(ReceiverUserSettings.class.getResourceAsStream("/themes.json"))) {
             JsonObject obj = JsonParser.parseReader(reader).getAsJsonObject();
             for (Entry<String, JsonElement> entry : obj.entrySet()) {
                 if (entry.getValue() instanceof JsonArray array) {
@@ -43,15 +38,28 @@ public class ReceiverUserSettings {
         }
     }
 
+    private BuiltinWaterfallTheme selectedBuiltinWaterfallTheme = BuiltinWaterfallTheme.TURBO;
+    private List<String> waterfallCustomTheme = List.of("#000000", "#ffffff");
+
+    private WaterfallThemeMode waterfallThemeMode = WaterfallThemeMode.SERVER;
+
+    public ReceiverUserSettings() {
+
+    }
+
+    public ReceiverUserSettings(BuiltinWaterfallTheme selectedBuiltinWaterfallTheme, List<String> waterfallCustomTheme,
+            WaterfallThemeMode waterfallThemeMode) {
+        super();
+        this.selectedBuiltinWaterfallTheme = selectedBuiltinWaterfallTheme;
+        this.waterfallCustomTheme = waterfallCustomTheme;
+        this.waterfallThemeMode = waterfallThemeMode;
+    }
+
     public BuiltinWaterfallTheme getSelectedBuiltinWaterfallTheme() {
         return selectedBuiltinWaterfallTheme;
     }
 
-    public Optional<Color[]> getTheme(String index) {
-        return Optional.ofNullable(themeIndex.get(index));
-    }
-
-    public Set<String> getWaterfallCustomTheme() {
+    public List<String> getWaterfallCustomTheme() {
         return waterfallCustomTheme;
     }
 
@@ -63,12 +71,16 @@ public class ReceiverUserSettings {
         this.selectedBuiltinWaterfallTheme = Objects.requireNonNull(selectedBuiltinWaterfallTheme);
     }
 
-    public void setWaterfallCustomTheme(Set<String> waterfallCustomTheme) {
+    public void setWaterfallCustomTheme(List<String> waterfallCustomTheme) {
         this.waterfallCustomTheme = Objects.requireNonNull(waterfallCustomTheme);
     }
 
     public void setWaterfallThemeMode(WaterfallThemeMode waterfallThemeMode) {
         this.waterfallThemeMode = Objects.requireNonNull(waterfallThemeMode);
+    }
+
+    public static Optional<Color[]> getTheme(String index) {
+        return Optional.ofNullable(themeIndex.get(index));
     }
 
 }

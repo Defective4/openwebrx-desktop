@@ -1,17 +1,20 @@
 package io.github.defective4.sdr.owrxdesktop.ui;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.FlowLayout;
 import java.awt.GridLayout;
 import java.awt.Window;
 import java.awt.event.ActionListener;
+import java.util.List;
 
 import javax.swing.BoxLayout;
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JDialog;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
@@ -21,20 +24,30 @@ import javax.swing.border.EmptyBorder;
 
 import io.github.defective4.sdr.owrxdesktop.ui.settings.ReceiverUserSettings;
 import io.github.defective4.sdr.owrxdesktop.ui.settings.waterfall.BuiltinWaterfallTheme;
+import io.github.defective4.sdr.owrxdesktop.ui.settings.waterfall.WaterfallThemeMode;
 
 public class SettingsDialog extends JDialog {
+
+    private ReceiverUserSettings newSettings;
+
+    private final JRadioButton rdbtnBuiltin = new JRadioButton("Built-in: ");
+    private final JRadioButton rdbtnCustom = new JRadioButton("Custom (One hex color per line, each starting with #):");
+    private final JRadioButton rdbtnServerprovidedConfiguration = new JRadioButton("Server-provided configuration");
+    private final JTextArea themeArea = new JTextArea();
+    private final JComboBox<BuiltinWaterfallTheme> themesBox = new JComboBox<>();
 
     private SettingsDialog(Window parent, ReceiverUserSettings settings) {
         super(parent);
         setTitle("Receiver settings");
         setModal(true);
-        setSize(450, 300);
+        setSize(450, 500);
         setLocationRelativeTo(parent);
         getContentPane().setLayout(new BorderLayout());
         JPanel contentPanel = new JPanel();
         contentPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
         getContentPane().add(contentPanel, BorderLayout.CENTER);
         contentPanel.setLayout(new BoxLayout(contentPanel, BoxLayout.X_AXIS));
+
         {
             JTabbedPane tabbedPane = new JTabbedPane(JTabbedPane.TOP);
             contentPanel.add(tabbedPane);
@@ -49,22 +62,15 @@ public class SettingsDialog extends JDialog {
                         fftThemePanel.setBorder(new EmptyBorder(0, 8, 8, 8));
                         scrollPane.setViewportView(fftThemePanel);
                         fftThemePanel.setLayout(new BoxLayout(fftThemePanel, BoxLayout.Y_AXIS));
-                        JRadioButton rdbtnServerprovidedConfiguration = new JRadioButton(
-                                "Server-provided configuration");
-                        fftThemePanel.add(rdbtnServerprovidedConfiguration);
                         JPanel builtin = new JPanel();
                         builtin.setAlignmentX(Component.LEFT_ALIGNMENT);
+                        fftThemePanel.add(rdbtnServerprovidedConfiguration);
                         fftThemePanel.add(builtin);
                         builtin.setLayout(new GridLayout(0, 3, 0, 0));
-                        JRadioButton rdbtnBuiltin = new JRadioButton("Built-in: ");
                         builtin.add(rdbtnBuiltin);
-                        JComboBox<BuiltinWaterfallTheme> themesBox = new JComboBox<>();
                         for (BuiltinWaterfallTheme theme : BuiltinWaterfallTheme.values()) themesBox.addItem(theme);
                         builtin.add(themesBox);
-                        JRadioButton rdbtnCustom = new JRadioButton(
-                                "Custom (One hex color per line, each starting with #):");
                         fftThemePanel.add(rdbtnCustom);
-                        JTextArea themeArea = new JTextArea();
                         themeArea.setAlignmentX(Component.LEFT_ALIGNMENT);
                         fftThemePanel.add(themeArea);
 
@@ -103,7 +109,17 @@ public class SettingsDialog extends JDialog {
             {
                 JButton okButton = new JButton("Save");
                 okButton.setActionCommand("OK");
-                okButton.addActionListener(e -> dispose());
+                okButton.addActionListener(e -> {
+                    WaterfallThemeMode mode = WaterfallThemeMode.SERVER;
+                    if (rdbtnBuiltin.isSelected()) mode = WaterfallThemeMode.BUILTIN;
+                    if (rdbtnCustom.isSelected()) mode = WaterfallThemeMode.CUSTOM;
+
+                    if (!validateSettings()) return;
+
+                    newSettings = new ReceiverUserSettings((BuiltinWaterfallTheme) themesBox.getSelectedItem(),
+                            List.of(themeArea.getText().split("\n")), mode);
+                    dispose();
+                });
                 buttonPane.add(okButton);
                 getRootPane().setDefaultButton(okButton);
             }
@@ -116,8 +132,23 @@ public class SettingsDialog extends JDialog {
         }
     }
 
-    public static void show(Window parent, ReceiverUserSettings initialSettings) {
+    private boolean validateSettings() {
+        if (rdbtnCustom.isSelected()) {
+            for (String line : themeArea.getText().split("\n")) {
+                try {
+                    Color.decode(line);
+                } catch (Exception e) {
+                    JOptionPane.showMessageDialog(this, "Some color lines in the custom theme are invalid.", "Invalid theem", JOptionPane.ERROR_MESSAGE);
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    public static ReceiverUserSettings show(Window parent, ReceiverUserSettings initialSettings) {
         SettingsDialog dialog = new SettingsDialog(parent, initialSettings);
         dialog.setVisible(true);
+        return dialog.newSettings;
     }
 }
