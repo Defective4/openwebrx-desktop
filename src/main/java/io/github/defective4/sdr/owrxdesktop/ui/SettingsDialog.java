@@ -29,8 +29,6 @@ import io.github.defective4.sdr.owrxdesktop.ui.settings.waterfall.WaterfallTheme
 
 public class SettingsDialog extends JDialog {
 
-    private ReceiverUserSettings newSettings;
-
     private final JRadioButton rdbtnBuiltin = new JRadioButton("Built-in: ");
     private final JRadioButton rdbtnCustom = new JRadioButton("Custom (One hex color per line, each starting with #):");
     private final JRadioButton rdbtnServerprovidedConfiguration = new JRadioButton("Server-provided configuration");
@@ -119,8 +117,9 @@ public class SettingsDialog extends JDialog {
 
                     if (!validateSettings()) return;
 
-                    newSettings = new ReceiverUserSettings((BuiltinWaterfallTheme) themesBox.getSelectedItem(),
-                            List.of(themeArea.getText().split("\n")), mode);
+                    settings.setSelectedBuiltinWaterfallTheme((BuiltinWaterfallTheme) themesBox.getSelectedItem());
+                    settings.setWaterfallCustomTheme(List.of(themeArea.getText().split("\n")));
+                    settings.setWaterfallThemeMode(mode);
                     dispose();
                 });
                 buttonPane.add(okButton);
@@ -150,9 +149,8 @@ public class SettingsDialog extends JDialog {
         return true;
     }
 
-    public static ReceiverUserSettings show(Window parent, ReceiverUserSettings initialSettings) {
+    public static void show(Window parent, ReceiverUserSettings initialSettings) {
         SettingsDialog dialog = new SettingsDialog(parent, initialSettings);
         dialog.setVisible(true);
-        return dialog.newSettings;
     }
 }

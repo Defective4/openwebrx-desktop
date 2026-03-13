@@ -33,7 +33,7 @@ public class RadioReceiver {
     private final OpenWebRXClient client;
 
     private final ReceiverWindow rxWindow;
-    private ReceiverUserSettings settings;
+    private final ReceiverUserSettings settings;
     private final URI uri;
 
     public RadioReceiver(URI uri, ReceiverUserSettings settings) throws LineUnavailableException {
@@ -64,8 +64,7 @@ public class RadioReceiver {
             }
 
             @Override
-            public void settingsChanged(ReceiverUserSettings settings) {
-                RadioReceiver.this.settings = settings;
+            public void settingsChanged() {
                 Color[] theme = switch (settings.getWaterfallThemeMode()) {
                     default -> waterfallTheme;
                     case BUILTIN ->
@@ -87,7 +86,7 @@ public class RadioReceiver {
             }
         });
 
-        rxWindow.getListeners().forEach(ls -> ls.settingsChanged(settings));
+        rxWindow.getListeners().forEach(ls -> ls.settingsChanged());
 
         rxWindow.addFFTPanelListener(label -> {
             int offset = label.freq() - rxWindow.getCenterFrequency();

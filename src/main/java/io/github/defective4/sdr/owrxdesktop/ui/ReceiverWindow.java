@@ -109,7 +109,7 @@ public class ReceiverWindow extends JFrame {
     private final JProgressBar signalBar = new JProgressBar();
     private int temperatureC = Integer.MIN_VALUE;
 
-    private ReceiverUserSettings userSettings;
+    private final ReceiverUserSettings userSettings;
 
     private final WaterfallPanel waterfallPanel;
 
@@ -859,11 +859,8 @@ public class ReceiverWindow extends JFrame {
     }
 
     public void showSettings() {
-        ReceiverUserSettings uSettings = SettingsDialog.show(this, userSettings);
-        if (uSettings != null) {
-            userSettings = uSettings;
-            listeners.forEach(ls -> ls.settingsChanged(uSettings));
-        }
+        SettingsDialog.show(this, userSettings);
+        listeners.forEach(ls -> ls.settingsChanged());
     }
 
     public void tune(int offset) {

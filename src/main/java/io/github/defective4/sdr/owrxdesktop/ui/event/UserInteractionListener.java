@@ -2,7 +2,6 @@ package io.github.defective4.sdr.owrxdesktop.ui.event;
 
 import io.github.defective4.sdr.owrxclient.model.ReceiverMode;
 import io.github.defective4.sdr.owrxclient.model.ReceiverProfile;
-import io.github.defective4.sdr.owrxdesktop.ui.settings.ReceiverUserSettings;
 
 public interface UserInteractionListener {
     void modeChanged(ReceiverMode primary, ReceiverMode underlying);
@@ -13,7 +12,7 @@ public interface UserInteractionListener {
 
     void scopeChanged(int scopeLower, int scopeUpper);
 
-    void settingsChanged(ReceiverUserSettings settings);
+    void settingsChanged();
 
     void tuned(int offset);
 
