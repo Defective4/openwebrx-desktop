@@ -259,14 +259,20 @@ public class ReceiverWindow extends JFrame {
                 int freq = (int) freqSpinner.getValue();
                 int offset = freq - centerFrequency;
                 if (Math.abs(offset) > bandwidth / 2) {
-//                    if (JOptionPane.showOptionDialog(this,
-//                            new String[] { "You are trying to tune outside of the current profile's frequency range.",
-//                                    "This requires free tuning mode to be enabled in Settings > Receiver" },
-//                            "Can't tune", JOptionPane.OK_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE, null,
-//                            new String[] { "Take me there", "Cancel" }, null) == 0) {
-//                        showSettings();
-//                    }
-                    updateFreqSpinnerValue(this.offset);
+                    if (settings.isEnableFreeTuning()) {
+                        listeners.forEach(ls -> ls.freeTune(freq));
+                        tune(0, true, false);
+                    } else {
+                        if (JOptionPane.showOptionDialog(this,
+                                new String[] {
+                                        "You are trying to tune outside of the current profile's frequency range.",
+                                        "This requires free tuning mode to be enabled in Settings > Receiver" },
+                                "Can't tune", JOptionPane.OK_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE, null,
+                                new String[] { "Take me there", "Cancel" }, null) == 0) {
+                            showSettings();
+                        }
+                        updateFreqSpinnerValue(this.offset);
+                    }
                     return;
                 }
                 tune(offset, true, false);

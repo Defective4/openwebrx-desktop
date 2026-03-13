@@ -44,6 +44,11 @@ public class RadioReceiver {
         client = prepareClient();
         rxWindow.addListener(new UserInteractionListener() {
             @Override
+            public void freeTune(int freq) {
+                client.setCenterFrequency(freq, settings.getMagicKey());
+            }
+
+            @Override
             public void modeChanged(ReceiverMode primary, ReceiverMode underlying) {
                 client.setModulation(primary, underlying);
             }

@@ -4,6 +4,8 @@ import io.github.defective4.sdr.owrxclient.model.ReceiverMode;
 import io.github.defective4.sdr.owrxclient.model.ReceiverProfile;
 
 public interface UserInteractionListener {
+    void freeTune(int freq);
+
     void modeChanged(ReceiverMode primary, ReceiverMode underlying);
 
     void muteToggled(boolean muted);
