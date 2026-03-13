@@ -77,7 +77,6 @@ public class FFTPanel extends BandplanPanel {
                     setCursor(pointer);
                 } else {
                     setDrawFrequencyLabel(true);
-                    setCursor(def);
                 }
             }
 
