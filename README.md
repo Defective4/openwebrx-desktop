@@ -1,4 +1,4 @@
-# openwebrx-desktop
+# OpenWebRX Desktop
 
 ![screen1](./img/screen1.png)
 
