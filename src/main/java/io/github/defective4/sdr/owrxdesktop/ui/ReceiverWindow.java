@@ -304,7 +304,6 @@ public class ReceiverWindow extends JFrame {
                 if (Math.abs(offset) > bandwidth / 2) {
                     if (settings.isEnableFreeTuning()) {
                         listeners.forEach(ls -> ls.freeTune(freq));
-//                        tune(0, true, false);
                     } else {
                         if (JOptionPane.showOptionDialog(this,
                                 new String[] {

@@ -74,6 +74,7 @@ public class RadioReceiver {
 
             @Override
             public void freeTune(int freq) {
+                jumpFreq = freq;
                 client.setCenterFrequency(freq, settings.getMagicKey());
             }
 
