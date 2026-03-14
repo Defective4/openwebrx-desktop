@@ -50,6 +50,7 @@ public class SettingsDialog extends JDialog {
         setTitle("Receiver settings");
         setModal(true);
         setSize(450, 500);
+        setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         setMinimumSize(new Dimension(450, 500));
         setLocationRelativeTo(parent);
         getContentPane().setLayout(new BorderLayout());

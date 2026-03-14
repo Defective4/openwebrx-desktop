@@ -21,6 +21,7 @@ import io.github.defective4.sdr.owrxclient.model.ServerConfig;
 import io.github.defective4.sdr.owrxdesktop.audio.AudioSinkManager;
 import io.github.defective4.sdr.owrxdesktop.bandplan.Bandplan;
 import io.github.defective4.sdr.owrxdesktop.cache.ReceiverCache;
+import io.github.defective4.sdr.owrxdesktop.ui.BookmarksDialog.MergedLabel;
 import io.github.defective4.sdr.owrxdesktop.ui.ReceiverWindow;
 import io.github.defective4.sdr.owrxdesktop.ui.component.FFTLabel;
 import io.github.defective4.sdr.owrxdesktop.ui.component.FFTLabel.Type;
@@ -35,17 +36,42 @@ public class RadioReceiver {
     private final ReceiverCache cache = new ReceiverCache();
 
     private final OpenWebRXClient client;
+    private int jumpFreq = -1;
+    private String jumpMode;
+    private String modulation, profileId;
+
     private final ReceiverWindow rxWindow;
     private final ReceiverUserSettings settings;
+
     private final URI uri;
 
     public RadioReceiver(URI uri, ReceiverUserSettings settings) throws LineUnavailableException {
         this.settings = settings;
         audioSinkManager = new AudioSinkManager();
         this.uri = uri;
-        rxWindow = new ReceiverWindow(settings);
+        rxWindow = new ReceiverWindow(settings, cache);
         client = prepareClient();
         rxWindow.addListener(new UserInteractionListener() {
+
+            @Override
+            public void bookmarkJumped(MergedLabel label) {
+                rxWindow.getProfileById(label.profile()).ifPresent(profile -> {
+                    FFTLabel lbl = label.label();
+                    if (profile.uuids()[1].equals(profileId)) {
+                        System.out.println(1);
+                        int offset = lbl.freq() - rxWindow.getCenterFrequency();
+                        rxWindow.tune(offset, true, false);
+                        client.getModeByName(lbl.mode()).ifPresent(m -> {
+                            client.setModulation(m);
+                        });
+                        return;
+                    }
+                    client.switchProfile(profile);
+                    jumpFreq = lbl.freq();
+                    jumpMode = lbl.mode();
+                });
+            }
+
             @Override
             public void freeTune(int freq) {
                 client.setCenterFrequency(freq, settings.getMagicKey());
@@ -127,8 +153,6 @@ public class RadioReceiver {
         OpenWebRXClient client = new OpenWebRXClient(uri);
 
         client.addListener(new OWRXAdapter() {
-
-            private String modulation, profileId;
 
             @Override
             public void bandsUpdated(Band[] bands) {
@@ -237,6 +261,13 @@ public class RadioReceiver {
                 if (config.startOffsetFrequency() != null) {
                     rxWindow.tune(config.startOffsetFrequency(), true, false);
                 }
+                if (config.startOffsetFrequency() != null && config.centerFrequency() != null) {
+                    if (jumpFreq >= 0) {
+                        int offset = jumpFreq - config.centerFrequency();
+                        jumpFreq = -1;
+                        rxWindow.tune(offset);
+                    }
+                }
                 if (config.profileId() != null) {
                     profileId = config.profileId();
                     Optional<ReceiverProfile> profile = rxWindow.getProfileById(profileId);
@@ -246,6 +277,11 @@ public class RadioReceiver {
                 }
                 if (config.startModulation() != null) {
                     modulation = config.startModulation();
+                    if (jumpMode != null) {
+                        client.getModeByName(jumpMode).ifPresent(mode -> client.setModulation(mode));
+                        modulation = jumpMode;
+                        jumpMode = null;
+                    }
                     client.getModeByName(modulation).ifPresent(mode -> {
                         Bandpass bandpass = mode.bandpass();
                         if (bandpass != null) {

@@ -11,11 +11,12 @@ import javax.swing.SpinnerNumberModel;
 
 public class JFrequencySpinner extends JSpinner {
 
-    private static final class FrequencyFormatter extends AbstractFormatter {
+    public static final class FrequencyFormatter extends AbstractFormatter {
         private int val = 0;
 
         @Override
         public Object stringToValue(String text) throws ParseException {
+            while (text.contains("  ")) text = text.replace("  ", " ");
             String[] split = text.split(" ");
             try {
                 if (split.length == 2) {
@@ -34,6 +35,7 @@ public class JFrequencySpinner extends JSpinner {
 
         @Override
         public String valueToString(Object value) throws ParseException {
+            if (!(value instanceof Integer)) throw new ParseException("value is not of type int", val);
             val = Math.max(0, (int) value);
             FrequencyUnit u = FrequencyUnit.H;
             for (FrequencyUnit unit : Arrays.stream(FrequencyUnit.values())

@@ -51,6 +51,8 @@ import io.github.defective4.sdr.owrxclient.model.ReceiverMode;
 import io.github.defective4.sdr.owrxclient.model.ReceiverProfile;
 import io.github.defective4.sdr.owrxclient.model.WaterfallLevels;
 import io.github.defective4.sdr.owrxdesktop.bandplan.Bandplan;
+import io.github.defective4.sdr.owrxdesktop.cache.ReceiverCache;
+import io.github.defective4.sdr.owrxdesktop.ui.BookmarksDialog.MergedLabel;
 import io.github.defective4.sdr.owrxdesktop.ui.component.FFTLabel;
 import io.github.defective4.sdr.owrxdesktop.ui.component.FFTPanel;
 import io.github.defective4.sdr.owrxdesktop.ui.component.FFTPanel.FFTPanelListener;
@@ -70,7 +72,9 @@ public class ReceiverWindow extends JFrame {
 
     private int bandwidth;
 
+    private final ReceiverCache cache;
     private int centerFrequency;
+
     private final JProgressBar clientsBar = new JProgressBar();
 
     private final JProgressBar cpuBar = new JProgressBar();
@@ -80,21 +84,21 @@ public class ReceiverWindow extends JFrame {
     private final JComboBox<ReceiverMode> digitalBox = new JComboBox<>();
 
     private boolean exiting;
-
     private final float fftMax = -20;
+
     private final float fftMin = -88;
 
     private final FFTPanel fftPanel;
-
     private final JSpinner freqSpinner = new JFrequencySpinner();
     private final JRadioButton ftlAuto = new JRadioButton("Auto");
+
     private final JRadioButton ftlServer = new JRadioButton("Server");
 
     private long lastFFTDraw;
-
     private final List<UserInteractionListener> listeners = new CopyOnWriteArrayList<>();
     private int maxFPS = -1;
     private float minFFT, maxFFT;
+
     private int offset;
 
     private final JComboBox<ReceiverProfile> profileBox = new JComboBox<>();
@@ -108,15 +112,14 @@ public class ReceiverWindow extends JFrame {
     private int scopeUpper;
 
     private WaterfallLevels serverLevels = new WaterfallLevels(-88, -20);
-
     private final JProgressBar signalBar = new JProgressBar();
+
     private int temperatureC = Integer.MIN_VALUE;
 
     private final ReceiverUserSettings userSettings;
-
     private final WaterfallPanel waterfallPanel;
 
-    public ReceiverWindow(ReceiverUserSettings settings) {
+    public ReceiverWindow(ReceiverUserSettings settings, ReceiverCache cache) {
         userSettings = settings;
         resetAutoFFT();
         setBounds(100, 100, 768, 550);
@@ -128,6 +131,7 @@ public class ReceiverWindow extends JFrame {
             }
         });
         getContentPane().setLayout(new BoxLayout(getContentPane(), BoxLayout.Y_AXIS));
+        this.cache = cache;
 
         JPanel mainPanel = new JPanel();
         mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
@@ -151,9 +155,19 @@ public class ReceiverWindow extends JFrame {
             menuBar.add(mnWindow);
 
             JMenuItem mntmSettings = new JMenuItem("Settings...");
-            mntmSettings.addActionListener(e -> { showSettings(); });
+            mntmSettings.addActionListener(e -> showSettings());
             mntmSettings.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_O, InputEvent.CTRL_DOWN_MASK));
             mnWindow.add(mntmSettings);
+
+            JMenuItem mntmBookmarks = new JMenuItem("Bookmarks");
+            mntmBookmarks.addActionListener(e -> {
+                MergedLabel label = BookmarksDialog.show(cache, this);
+                if (label != null) {
+                    listeners.forEach(ls -> ls.bookmarkJumped(label));
+                }
+            });
+            mntmBookmarks.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_B, InputEvent.CTRL_DOWN_MASK));
+            mnWindow.add(mntmBookmarks);
         }
 
         JSplitPane splitPane = new JSplitPane();
