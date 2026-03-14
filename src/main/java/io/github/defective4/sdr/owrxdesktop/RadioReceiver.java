@@ -36,13 +36,14 @@ public class RadioReceiver {
     private final ReceiverCache cache = new ReceiverCache();
 
     private final OpenWebRXClient client;
+    private boolean freeTuned;
     private int jumpFreq = -1;
     private String jumpMode;
+
     private String modulation, profileId;
-
     private final ReceiverWindow rxWindow;
-    private final ReceiverUserSettings settings;
 
+    private final ReceiverUserSettings settings;
     private final URI uri;
 
     public RadioReceiver(URI uri, ReceiverUserSettings settings) throws LineUnavailableException {
@@ -61,9 +62,7 @@ public class RadioReceiver {
                         System.out.println(1);
                         int offset = lbl.freq() - rxWindow.getCenterFrequency();
                         rxWindow.tune(offset, true, false);
-                        client.getModeByName(lbl.mode()).ifPresent(m -> {
-                            client.setModulation(m);
-                        });
+                        client.getModeByName(lbl.mode()).ifPresent(m -> { client.setModulation(m); });
                         return;
                     }
                     client.switchProfile(profile);
@@ -75,6 +74,7 @@ public class RadioReceiver {
             @Override
             public void freeTune(int freq) {
                 jumpFreq = freq;
+                freeTuned = true;
                 client.setCenterFrequency(freq, settings.getMagicKey());
             }
 
@@ -180,7 +180,7 @@ public class RadioReceiver {
                                 Color.decode("#979700"), Type.BOOKMARK, bookmark.modulation(), bookmark.underlying()))
                         .toList();
                 rxWindow.setLabels(labels);
-                cache.setLabels(profileId, labels);
+                if (!freeTuned) cache.setLabels(profileId, labels);
             }
 
             @Override
@@ -193,7 +193,7 @@ public class RadioReceiver {
                 List<FFTLabel> labels = Arrays.stream(frequencies).map(freq -> new FFTLabel(freq.frequency(),
                         freq.mode(), Color.green, Color.decode("#009000"), Type.DIAL, freq.mode(), null)).toList();
                 rxWindow.setLabels(labels);
-                cache.setLabels(profileId, labels);
+                if (!freeTuned) cache.setLabels(profileId, labels);
             }
 
             @Override
@@ -256,9 +256,13 @@ public class RadioReceiver {
 
             @Override
             public void serverConfigChanged(ServerConfig config) {
-                if (config.sampleRate() != null) rxWindow.setBandwidth(config.sampleRate());
+                if (config.sampleRate() != null) {
+                    rxWindow.setBandwidth(config.sampleRate());
+                }
                 if (config.tuningStep() != null) rxWindow.setTuningStep(config.tuningStep());
-                if (config.centerFrequency() != null) rxWindow.setCenterFrequency(config.centerFrequency());
+                if (config.centerFrequency() != null) {
+                    rxWindow.setCenterFrequency(config.centerFrequency());
+                }
                 if (config.startOffsetFrequency() != null) {
                     rxWindow.tune(config.startOffsetFrequency(), true, false);
                 }
@@ -270,6 +274,7 @@ public class RadioReceiver {
                     }
                 }
                 if (config.profileId() != null) {
+                    freeTuned = false;
                     profileId = config.profileId();
                     Optional<ReceiverProfile> profile = rxWindow.getProfileById(profileId);
                     if (profile.isPresent()) {

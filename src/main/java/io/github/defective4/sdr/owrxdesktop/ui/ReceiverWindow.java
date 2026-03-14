@@ -805,6 +805,10 @@ public class ReceiverWindow extends JFrame {
         return bandplan;
     }
 
+    public int getBandwidth() {
+        return bandwidth;
+    }
+
     public int getCenterFrequency() {
         return centerFrequency;
     }
