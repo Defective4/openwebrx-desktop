@@ -185,8 +185,10 @@ public class FFTPanel extends BandplanPanel {
 
     public void setLabels(Collection<FFTLabel> labels) {
         List<Type> types = labels.stream().map(FFTLabel::type).toList();
-        this.labels.stream().filter(label -> types.contains(label.type())).toList().forEach(this.labels::remove);
-        this.labels.addAll(labels);
+        synchronized (this.labels) {
+            this.labels.stream().filter(label -> types.contains(label.type())).toList().forEach(this.labels::remove);
+            this.labels.addAll(labels);
+        }
     }
 
     public void setShowBandplan(boolean showBandplan) {
@@ -301,40 +303,43 @@ public class FFTPanel extends BandplanPanel {
             occupied.clear();
         }
 
-        for (FFTLabel label : labels) {
-            if (!labelRenderMode.contains(label.type()) || label.freq() < centerFrequency - bandwidth / 2
-                    || label.freq() > centerFrequency + bandwidth / 2)
-                continue;
-            int offset = (int) Math.floor((label.freq() - centerFrequency) * pxPerHz) + center;
-            int width = metrics.stringWidth(label.name());
+        synchronized (labels) {
+            for (FFTLabel label : labels) {
+                if (!labelRenderMode.contains(label.type()) || label.freq() < centerFrequency - bandwidth / 2
+                        || label.freq() > centerFrequency + bandwidth / 2)
+                    continue;
+                int offset = (int) Math.floor((label.freq() - centerFrequency) * pxPerHz) + center;
+                int width = metrics.stringWidth(label.name());
 
-            int y = labelHeight;
+                int y = labelHeight;
 
-            int from = offset - width / 2;
-            int to = offset + width / 2;
+                int from = offset - width / 2;
+                int to = offset + width / 2;
 
-            synchronized (occupied) {
-                for (LabelSpace lab : occupied) {
-                    Rectangle rect = lab.rect;
-                    if (from < rect.x + rect.width + 16 && to > rect.x - 16) y += labelHeight * 1.5;
-                    if (y > getLineHeight()) {
-                        y -= labelHeight * 1.5;
-                        break;
+                synchronized (occupied) {
+                    for (LabelSpace lab : occupied) {
+                        Rectangle rect = lab.rect;
+                        if (from < rect.x + rect.width + 16 && to > rect.x - 16) y += labelHeight * 1.5;
+                        if (y > getLineHeight()) {
+                            y -= labelHeight * 1.5;
+                            break;
+                        }
                     }
+
+                    if (y > getLineHeight()) continue;
+
+                    g2.setColor(label == selectedLabel || label.freq() == centerFrequency + super.offset
+                            ? label.activeColor()
+                            : label.inactiveColor());
+                    g2.drawLine(offset, y, offset, getLineHeight());
+                    g2.drawLine(from, y, to, y);
+
+                    int ty = y - labelHeight / 8;
+
+                    g2.drawString(label.name(), from, ty);
+                    occupied.addFirst(
+                            new LabelSpace(new Rectangle(from, ty - labelHeight / 2, to - from, labelHeight), label));
                 }
-
-                if (y > getLineHeight()) continue;
-
-                g2.setColor(label == selectedLabel || label.freq() == centerFrequency + super.offset ? label.activeColor()
-                        : label.inactiveColor());
-                g2.drawLine(offset, y, offset, getLineHeight());
-                g2.drawLine(from, y, to, y);
-
-                int ty = y - labelHeight / 8;
-
-                g2.drawString(label.name(), from, ty);
-                occupied.addFirst(
-                        new LabelSpace(new Rectangle(from, ty - labelHeight / 2, to - from, labelHeight), label));
             }
         }
 
