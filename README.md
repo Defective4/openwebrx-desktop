@@ -1,5 +1,7 @@
 # openwebrx-desktop
 
+![screen1](./img/screen1.png)
+
 A desktop client for OpenWebRX(+) receivers
 
 > [!WARNING]
