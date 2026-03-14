@@ -3,6 +3,7 @@ package io.github.defective4.sdr.owrxdesktop;
 import java.awt.Color;
 import java.net.URI;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -19,6 +20,7 @@ import io.github.defective4.sdr.owrxclient.model.ReceiverProfile;
 import io.github.defective4.sdr.owrxclient.model.ServerConfig;
 import io.github.defective4.sdr.owrxdesktop.audio.AudioSinkManager;
 import io.github.defective4.sdr.owrxdesktop.bandplan.Bandplan;
+import io.github.defective4.sdr.owrxdesktop.cache.ReceiverCache;
 import io.github.defective4.sdr.owrxdesktop.ui.ReceiverWindow;
 import io.github.defective4.sdr.owrxdesktop.ui.component.FFTLabel;
 import io.github.defective4.sdr.owrxdesktop.ui.component.FFTLabel.Type;
@@ -30,8 +32,9 @@ public class RadioReceiver {
 
     protected Color[] waterfallTheme = { Color.black, Color.white };
     private final AudioSinkManager audioSinkManager;
-    private final OpenWebRXClient client;
+    private final ReceiverCache cache = new ReceiverCache();
 
+    private final OpenWebRXClient client;
     private final ReceiverWindow rxWindow;
     private final ReceiverUserSettings settings;
     private final URI uri;
@@ -147,10 +150,12 @@ public class RadioReceiver {
 
             @Override
             public void bookmarksUpdated(Bookmark[] bookmarks) {
-                rxWindow.setLabels(Arrays.stream(bookmarks)
+                List<FFTLabel> labels = Arrays.stream(bookmarks)
                         .map(bookmark -> new FFTLabel(bookmark.frequency(), bookmark.name(), Color.yellow,
                                 Color.decode("#979700"), Type.BOOKMARK, bookmark.modulation(), bookmark.underlying()))
-                        .toList());
+                        .toList();
+                rxWindow.setLabels(labels);
+                cache.setLabels(profileId, labels);
             }
 
             @Override
@@ -160,8 +165,10 @@ public class RadioReceiver {
 
             @Override
             public void dialFrequenciesUpdated(DialFrequency[] frequencies) {
-                rxWindow.setLabels(Arrays.stream(frequencies).map(freq -> new FFTLabel(freq.frequency(), freq.mode(),
-                        Color.green, Color.decode("#009000"), Type.DIAL, freq.mode(), null)).toList());
+                List<FFTLabel> labels = Arrays.stream(frequencies).map(freq -> new FFTLabel(freq.frequency(),
+                        freq.mode(), Color.green, Color.decode("#009000"), Type.DIAL, freq.mode(), null)).toList();
+                rxWindow.setLabels(labels);
+                cache.setLabels(profileId, labels);
             }
 
             @Override
