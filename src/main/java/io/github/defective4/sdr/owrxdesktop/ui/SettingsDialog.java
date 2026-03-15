@@ -121,10 +121,11 @@ public class SettingsDialog extends JDialog {
                         magicKeyField.setText(settings.getMagicKey());
 
                         ActionListener a = e -> {
-                            if (freeTuningCheck.isSelected() && JOptionPane.showOptionDialog(this, new String[] {
-                                    "Free tuning is an unstable feature that can make some of the program's features not work properly or even completely break them. It can also impact yours and others' listening experience.",
-                                    "Please proceed with caution" }, "Warning", JOptionPane.OK_CANCEL_OPTION,
-                                    JOptionPane.WARNING_MESSAGE, null, null, null) != JOptionPane.OK_OPTION) {
+                            if (e != null && freeTuningCheck.isSelected()
+                                    && JOptionPane.showOptionDialog(this, new String[] {
+                                            "Free tuning is an unstable feature that can make some of the program's features not work properly or even completely break them. It can also impact yours and others' listening experience.",
+                                            "Please proceed with caution" }, "Warning", JOptionPane.OK_CANCEL_OPTION,
+                                            JOptionPane.WARNING_MESSAGE, null, null, null) != JOptionPane.OK_OPTION) {
                                 freeTuningCheck.setSelected(false);
                             }
                             magicKeyField.setEnabled(freeTuningCheck.isSelected());
