@@ -6,6 +6,7 @@ import java.awt.Component;
 import java.awt.Cursor;
 import java.awt.FlowLayout;
 import java.awt.Frame;
+import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.List;
@@ -134,9 +135,24 @@ public class BookmarksDialog extends JDialog {
                         .flatMap(t -> t.getValue().stream().map(l -> new MergedLabel(l, t.getKey())))
                         .sorted((o1, o2) -> o2.label.freq() - o1.label.freq()).toList();
 
+                ActionListener checkListener = e -> {
+                    boolean allChecked = true;
+                    int rows = table.getRowCount();
+                    for (int i = 0; i < rows; i++) {
+                        JCheckBox check = (JCheckBox) table.getValueAt(i, 0);
+                        if (!check.isSelected()) {
+                            allChecked = false;
+                            break;
+                        }
+                    }
+                    selectAllCheck.setSelected(allChecked);
+                    header.repaint();
+                };
+
                 for (MergedLabel label : sorted) {
                     try {
                         JCheckBox checkBox = new JCheckBox();
+                        checkBox.addActionListener(checkListener);
                         checkBox.setBackground(new Color(0, 0, 0, 0));
 
                         model.addRow(new Object[] { checkBox, label, fmt.valueToString(label.label.freq()),
@@ -145,6 +161,15 @@ public class BookmarksDialog extends JDialog {
                         throw new IllegalStateException(e);
                     }
                 }
+
+                selectAllCheck.addActionListener(e -> {
+                    int rows = table.getRowCount();
+                    for (int i = 0; i < rows; i++) {
+                        JCheckBox check = (JCheckBox) table.getValueAt(i, 0);
+                        check.setSelected(check.isEnabled() && selectAllCheck.isSelected());
+                        table.repaint();
+                    }
+                });
             }
         }
         {
