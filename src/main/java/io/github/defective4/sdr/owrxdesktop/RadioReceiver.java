@@ -62,7 +62,10 @@ public class RadioReceiver {
                         System.out.println(1);
                         int offset = lbl.freq() - rxWindow.getCenterFrequency();
                         rxWindow.tune(offset, true, false);
-                        client.getModeByName(lbl.mode()).ifPresent(m -> { client.setModulation(m); });
+                        client.getModeByName(lbl.mode()).ifPresent(m -> {
+                            client.setModulation(m);
+                            rxWindow.setStartingMode(m);
+                        });
                         return;
                     }
                     client.switchProfile(profile);
