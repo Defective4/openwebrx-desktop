@@ -21,6 +21,7 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
+import javax.swing.table.TableColumn;
 
 import io.github.defective4.sdr.owrxdesktop.cache.ReceiverCache;
 import io.github.defective4.sdr.owrxdesktop.ui.component.FFTLabel;
@@ -34,6 +35,8 @@ public class BookmarksDialog extends JDialog {
     }
 
     private static final int CHECKBOX_COLUMN = 0;
+
+    private static final String CHECKBOX_COLUMN_ID = "selall";
 
     private static final int NAME_COLUMN = 1;
 
@@ -58,7 +61,8 @@ public class BookmarksDialog extends JDialog {
             contentPanel.add(scrollPane, BorderLayout.CENTER);
             {
                 table = new JComponentTable();
-                DefaultTableModel model = new DefaultTableModel(new String[] { "", "Name", "Frequency", "Type" }, 0) {
+                DefaultTableModel model = new DefaultTableModel(
+                        new String[] { CHECKBOX_COLUMN_ID, "Name", "Frequency", "Type" }, 0) {
                     @Override
                     public boolean isCellEditable(int row, int column) {
                         return false;
@@ -74,7 +78,6 @@ public class BookmarksDialog extends JDialog {
                     @Override
                     public void mouseClicked(MouseEvent e) {
                         int col = header.columnAtPoint(e.getPoint());
-                        System.out.println(col);
                         if (col == CHECKBOX_COLUMN) {
                             selectAllCheck.doClick();
                             header.invalidate();
@@ -85,8 +88,10 @@ public class BookmarksDialog extends JDialog {
                 header.setReorderingAllowed(false);
                 table.setCellSelectionEnabled(true);
                 table.setDefaultRenderer(Object.class, new FFTLabelRenderer());
-                table.getColumn("").setMaxWidth(24);
-                table.getColumn("").setHeaderRenderer(new DefaultTableCellRenderer() {
+                TableColumn column = table.getColumn(CHECKBOX_COLUMN_ID);
+                column.setMaxWidth(24);
+                column.setResizable(false);
+                table.getColumn(CHECKBOX_COLUMN_ID).setHeaderRenderer(new DefaultTableCellRenderer() {
                     @Override
                     public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected,
                             boolean hasFocus, int row, int column) {
