@@ -8,6 +8,9 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.sound.sampled.LineUnavailableException;
+import javax.swing.JCheckBox;
+import javax.swing.JOptionPane;
+import javax.swing.JSeparator;
 
 import io.github.defective4.sdr.owrxclient.client.OpenWebRXClient;
 import io.github.defective4.sdr.owrxclient.event.OWRXAdapter;
@@ -56,7 +59,7 @@ public class RadioReceiver {
 
             @Override
             public void bookmarkJumped(MergedLabel label) {
-                rxWindow.getProfileById(label.profile()).ifPresent(profile -> {
+                rxWindow.getProfileById(label.profile()).ifPresentOrElse(profile -> {
                     FFTLabel lbl = label.label();
                     if (profile.uuids()[1].equals(profileId)) {
                         System.out.println(1);
@@ -71,6 +74,19 @@ public class RadioReceiver {
                     client.switchProfile(profile);
                     jumpFreq = lbl.freq();
                     jumpMode = lbl.mode();
+                }, () -> {
+                    JCheckBox removeAll = new JCheckBox("Remove all bookmarks from this profile");
+                    removeAll.setSelected(true);
+                    if (JOptionPane.showOptionDialog(rxWindow,
+                            new Object[] { "The profile for this bookmark is no longer available.",
+                                    "Do you want to remove this bookmark from memory?", new JSeparator(JSeparator.HORIZONTAL), removeAll },
+                            "Profile not available", JOptionPane.YES_NO_OPTION, JOptionPane.ERROR_MESSAGE, null, null,
+                            null) == JOptionPane.YES_OPTION) {
+                        if (removeAll.isSelected())
+                            cache.clearLabels(label.profile());
+                        else
+                            cache.removeLabel(label.profile(), label.label());
+                    }
                 });
             }
 
