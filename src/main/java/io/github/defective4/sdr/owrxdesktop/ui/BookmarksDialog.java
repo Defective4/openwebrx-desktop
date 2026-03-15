@@ -9,11 +9,13 @@ import java.awt.Frame;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JDialog;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
@@ -41,9 +43,11 @@ public class BookmarksDialog extends JDialog {
 
     private static final int NAME_COLUMN = 1;
 
+    private final JButton btnDelete = new JButton("Delete selected");
+
     private MergedLabel label;
 
-    private JTable table;
+    private final JTable table = new JComponentTable();
 
     private BookmarksDialog(ReceiverCache cache, Frame window, String profile) {
         super(window);
@@ -61,7 +65,7 @@ public class BookmarksDialog extends JDialog {
             JScrollPane scrollPane = new JScrollPane();
             contentPanel.add(scrollPane, BorderLayout.CENTER);
             {
-                table = new JComponentTable();
+
                 DefaultTableModel model = new DefaultTableModel(
                         new String[] { CHECKBOX_COLUMN_ID, "Name", "Frequency", "Type" }, 0) {
                     @Override
@@ -137,16 +141,16 @@ public class BookmarksDialog extends JDialog {
 
                 ActionListener checkListener = e -> {
                     boolean allChecked = true;
+                    boolean anyChecked = false;
                     int rows = table.getRowCount();
                     for (int i = 0; i < rows; i++) {
                         JCheckBox check = (JCheckBox) table.getValueAt(i, CHECKBOX_COLUMN);
                         if (!check.isEnabled()) continue;
-                        if (!check.isSelected()) {
-                            allChecked = false;
-                            break;
-                        }
+                        if (check.isSelected()) anyChecked = true;
+                        if (!check.isSelected()) allChecked = false;
                     }
                     selectAllCheck.setSelected(allChecked);
+                    btnDelete.setEnabled(anyChecked);
                     header.repaint();
                 };
 
@@ -166,11 +170,14 @@ public class BookmarksDialog extends JDialog {
 
                 selectAllCheck.addActionListener(e -> {
                     int rows = table.getRowCount();
+                    boolean anySelected = false;
                     for (int i = 0; i < rows; i++) {
                         JCheckBox check = (JCheckBox) table.getValueAt(i, CHECKBOX_COLUMN);
                         check.setSelected(check.isEnabled() && selectAllCheck.isSelected());
+                        if (check.isSelected()) anySelected = true;
                         table.repaint();
                     }
+                    btnDelete.setEnabled(anySelected);
                 });
             }
         }
@@ -182,6 +189,29 @@ public class BookmarksDialog extends JDialog {
                 JButton okButton = new JButton("OK");
                 okButton.setActionCommand("OK");
                 okButton.addActionListener(e -> dispose());
+                btnDelete.setEnabled(false);
+                btnDelete.setForeground(new Color(255, 155, 155));
+                btnDelete.addActionListener(e -> {
+                    if (JOptionPane.showOptionDialog(this, new String[] {
+                            "Do you want to delete the selected bookmarks?",
+                            "Keep in mind, that server bookmarks and dial frequencies may be restored once you switch back to their respective profiles" },
+                            "Deleting bookmarks", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, null,
+                            null) == JOptionPane.YES_OPTION) {
+                        List<MergedLabel> toDelete = new ArrayList<>();
+                        int rows = table.getRowCount();
+                        for (int i = 0; i < rows; i++) {
+                            JCheckBox check = (JCheckBox) table.getValueAt(i, CHECKBOX_COLUMN);
+                            if (check.isSelected()) {
+                                MergedLabel label = (MergedLabel) table.getValueAt(i, NAME_COLUMN);
+                                toDelete.add(label);
+                            }
+                        }
+                        toDelete.forEach(label -> cache.removeLabel(label.profile(), label.label()));
+                        dispose();
+                        show(cache, window, profile);
+                    }
+                });
+                buttonPane.add(btnDelete);
                 buttonPane.add(okButton);
                 getRootPane().setDefaultButton(okButton);
             }
