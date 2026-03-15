@@ -196,7 +196,7 @@ public class RadioReceiver {
             public void bookmarksUpdated(Bookmark[] bookmarks) {
                 List<FFTLabel> labels = Arrays.stream(bookmarks)
                         .map(bookmark -> new FFTLabel(bookmark.frequency(), bookmark.name(), Color.yellow,
-                                Color.decode("#979700"), Type.BOOKMARK, bookmark.modulation(), bookmark.underlying()))
+                                Color.decode("#979700"), Type.SRV_BOOKMARK, bookmark.modulation(), bookmark.underlying()))
                         .toList();
                 rxWindow.setLabels(labels);
                 if (!freeTuned) cache.setLabels(profileId, labels);

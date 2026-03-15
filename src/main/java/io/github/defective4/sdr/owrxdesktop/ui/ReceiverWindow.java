@@ -719,7 +719,7 @@ public class ReceiverWindow extends JFrame {
 
             JCheckBox bookmarksCheck = new JCheckBox("Bookmarks");
             bookmarksCheck.addActionListener(
-                    e -> fftPanel.setLabelRender(FFTLabel.Type.BOOKMARK, bookmarksCheck.isSelected()));
+                    e -> fftPanel.setLabelRender(FFTLabel.Type.SRV_BOOKMARK, bookmarksCheck.isSelected()));
             bookmarksCheck.setSelected(true);
             labelsPanel.add(bookmarksCheck);
         }
