@@ -1,6 +1,8 @@
 package io.github.defective4.sdr.owrxdesktop.ui;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Component;
 import java.awt.Cursor;
 import java.awt.FlowLayout;
 import java.awt.Frame;
@@ -9,23 +11,31 @@ import java.awt.event.MouseEvent;
 import java.util.List;
 
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JDialog;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
 import javax.swing.border.EmptyBorder;
+import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.JTableHeader;
 
 import io.github.defective4.sdr.owrxdesktop.cache.ReceiverCache;
 import io.github.defective4.sdr.owrxdesktop.ui.component.FFTLabel;
-import io.github.defective4.sdr.owrxdesktop.ui.component.FFTLabelRenderer;
+import io.github.defective4.sdr.owrxdesktop.ui.component.JComponentTable;
 import io.github.defective4.sdr.owrxdesktop.ui.component.JFrequencySpinner.FrequencyFormatter;
+import io.github.defective4.sdr.owrxdesktop.ui.component.render.FFTLabelRenderer;
 
 public class BookmarksDialog extends JDialog {
     public static record MergedLabel(FFTLabel label, String profile) {
 
     }
+
+    private static final int CHECKBOX_COLUMN = 0;
+
+    private static final int NAME_COLUMN = 1;
 
     private MergedLabel label;
 
@@ -47,17 +57,42 @@ public class BookmarksDialog extends JDialog {
             JScrollPane scrollPane = new JScrollPane();
             contentPanel.add(scrollPane, BorderLayout.CENTER);
             {
-                table = new JTable();
-                DefaultTableModel model = new DefaultTableModel(new String[] { "Name", "Frequency", "Type" }, 0) {
+                table = new JComponentTable();
+                DefaultTableModel model = new DefaultTableModel(new String[] { "", "Name", "Frequency", "Type" }, 0) {
                     @Override
                     public boolean isCellEditable(int row, int column) {
                         return false;
                     }
                 };
+
+                JCheckBox selectAllCheck = new JCheckBox();
+                selectAllCheck.setBackground(new Color(0, 0, 0, 0));
+
                 table.setModel(model);
-                table.getTableHeader().setReorderingAllowed(false);
+                JTableHeader header = table.getTableHeader();
+                header.addMouseListener(new MouseAdapter() {
+                    @Override
+                    public void mouseClicked(MouseEvent e) {
+                        int col = header.columnAtPoint(e.getPoint());
+                        System.out.println(col);
+                        if (col == CHECKBOX_COLUMN) {
+                            selectAllCheck.doClick();
+                            header.invalidate();
+                            header.repaint();
+                        }
+                    }
+                });
+                header.setReorderingAllowed(false);
                 table.setCellSelectionEnabled(true);
                 table.setDefaultRenderer(Object.class, new FFTLabelRenderer());
+                table.getColumn("").setMaxWidth(24);
+                table.getColumn("").setHeaderRenderer(new DefaultTableCellRenderer() {
+                    @Override
+                    public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected,
+                            boolean hasFocus, int row, int column) {
+                        return selectAllCheck;
+                    }
+                });
                 scrollPane.setViewportView(table);
 
                 MouseAdapter adapter = new MouseAdapter() {
@@ -69,7 +104,7 @@ public class BookmarksDialog extends JDialog {
                     public void mouseClicked(MouseEvent e) {
                         int col = table.columnAtPoint(e.getPoint());
                         int row = table.rowAtPoint(e.getPoint());
-                        if (col == 0 && row >= 0 && row < model.getRowCount()) {
+                        if (col == NAME_COLUMN && row >= 0 && row < model.getRowCount()) {
                             label = (MergedLabel) table.getValueAt(row, col);
                             dispose();
                         }
@@ -77,7 +112,7 @@ public class BookmarksDialog extends JDialog {
 
                     @Override
                     public void mouseMoved(MouseEvent e) {
-                        if (table.columnAtPoint(e.getPoint()) == 0)
+                        if (table.columnAtPoint(e.getPoint()) == 1)
                             table.setCursor(POINTER);
                         else
                             table.setCursor(DEFAULT);
@@ -96,7 +131,11 @@ public class BookmarksDialog extends JDialog {
 
                 for (MergedLabel label : sorted) {
                     try {
-                        model.addRow(new Object[] { label, fmt.valueToString(label.label.freq()), label.label.type() });
+                        JCheckBox checkBox = new JCheckBox();
+                        checkBox.setBackground(new Color(0, 0, 0, 0));
+
+                        model.addRow(new Object[] { checkBox, label, fmt.valueToString(label.label.freq()),
+                                label.label.type() });
                     } catch (Exception e) {
                         throw new IllegalStateException(e);
                     }

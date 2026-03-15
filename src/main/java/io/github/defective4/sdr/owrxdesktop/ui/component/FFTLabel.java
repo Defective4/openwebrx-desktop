@@ -7,7 +7,7 @@ import io.github.defective4.sdr.owrxdesktop.cache.SerializableFFTLabel;
 public record FFTLabel(int freq, String name, Color activeColor, Color inactiveColor, Type type, String mode,
         String underlying) {
     public static enum Type {
-        CL_BOOKMARK("Personal bookmark"), SRV_BOOKMARK("Server bookmark"), DIAL("Dial frequency");
+        CL_BOOKMARK("Personal bookmark"), DIAL("Dial frequency"), SRV_BOOKMARK("Server bookmark");
 
         private final String name;
 
