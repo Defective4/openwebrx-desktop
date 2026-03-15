@@ -7,7 +7,6 @@ import java.awt.Frame;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.List;
-import java.util.Map.Entry;
 
 import javax.swing.JButton;
 import javax.swing.JDialog;
@@ -27,6 +26,7 @@ public class BookmarksDialog extends JDialog {
     public static record MergedLabel(FFTLabel label, String profile) {
 
     }
+
     private MergedLabel label;
 
     private JTable table;
@@ -90,14 +90,15 @@ public class BookmarksDialog extends JDialog {
 
                 FrequencyFormatter fmt = new FrequencyFormatter();
 
-                for (Entry<String, List<FFTLabel>> entry : cache.getLabels().entrySet()) {
-                    for (FFTLabel label : entry.getValue()) {
-                        try {
-                            model.addRow(new Object[] { new MergedLabel(label, entry.getKey()),
-                                    fmt.valueToString(label.freq()), label.type() });
-                        } catch (Exception e) {
-                            throw new IllegalStateException(e);
-                        }
+                List<MergedLabel> sorted = cache.getLabels().entrySet().stream()
+                        .flatMap(t -> t.getValue().stream().map(l -> new MergedLabel(l, t.getKey())))
+                        .sorted((o1, o2) -> o2.label.freq() - o1.label.freq()).toList();
+
+                for (MergedLabel label : sorted) {
+                    try {
+                        model.addRow(new Object[] { label, fmt.valueToString(label.label.freq()), label.label.type() });
+                    } catch (Exception e) {
+                        throw new IllegalStateException(e);
                     }
                 }
             }
