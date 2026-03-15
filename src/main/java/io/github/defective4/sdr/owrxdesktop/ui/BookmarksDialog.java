@@ -45,7 +45,7 @@ public class BookmarksDialog extends JDialog {
 
     private JTable table;
 
-    private BookmarksDialog(ReceiverCache cache, Frame window) {
+    private BookmarksDialog(ReceiverCache cache, Frame window, String profile) {
         super(window);
         setTitle("Bookmarks");
         setModal(true);
@@ -139,7 +139,8 @@ public class BookmarksDialog extends JDialog {
                     boolean allChecked = true;
                     int rows = table.getRowCount();
                     for (int i = 0; i < rows; i++) {
-                        JCheckBox check = (JCheckBox) table.getValueAt(i, 0);
+                        JCheckBox check = (JCheckBox) table.getValueAt(i, CHECKBOX_COLUMN);
+                        if (!check.isEnabled()) continue;
                         if (!check.isSelected()) {
                             allChecked = false;
                             break;
@@ -152,6 +153,7 @@ public class BookmarksDialog extends JDialog {
                 for (MergedLabel label : sorted) {
                     try {
                         JCheckBox checkBox = new JCheckBox();
+                        checkBox.setEnabled(!label.profile().equals(profile));
                         checkBox.addActionListener(checkListener);
                         checkBox.setBackground(new Color(0, 0, 0, 0));
 
@@ -165,7 +167,7 @@ public class BookmarksDialog extends JDialog {
                 selectAllCheck.addActionListener(e -> {
                     int rows = table.getRowCount();
                     for (int i = 0; i < rows; i++) {
-                        JCheckBox check = (JCheckBox) table.getValueAt(i, 0);
+                        JCheckBox check = (JCheckBox) table.getValueAt(i, CHECKBOX_COLUMN);
                         check.setSelected(check.isEnabled() && selectAllCheck.isSelected());
                         table.repaint();
                     }
@@ -186,8 +188,8 @@ public class BookmarksDialog extends JDialog {
         }
     }
 
-    public static MergedLabel show(ReceiverCache cache, Frame window) {
-        BookmarksDialog dialog = new BookmarksDialog(cache, window);
+    public static MergedLabel show(ReceiverCache cache, Frame window, String profile) {
+        BookmarksDialog dialog = new BookmarksDialog(cache, window, profile);
         dialog.setVisible(true);
         return dialog.label;
     }

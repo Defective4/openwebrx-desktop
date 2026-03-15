@@ -67,14 +67,13 @@ import io.github.defective4.sdr.owrxdesktop.ui.settings.ReceiverUserSettings;
 public class ReceiverWindow extends JFrame {
 
     private final JComboBox<ReceiverMode> analogBox = new JComboBox<>();
-
     private final Bandplan bandplan = new Bandplan();
 
     private int bandwidth;
 
     private final ReceiverCache cache;
-    private int centerFrequency;
 
+    private int centerFrequency;
     private final JProgressBar clientsBar = new JProgressBar();
 
     private final JProgressBar cpuBar = new JProgressBar();
@@ -84,20 +83,22 @@ public class ReceiverWindow extends JFrame {
     private final JComboBox<ReceiverMode> digitalBox = new JComboBox<>();
 
     private boolean exiting;
-    private final float fftMax = -20;
 
+    private final float fftMax = -20;
     private final float fftMin = -88;
 
     private final FFTPanel fftPanel;
+
     private final JSpinner freqSpinner = new JFrequencySpinner();
     private final JRadioButton ftlAuto = new JRadioButton("Auto");
-
     private final JRadioButton ftlServer = new JRadioButton("Server");
 
     private long lastFFTDraw;
+
     private final List<UserInteractionListener> listeners = new CopyOnWriteArrayList<>();
     private int maxFPS = -1;
     private float minFFT, maxFFT;
+    private final JMenuItem mntmBookmarks = new JMenuItem("Bookmarks");
 
     private int offset;
 
@@ -159,9 +160,10 @@ public class ReceiverWindow extends JFrame {
             mntmSettings.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_O, InputEvent.CTRL_DOWN_MASK));
             mnWindow.add(mntmSettings);
 
-            JMenuItem mntmBookmarks = new JMenuItem("Bookmarks");
+            mntmBookmarks.setEnabled(false);
             mntmBookmarks.addActionListener(e -> {
-                MergedLabel label = BookmarksDialog.show(cache, this);
+                ReceiverProfile profile = (ReceiverProfile) profileBox.getSelectedItem();
+                MergedLabel label = BookmarksDialog.show(cache, this, profile == null ? null : profile.uuids()[1]);
                 if (label != null) {
                     listeners.forEach(ls -> ls.bookmarkJumped(label));
                 }
@@ -1014,6 +1016,7 @@ public class ReceiverWindow extends JFrame {
     }
 
     public void updateProfile(ReceiverProfile profile) {
+        mntmBookmarks.setEnabled(true);
         profileDebounce = true;
         profileBox.setSelectedItem(profile);
         profileDebounce = false;
