@@ -274,6 +274,7 @@ public class RadioReceiver {
                     }
                 }
                 if (config.profileId() != null) {
+                    rxWindow.enableControls();
                     freeTuned = false;
                     profileId = config.profileId();
                     Optional<ReceiverProfile> profile = rxWindow.getProfileById(profileId);

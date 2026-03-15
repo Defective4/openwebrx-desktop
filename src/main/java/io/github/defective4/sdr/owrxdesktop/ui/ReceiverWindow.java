@@ -347,6 +347,7 @@ public class ReceiverWindow extends JFrame {
 
             profileBox.addActionListener(e -> {
                 if (profileDebounce) return;
+                disableControls();
                 ReceiverProfile profile = (ReceiverProfile) profileBox.getSelectedItem();
                 if (profile != null) listeners.forEach(ls -> ls.profileChanged(profile));
             });
@@ -766,6 +767,8 @@ public class ReceiverWindow extends JFrame {
                     .addChangeListener(e -> listeners.forEach(ls -> ls.volumeChanged(volumeSlider.getValue() / 100f)));
 
             confirmComponentState(muteCheck);
+
+            disableControls();
         }
     }
 
@@ -775,6 +778,10 @@ public class ReceiverWindow extends JFrame {
 
     public boolean addListener(UserInteractionListener listener) {
         return listeners.add(Objects.requireNonNull(listener));
+    }
+
+    public void disableControls() {
+        setControls(false);
     }
 
     public void drawFFT(float[] fft, int offset) {
@@ -799,6 +806,10 @@ public class ReceiverWindow extends JFrame {
                 }
             }
         }
+    }
+
+    public void enableControls() {
+        setControls(true);
     }
 
     public Bandplan getBandplan() {
@@ -1032,6 +1043,13 @@ public class ReceiverWindow extends JFrame {
             exiting = true;
             System.exit(0);
         }
+    }
+
+    private void setControls(boolean state) {
+        profileBox.setEnabled(state);
+        analogBox.setEnabled(state);
+        digitalBox.setEnabled(state);
+        freqSpinner.setEnabled(state);
     }
 
     private void updateCPU() {
