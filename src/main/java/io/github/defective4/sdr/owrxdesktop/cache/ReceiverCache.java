@@ -28,7 +28,9 @@ public class ReceiverCache {
         List<Type> types = labels.stream().map(FFTLabel::type).toList();
         List<FFTLabel> list = this.labels.computeIfAbsent(profile, t -> new ArrayList<>());
         list.stream().filter(label -> types.contains(label.type())).toList().forEach(list::remove);
-        list.addAll(labels);
+        List<FFTLabel> flatList = this.labels.values().stream().flatMap(List::stream).toList();
+        list.addAll(labels.stream()
+                .filter(label -> flatList.stream().noneMatch(flatLabel -> flatLabel.freq() == label.freq())).toList());
     }
 
 }

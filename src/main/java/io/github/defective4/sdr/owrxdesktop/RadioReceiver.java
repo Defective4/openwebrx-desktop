@@ -62,7 +62,6 @@ public class RadioReceiver {
                 rxWindow.getProfileById(label.profile()).ifPresentOrElse(profile -> {
                     FFTLabel lbl = label.label();
                     if (profile.uuids()[1].equals(profileId)) {
-                        System.out.println(1);
                         int offset = lbl.freq() - rxWindow.getCenterFrequency();
                         rxWindow.tune(offset, true, false);
                         client.getModeByName(lbl.mode()).ifPresent(m -> {
