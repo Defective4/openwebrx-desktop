@@ -48,14 +48,16 @@ public abstract class TuneablePanel extends JComponent implements FFTVisualizer 
             private int dragX = 0;
 
             private final Cursor E_RESIZE = new Cursor(Cursor.W_RESIZE_CURSOR);
+            private boolean noinput;
             private final Cursor RESIZE = new Cursor(Cursor.MOVE_CURSOR);
             private int scopeMode = 0;
-            private boolean tuneMode = false;
 
+            private boolean tuneMode = false;
             private final Cursor W_RESIZE = new Cursor(Cursor.E_RESIZE_CURSOR);
 
             @Override
             public void mouseDragged(MouseEvent e) {
+                if (noinput) return;
                 if (tuneMode)
                     tune(calculateOffsetAtPoint(e.getX()));
                 else if (scopeMode != 0 && e.getY() <= getLineHeight()) {
@@ -104,15 +106,19 @@ public abstract class TuneablePanel extends JComponent implements FFTVisualizer 
 
             @Override
             public void mousePressed(MouseEvent e) {
+                noinput = false;
+                if (e.getButton() != MouseEvent.BUTTON1) {
+                    noinput = true;
+                }
                 mouseDown = true;
-                tuneMode = e.getY() <= getLineHeight();
+                tuneMode = e.getY() <= getLineHeight() && e.getButton() == MouseEvent.BUTTON1;
                 scopeMode = getScopeArea(e.getX());
                 if (tuneMode && scopeMode != 0) {
                     dragX = e.getXOnScreen();
                     tuneMode = false;
                 } else if (tuneMode) {
                     tune(calculateOffsetAtPoint(e.getX()));
-                } else {
+                } else if (e.getY() > getLineHeight()) {
                     dragX = e.getXOnScreen();
                     if (e.getButton() == MouseEvent.BUTTON3) {
                         setBounds(0, getY(), getParent().getWidth(), getHeight());
