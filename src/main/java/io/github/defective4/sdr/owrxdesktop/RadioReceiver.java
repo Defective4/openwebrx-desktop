@@ -28,6 +28,7 @@ import io.github.defective4.sdr.owrxdesktop.ui.BookmarksDialog.MergedLabel;
 import io.github.defective4.sdr.owrxdesktop.ui.ReceiverWindow;
 import io.github.defective4.sdr.owrxdesktop.ui.component.FFTLabel;
 import io.github.defective4.sdr.owrxdesktop.ui.component.FFTLabel.Type;
+import io.github.defective4.sdr.owrxdesktop.ui.component.UserBookmark;
 import io.github.defective4.sdr.owrxdesktop.ui.event.UserInteractionListener;
 import io.github.defective4.sdr.owrxdesktop.ui.settings.ReceiverUserSettings;
 import io.github.defective4.sdr.owrxdesktop.ui.settings.waterfall.WaterfallThemeMode;
@@ -78,7 +79,8 @@ public class RadioReceiver {
                     removeAll.setSelected(true);
                     if (JOptionPane.showOptionDialog(rxWindow,
                             new Object[] { "The profile for this bookmark is no longer available.",
-                                    "Do you want to remove this bookmark from memory?", new JSeparator(JSeparator.HORIZONTAL), removeAll },
+                                    "Do you want to remove this bookmark from memory?",
+                                    new JSeparator(JSeparator.HORIZONTAL), removeAll },
                             "Profile not available", JOptionPane.YES_NO_OPTION, JOptionPane.ERROR_MESSAGE, null, null,
                             null) == JOptionPane.YES_OPTION) {
                         if (removeAll.isSelected())
@@ -195,7 +197,8 @@ public class RadioReceiver {
             public void bookmarksUpdated(Bookmark[] bookmarks) {
                 List<FFTLabel> labels = Arrays.stream(bookmarks)
                         .map(bookmark -> new FFTLabel(bookmark.frequency(), bookmark.name(), Color.yellow,
-                                Color.decode("#979700"), Type.SRV_BOOKMARK, bookmark.modulation(), bookmark.underlying()))
+                                Color.decode("#979700"), Type.SRV_BOOKMARK, bookmark.modulation(),
+                                bookmark.underlying()))
                         .toList();
                 rxWindow.setLabels(labels);
                 if (!freeTuned) cache.setLabels(profileId, labels);
@@ -299,6 +302,7 @@ public class RadioReceiver {
                     if (profile.isPresent()) {
                         rxWindow.updateProfile(profile.get());
                     }
+                    rxWindow.setLabels(cache.getUserBookmarks(profileId).stream().map(UserBookmark::toLabel).toList());
                 }
                 if (config.startModulation() != null) {
                     modulation = config.startModulation();

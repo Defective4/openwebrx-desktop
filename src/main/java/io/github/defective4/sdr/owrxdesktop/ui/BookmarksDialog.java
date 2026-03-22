@@ -29,6 +29,7 @@ import io.github.defective4.sdr.owrxdesktop.cache.ReceiverCache;
 import io.github.defective4.sdr.owrxdesktop.ui.component.FFTLabel;
 import io.github.defective4.sdr.owrxdesktop.ui.component.JComponentTable;
 import io.github.defective4.sdr.owrxdesktop.ui.component.JFrequencySpinner.FrequencyFormatter;
+import io.github.defective4.sdr.owrxdesktop.ui.component.UserBookmark;
 import io.github.defective4.sdr.owrxdesktop.ui.component.render.FFTLabelRenderer;
 
 public class BookmarksDialog extends JDialog {
@@ -215,7 +216,11 @@ public class BookmarksDialog extends JDialog {
                 newBookmark.addActionListener(e -> {
                     BookmarkEditorDialog.show(BookmarksDialog.this, window.getAnalogModes(), window.getDigitalModes(),
                             window.getCenterFrequency(), window.getPrimaryMode(),
-                            window.getSecondaryMode().orElse(null));
+                            window.getSecondaryMode().orElse(null), profile).ifPresent(bookmark -> {
+                                cache.addBookmark(bookmark);
+                                window.setLabels(
+                                        cache.getUserBookmarks(profile).stream().map(UserBookmark::toLabel).toList());
+                            });
                 });
 
                 buttonPane.add(newBookmark);

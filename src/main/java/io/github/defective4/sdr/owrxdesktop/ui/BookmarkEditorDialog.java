@@ -9,6 +9,7 @@ import java.awt.Window;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 import javax.swing.JButton;
 import javax.swing.JComboBox;
@@ -17,14 +18,24 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.border.EmptyBorder;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 
 import io.github.defective4.sdr.owrxclient.model.ReceiverMode;
 import io.github.defective4.sdr.owrxdesktop.ui.component.JFrequencySpinner;
+import io.github.defective4.sdr.owrxdesktop.ui.component.UserBookmark;
 
 public class BookmarkEditorDialog extends JDialog {
 
+    private final JComboBox<ReceiverMode> analogBox = new JComboBox<>();
+    private UserBookmark bookmark = null;
+    private final JComboBox<ReceiverMode> digitalBox = new JComboBox<>();
+    private final JTextField nameField = new JTextField();
+
+    private final JFrequencySpinner spinner = new JFrequencySpinner();
+
     private BookmarkEditorDialog(Window parent, Collection<ReceiverMode> modes, List<ReceiverMode> digital,
-            int centerFrequency, ReceiverMode initialMode, ReceiverMode secondaryMode) {
+            int centerFrequency, ReceiverMode initialMode, ReceiverMode secondaryMode, String profile) {
         super(parent);
         setTitle("Bookmark editor");
         setModal(true);
@@ -49,7 +60,6 @@ public class BookmarkEditorDialog extends JDialog {
             contentPanel.add(lblName, gbc_lblName);
         }
         {
-            JTextField nameField = new JTextField();
             GridBagConstraints gbc_textField = new GridBagConstraints();
             gbc_textField.fill = GridBagConstraints.HORIZONTAL;
             gbc_textField.insets = new Insets(0, 0, 5, 0);
@@ -68,7 +78,6 @@ public class BookmarkEditorDialog extends JDialog {
             contentPanel.add(lblFrequency, gbc_lblFrequency);
         }
         {
-            JFrequencySpinner spinner = new JFrequencySpinner();
             spinner.setValue(centerFrequency);
 
             GridBagConstraints gbc_spinner = new GridBagConstraints();
@@ -88,7 +97,6 @@ public class BookmarkEditorDialog extends JDialog {
             contentPanel.add(lblPrimaryMode, gbc_lblPrimaryMode);
         }
         {
-            JComboBox<ReceiverMode> analogBox = new JComboBox<>();
             modes.stream().filter(Objects::nonNull).forEach(analogBox::addItem);
             analogBox.setSelectedItem(initialMode);
             GridBagConstraints gbc_comboBox = new GridBagConstraints();
@@ -108,7 +116,6 @@ public class BookmarkEditorDialog extends JDialog {
             contentPanel.add(lblSecondaryMode, gbc_lblSecondaryMode);
         }
         {
-            JComboBox<ReceiverMode> digitalBox = new JComboBox<>();
             digital.stream().forEach(digitalBox::addItem);
             if (secondaryMode != null) digitalBox.setSelectedItem(secondaryMode);
             GridBagConstraints gbc_comboBox = new GridBagConstraints();
@@ -125,10 +132,32 @@ public class BookmarkEditorDialog extends JDialog {
             {
                 JButton okButton = new JButton("Save");
                 okButton.setEnabled(false);
-                okButton.addActionListener(e -> dispose());
+                okButton.addActionListener(e -> {
+                    bookmark = new UserBookmark(nameField.getText(), (int) spinner.getValue(),
+                            (ReceiverMode) analogBox.getSelectedItem(),
+                            Optional.ofNullable((ReceiverMode) digitalBox.getSelectedItem()), profile);
+                    dispose();
+                });
                 okButton.setActionCommand("Save");
                 buttonPane.add(okButton);
                 getRootPane().setDefaultButton(okButton);
+
+                nameField.getDocument().addDocumentListener(new DocumentListener() {
+                    @Override
+                    public void changedUpdate(DocumentEvent e) {
+                        okButton.setEnabled(!nameField.getText().isBlank());
+                    }
+
+                    @Override
+                    public void insertUpdate(DocumentEvent e) {
+                        okButton.setEnabled(!nameField.getText().isBlank());
+                    }
+
+                    @Override
+                    public void removeUpdate(DocumentEvent e) {
+                        okButton.setEnabled(!nameField.getText().isBlank());
+                    }
+                });
             }
             {
                 JButton cancelButton = new JButton("Cancel");
@@ -142,11 +171,12 @@ public class BookmarkEditorDialog extends JDialog {
         setLocationRelativeTo(parent);
     }
 
-    public static void show(Window parent, Collection<ReceiverMode> modes, List<ReceiverMode> digital,
-            int centerFrequency, ReceiverMode initialMode, ReceiverMode secondaryMode) {
+    public static Optional<UserBookmark> show(Window parent, Collection<ReceiverMode> modes, List<ReceiverMode> digital,
+            int centerFrequency, ReceiverMode initialMode, ReceiverMode secondaryMode, String profile) {
         BookmarkEditorDialog dialog = new BookmarkEditorDialog(parent, modes, digital, centerFrequency, initialMode,
-                secondaryMode);
+                secondaryMode, profile);
         dialog.setVisible(true);
+        return Optional.ofNullable(dialog.bookmark);
     }
 
 }
