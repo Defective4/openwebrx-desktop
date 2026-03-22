@@ -463,6 +463,7 @@ public class ReceiverWindow extends JFrame {
             scopePanel.add(resetScope);
 
             JCheckBox symmetricalCheck = new JCheckBox("Symmetrical");
+            symmetricalCheck.setSelected(true);
             symmetricalCheck.addActionListener(e -> {
                 for (TuneablePanel panel : getPanels()) {
                     panel.setSymmetricalScope(symmetricalCheck.isSelected());

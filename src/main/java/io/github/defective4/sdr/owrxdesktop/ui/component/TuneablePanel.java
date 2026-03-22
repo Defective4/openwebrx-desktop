@@ -38,7 +38,7 @@ public abstract class TuneablePanel extends JComponent implements FFTVisualizer 
     private boolean drawFrequencyLabel = true;
 
     private final List<TuningListener> listeners = new CopyOnWriteArrayList<>();
-    private boolean symmetricalScope = false;
+    private boolean symmetricalScope = true;
 
     public TuneablePanel() {
         MouseAdapter adapter = new MouseAdapter() {
