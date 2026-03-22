@@ -26,6 +26,11 @@ public class ReceiverCache {
     }
 
     public Map<String, List<FFTLabel>> getLabels() {
+        Map<String, List<FFTLabel>> labels = new HashMap<>();
+        this.labels.forEach((k, v) -> labels.put(k, new ArrayList<>(v)));
+        for (UserBookmark bookmark : bookmarks.values()) {
+            labels.computeIfAbsent(bookmark.profile(), t -> new ArrayList<>()).add(bookmark.toLabel());
+        }
         return Collections.unmodifiableMap(labels);
     }
 

@@ -208,7 +208,7 @@ public class BookmarksDialog extends JDialog {
                         }
                         toDelete.forEach(label -> cache.removeLabel(label.profile(), label.label()));
                         dispose();
-                        show(cache, window, profile);
+                        label = show(cache, window, profile);
                     }
                 });
                 JButton newBookmark = new JButton("New bookmark");
@@ -220,6 +220,8 @@ public class BookmarksDialog extends JDialog {
                                 cache.addBookmark(bookmark);
                                 window.setLabels(
                                         cache.getUserBookmarks(profile).stream().map(UserBookmark::toLabel).toList());
+                                dispose();
+                                label = show(cache, window, profile);
                             });
                 });
 
