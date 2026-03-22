@@ -13,6 +13,7 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -815,6 +816,15 @@ public class ReceiverWindow extends JFrame {
         setControls(true);
     }
 
+    public List<ReceiverMode> getAnalogModes() {
+        List<ReceiverMode> mode = new ArrayList<>();
+        int count = analogBox.getItemCount();
+        for (int i = 0; i < count; i++) {
+            mode.add(analogBox.getItemAt(i));
+        }
+        return Collections.unmodifiableList(mode);
+    }
+
     public Bandplan getBandplan() {
         return bandplan;
     }
@@ -825,6 +835,15 @@ public class ReceiverWindow extends JFrame {
 
     public int getCenterFrequency() {
         return centerFrequency;
+    }
+
+    public List<ReceiverMode> getDigitalModes() {
+        List<ReceiverMode> mode = new ArrayList<>();
+        int count = digitalBox.getItemCount();
+        for (int i = 0; i < count; i++) {
+            mode.add(digitalBox.getItemAt(i));
+        }
+        return Collections.unmodifiableList(mode);
     }
 
     public FFTPanel getFftPanel() {

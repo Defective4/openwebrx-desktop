@@ -5,7 +5,6 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Cursor;
 import java.awt.FlowLayout;
-import java.awt.Frame;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -49,7 +48,7 @@ public class BookmarksDialog extends JDialog {
 
     private final JTable table = new JComponentTable();
 
-    private BookmarksDialog(ReceiverCache cache, Frame window, String profile) {
+    private BookmarksDialog(ReceiverCache cache, ReceiverWindow window, String profile) {
         super(window);
         setTitle("Bookmarks");
         setModal(true);
@@ -211,6 +210,15 @@ public class BookmarksDialog extends JDialog {
                         show(cache, window, profile);
                     }
                 });
+                JButton newBookmark = new JButton("New bookmark");
+
+                newBookmark.addActionListener(e -> {
+                    BookmarkEditorDialog.show(BookmarksDialog.this, window.getAnalogModes(), window.getDigitalModes(),
+                            window.getCenterFrequency(), window.getPrimaryMode(),
+                            window.getSecondaryMode().orElse(null));
+                });
+
+                buttonPane.add(newBookmark);
                 buttonPane.add(btnDelete);
                 buttonPane.add(okButton);
                 getRootPane().setDefaultButton(okButton);
@@ -218,7 +226,7 @@ public class BookmarksDialog extends JDialog {
         }
     }
 
-    public static MergedLabel show(ReceiverCache cache, Frame window, String profile) {
+    public static MergedLabel show(ReceiverCache cache, ReceiverWindow window, String profile) {
         BookmarksDialog dialog = new BookmarksDialog(cache, window, profile);
         dialog.setVisible(true);
         return dialog.label;
