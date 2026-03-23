@@ -150,6 +150,10 @@ public class FFTPanel extends BandplanPanel {
         return panelListeners.remove(listener);
     }
 
+    public void resetLabels() {
+        labels.clear();
+    }
+
     public void resetMaxFFT() {
         synchronized (fftValuesMaxLock) {
             fftValuesMax = new float[0];

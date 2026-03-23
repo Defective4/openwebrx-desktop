@@ -9,7 +9,10 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -33,7 +36,7 @@ import io.github.defective4.sdr.owrxdesktop.ui.component.UserBookmark;
 import io.github.defective4.sdr.owrxdesktop.ui.component.render.FFTLabelRenderer;
 
 public class BookmarksDialog extends JDialog {
-    public static record MergedLabel(FFTLabel label, String profile) {
+    public static record MergedLabel(FFTLabel label, String profile, Optional<UUID> uuid) {
 
     }
 
@@ -135,9 +138,16 @@ public class BookmarksDialog extends JDialog {
 
                 FrequencyFormatter fmt = new FrequencyFormatter();
 
-                List<MergedLabel> sorted = cache.getLabels().entrySet().stream()
-                        .flatMap(t -> t.getValue().stream().map(l -> new MergedLabel(l, t.getKey())))
-                        .sorted((o1, o2) -> o2.label.freq() - o1.label.freq()).toList();
+                List<MergedLabel> sorted = new ArrayList<>(cache.getLabels().entrySet().stream()
+                        .flatMap(t -> t.getValue().stream().map(l -> new MergedLabel(l, t.getKey(), Optional.empty())))
+                        .toList());
+
+                sorted.addAll(cache.getBookmarksMap().entrySet().stream()
+                        .map((entry) -> new MergedLabel(entry.getValue().toLabel(), entry.getValue().profile(),
+                                Optional.of(UUID.fromString(entry.getKey()))))
+                        .toList());
+
+                Collections.sort(sorted, (o1, o2) -> o2.label.freq() - o1.label.freq());
 
                 ActionListener checkListener = e -> {
                     boolean allChecked = true;
@@ -157,7 +167,8 @@ public class BookmarksDialog extends JDialog {
                 for (MergedLabel label : sorted) {
                     try {
                         JCheckBox checkBox = new JCheckBox();
-                        checkBox.setEnabled(!label.profile().equals(profile));
+                        checkBox.setEnabled(
+                                label.label().type() == FFTLabel.Type.CL_BOOKMARK || !label.profile().equals(profile));
                         checkBox.addActionListener(checkListener);
                         checkBox.setBackground(new Color(0, 0, 0, 0));
 
@@ -206,7 +217,13 @@ public class BookmarksDialog extends JDialog {
                                 toDelete.add(label);
                             }
                         }
-                        toDelete.forEach(label -> cache.removeLabel(label.profile(), label.label()));
+                        toDelete.forEach(label -> {
+                            cache.removeLabel(label.profile(), label.label());
+                            label.uuid().ifPresent(cache::removeBookmark);
+                        });
+                        window.resetLabels();
+                        window.setLabels(cache.getLabels().getOrDefault(profile, List.of()));
+                        window.setLabels(cache.getUserBookmarks(profile).stream().map(UserBookmark::toLabel).toList());
                         dispose();
                         label = show(cache, window, profile);
                     }

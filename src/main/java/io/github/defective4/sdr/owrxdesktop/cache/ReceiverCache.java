@@ -25,17 +25,20 @@ public class ReceiverCache {
         labels.remove(profile);
     }
 
+    public Map<String, UserBookmark> getBookmarksMap() {
+        return Collections.unmodifiableMap(bookmarks);
+    }
+
     public Map<String, List<FFTLabel>> getLabels() {
-        Map<String, List<FFTLabel>> labels = new HashMap<>();
-        this.labels.forEach((k, v) -> labels.put(k, new ArrayList<>(v)));
-        for (UserBookmark bookmark : bookmarks.values()) {
-            labels.computeIfAbsent(bookmark.profile(), t -> new ArrayList<>()).add(bookmark.toLabel());
-        }
         return Collections.unmodifiableMap(labels);
     }
 
     public List<UserBookmark> getUserBookmarks(String profile) {
         return bookmarks.values().stream().filter(bm -> bm.profile().equals(profile)).toList();
+    }
+
+    public void removeBookmark(UUID uuid) {
+        bookmarks.remove(uuid.toString());
     }
 
     public void removeLabel(String profile, FFTLabel label) {

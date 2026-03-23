@@ -890,6 +890,10 @@ public class ReceiverWindow extends JFrame {
         maxFFT = Integer.MIN_VALUE;
     }
 
+    public void resetLabels() {
+        fftPanel.resetLabels();
+    }
+
     public void setBandwidth(int bandwidth) {
         this.bandwidth = bandwidth;
         for (TuneablePanel fftPanel : getPanels()) fftPanel.setBandwidth(bandwidth);
@@ -918,6 +922,8 @@ public class ReceiverWindow extends JFrame {
     public void setFFTMax(float f) {
         for (TuneablePanel fftPanel : getPanels()) fftPanel.setFFTMax(f);
     }
+
+
 
     public void setFFTMin(float f) {
         for (TuneablePanel fftPanel : getPanels()) fftPanel.setFFTMin(f);
