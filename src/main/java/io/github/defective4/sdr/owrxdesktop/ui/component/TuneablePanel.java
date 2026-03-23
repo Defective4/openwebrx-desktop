@@ -262,6 +262,10 @@ public abstract class TuneablePanel extends JComponent implements FFTVisualizer 
         if (fireEvents) listeners.forEach(ls -> ls.tuned(this.offset));
     }
 
+    protected int calculateOffsetAtPoint(int x) {
+        return (int) Math.round(x * calculateHerzPerPixel() - bandwidth / 2);
+    }
+
     protected double calculatePixelPerHerz() {
         return getWidth() / (double) bandwidth;
     }
@@ -306,10 +310,6 @@ public abstract class TuneablePanel extends JComponent implements FFTVisualizer 
 
     private double calculateHerzPerPixel() {
         return bandwidth / (double) getWidth();
-    }
-
-    private int calculateOffsetAtPoint(int x) {
-        return (int) Math.round(x * calculateHerzPerPixel() - bandwidth / 2);
     }
 
     private int getScopeArea(int x) {

@@ -22,12 +22,20 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import javax.swing.JMenuItem;
+import javax.swing.JPopupMenu;
+import javax.swing.JSeparator;
+
 import io.github.defective4.sdr.owrxdesktop.bandplan.Band;
 import io.github.defective4.sdr.owrxdesktop.bandplan.Bandplan;
 import io.github.defective4.sdr.owrxdesktop.ui.component.FFTLabel.Type;
 
 public class FFTPanel extends BandplanPanel {
     public static interface FFTPanelListener {
+        void bookmarkAdding(int freq);
+
+        boolean isReady();
+
         void labelClicked(FFTLabel label);
     }
 
@@ -55,17 +63,19 @@ public class FFTPanel extends BandplanPanel {
     private final Set<FFTLabel.Type> labelRenderMode = new HashSet<>(Set.of(FFTLabel.Type.values()));
 
     private final List<FFTLabel> labels = new ArrayList<>();
+    private final JPopupMenu menu = new JPopupMenu();
+
     private final Deque<LabelSpace> occupied = new LinkedList<>();
 
     private final List<FFTPanelListener> panelListeners = new CopyOnWriteArrayList<>();
 
     private FFTLabel selectedLabel;
-
     private boolean showBandplan = true;
     private boolean solid;
 
     public FFTPanel(Bandplan bandplan) {
         super(bandplan);
+
         MouseAdapter adapter = new MouseAdapter() {
             Cursor def = new Cursor(DEFAULT_CURSOR);
             Cursor pointer = new Cursor(HAND_CURSOR);
@@ -84,8 +94,32 @@ public class FFTPanel extends BandplanPanel {
             @Override
             public void mousePressed(MouseEvent e) {
                 FFTLabel label = getLabelAt(e.getX(), e.getY());
-                if (label != null) {
-                    panelListeners.forEach(ls -> ls.labelClicked(label));
+                switch (e.getButton()) {
+                    case MouseEvent.BUTTON1 -> {
+                        if (label != null) {
+                            panelListeners.forEach(ls -> ls.labelClicked(label));
+                        }
+                    }
+                    case MouseEvent.BUTTON3 -> {
+                        JMenuItem freqItem = new JMenuItem(getDisplayFrequencyAt(e.getX(), 100, true));
+                        freqItem.setEnabled(false);
+
+                        menu.removeAll();
+
+                        menu.add(freqItem);
+                        menu.add(new JSeparator());
+
+                        JMenuItem addBookmarkItem = new JMenuItem("Add bookmark");
+                        int freq = (int) Math
+                                .round((calculateOffsetAtPoint(e.getX()) + centerFrequency) / (double) tuningStep)
+                                * tuningStep;
+                        addBookmarkItem.addActionListener(i -> panelListeners.forEach(ls -> ls.bookmarkAdding(freq)));
+                        addBookmarkItem.setEnabled(panelListeners.stream().allMatch(FFTPanelListener::isReady));
+                        menu.add(addBookmarkItem);
+
+                        menu.show(FFTPanel.this, e.getX(), e.getY());
+                    }
+                    default -> {}
                 }
             }
         };

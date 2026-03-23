@@ -24,10 +24,12 @@ import io.github.defective4.sdr.owrxclient.model.ServerConfig;
 import io.github.defective4.sdr.owrxdesktop.audio.AudioSinkManager;
 import io.github.defective4.sdr.owrxdesktop.bandplan.Bandplan;
 import io.github.defective4.sdr.owrxdesktop.cache.ReceiverCache;
+import io.github.defective4.sdr.owrxdesktop.ui.BookmarkEditorDialog;
 import io.github.defective4.sdr.owrxdesktop.ui.BookmarksDialog.MergedLabel;
 import io.github.defective4.sdr.owrxdesktop.ui.ReceiverWindow;
 import io.github.defective4.sdr.owrxdesktop.ui.component.FFTLabel;
 import io.github.defective4.sdr.owrxdesktop.ui.component.FFTLabel.Type;
+import io.github.defective4.sdr.owrxdesktop.ui.component.FFTPanel.FFTPanelListener;
 import io.github.defective4.sdr.owrxdesktop.ui.component.UserBookmark;
 import io.github.defective4.sdr.owrxdesktop.ui.event.UserInteractionListener;
 import io.github.defective4.sdr.owrxdesktop.ui.settings.ReceiverUserSettings;
@@ -144,21 +146,41 @@ public class RadioReceiver {
 
         rxWindow.getListeners().forEach(ls -> ls.settingsChanged());
 
-        rxWindow.addFFTPanelListener(label -> {
-            int offset = label.freq() - rxWindow.getCenterFrequency();
-            rxWindow.tune(offset, true, false);
-            client.getModeByName(label.mode()).ifPresent(mode -> {
-                if (label.underlying() != null) {
-                    Optional<ReceiverMode> uOpt = client.getModeByName(label.underlying());
-                    if (uOpt.isPresent()) {
-                        client.setModulation(mode, uOpt.get());
-                        rxWindow.setStartingMode(mode);
-                        return;
+        rxWindow.addFFTPanelListener(new FFTPanelListener() {
+            @Override
+            public void bookmarkAdding(int freq) {
+                BookmarkEditorDialog
+                        .show(rxWindow, rxWindow.getAnalogModes(), rxWindow.getDigitalModes(), freq,
+                                rxWindow.getPrimaryMode(), rxWindow.getSecondaryMode().orElse(null), profileId)
+                        .ifPresent(bookmark -> {
+                            cache.addBookmark(bookmark);
+                            rxWindow.setLabels(
+                                    cache.getUserBookmarks(profileId).stream().map(UserBookmark::toLabel).toList());
+                        });
+            }
+
+            @Override
+            public boolean isReady() {
+                return !rxWindow.getAnalogModes().isEmpty();
+            }
+
+            @Override
+            public void labelClicked(FFTLabel label) {
+                int offset = label.freq() - rxWindow.getCenterFrequency();
+                rxWindow.tune(offset, true, false);
+                client.getModeByName(label.mode()).ifPresent(mode -> {
+                    if (label.underlying() != null) {
+                        Optional<ReceiverMode> uOpt = client.getModeByName(label.underlying());
+                        if (uOpt.isPresent()) {
+                            client.setModulation(mode, uOpt.get());
+                            rxWindow.setStartingMode(mode);
+                            return;
+                        }
                     }
-                }
-                client.setModulation(mode);
-                rxWindow.setStartingMode(mode);
-            });
+                    client.setModulation(mode);
+                    rxWindow.setStartingMode(mode);
+                });
+            }
         });
     }
 
