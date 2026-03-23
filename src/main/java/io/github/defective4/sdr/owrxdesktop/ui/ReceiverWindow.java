@@ -139,41 +139,6 @@ public class ReceiverWindow extends JFrame {
         JPanel mainPanel = new JPanel();
         mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
 
-        JMenuBar menuBar = new JMenuBar();
-        menuBar.setAlignmentX(Component.LEFT_ALIGNMENT);
-        mainPanel.add(menuBar);
-
-        {
-            JMenu mnFile = new JMenu("File");
-            menuBar.add(mnFile);
-
-            JMenuItem mntmQuit = new JMenuItem("Quit");
-            mntmQuit.addActionListener(e -> exit());
-            mntmQuit.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_Q, InputEvent.CTRL_DOWN_MASK));
-            mnFile.add(mntmQuit);
-        }
-
-        {
-            JMenu mnWindow = new JMenu("Window");
-            menuBar.add(mnWindow);
-
-            JMenuItem mntmSettings = new JMenuItem("Settings...");
-            mntmSettings.addActionListener(e -> showSettings());
-            mntmSettings.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_O, InputEvent.CTRL_DOWN_MASK));
-            mnWindow.add(mntmSettings);
-
-            mntmBookmarks.setEnabled(false);
-            mntmBookmarks.addActionListener(e -> {
-                ReceiverProfile profile = (ReceiverProfile) profileBox.getSelectedItem();
-                MergedLabel label = BookmarksDialog.show(cache, this, profile == null ? null : profile.uuids()[1]);
-                if (label != null) {
-                    listeners.forEach(ls -> ls.bookmarkJumped(label));
-                }
-            });
-            mntmBookmarks.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_B, InputEvent.CTRL_DOWN_MASK));
-            mnWindow.add(mntmBookmarks);
-        }
-
         JSplitPane splitPane = new JSplitPane();
         splitPane.setResizeWeight(1);
 
@@ -801,6 +766,40 @@ public class ReceiverWindow extends JFrame {
                     .addChangeListener(e -> listeners.forEach(ls -> ls.volumeChanged(volumeSlider.getValue() / 100f)));
 
             confirmComponentState(muteCheck);
+
+            JMenuBar menuBar = new JMenuBar();
+            setJMenuBar(menuBar);
+
+            {
+                JMenu mnFile = new JMenu("File");
+                menuBar.add(mnFile);
+
+                JMenuItem mntmQuit = new JMenuItem("Quit");
+                mntmQuit.addActionListener(e -> exit());
+                mntmQuit.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_Q, InputEvent.CTRL_DOWN_MASK));
+                mnFile.add(mntmQuit);
+            }
+
+            {
+                JMenu mnWindow = new JMenu("Window");
+                menuBar.add(mnWindow);
+
+                JMenuItem mntmSettings = new JMenuItem("Settings...");
+                mntmSettings.addActionListener(e -> showSettings());
+                mntmSettings.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_O, InputEvent.CTRL_DOWN_MASK));
+                mnWindow.add(mntmSettings);
+
+                mntmBookmarks.setEnabled(false);
+                mntmBookmarks.addActionListener(e -> {
+                    ReceiverProfile profile = (ReceiverProfile) profileBox.getSelectedItem();
+                    MergedLabel label = BookmarksDialog.show(cache, this, profile == null ? null : profile.uuids()[1]);
+                    if (label != null) {
+                        listeners.forEach(ls -> ls.bookmarkJumped(label));
+                    }
+                });
+                mntmBookmarks.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_B, InputEvent.CTRL_DOWN_MASK));
+                mnWindow.add(mntmBookmarks);
+            }
 
             disableControls();
         }
