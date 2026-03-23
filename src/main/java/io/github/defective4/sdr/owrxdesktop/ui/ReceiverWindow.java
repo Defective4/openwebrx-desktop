@@ -118,13 +118,14 @@ public class ReceiverWindow extends JFrame {
 
     private int temperatureC = Integer.MIN_VALUE;
 
+    private final JFrequencySpinner tuningStepSpinner = new JFrequencySpinner();
     private final ReceiverUserSettings userSettings;
     private final WaterfallPanel waterfallPanel;
 
     public ReceiverWindow(ReceiverUserSettings settings, ReceiverCache cache) {
         userSettings = settings;
         resetAutoFFT();
-        setBounds(100, 100, 768, 550);
+        setBounds(100, 100, 768, 600);
         setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
         addWindowListener(new WindowAdapter() {
             @Override
@@ -249,9 +250,9 @@ public class ReceiverWindow extends JFrame {
             controlTabs.addTab("RX", null, rxCtlPanel, null);
             GridBagLayout gbl_rxCtlPanel = new GridBagLayout();
             gbl_rxCtlPanel.columnWidths = new int[] { 225, 0 };
-            gbl_rxCtlPanel.rowHeights = new int[] { 0, 0, 0, 0, 0, 0 };
-            gbl_rxCtlPanel.columnWeights = new double[] { 0.0, Double.MIN_VALUE };
-            gbl_rxCtlPanel.rowWeights = new double[] { 0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE };
+            gbl_rxCtlPanel.rowHeights = new int[] { 0, 0, 0, 0, 0, 0, 0 };
+            gbl_rxCtlPanel.columnWeights = new double[] { 1.0, Double.MIN_VALUE };
+            gbl_rxCtlPanel.rowWeights = new double[] { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE };
             rxCtlPanel.setLayout(gbl_rxCtlPanel);
 
             JPanel freqPanel = new JPanel();
@@ -477,6 +478,7 @@ public class ReceiverWindow extends JFrame {
             levelsPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
             levelsPanel.setBorder(new TitledBorder(null, "Levels", TitledBorder.LEADING, TitledBorder.TOP, null, null));
             GridBagConstraints gbc_levelsPanel = new GridBagConstraints();
+            gbc_levelsPanel.insets = new Insets(0, 0, 5, 0);
             gbc_levelsPanel.fill = GridBagConstraints.HORIZONTAL;
             gbc_levelsPanel.gridx = 0;
             gbc_levelsPanel.gridy = 4;
@@ -502,6 +504,28 @@ public class ReceiverWindow extends JFrame {
             cpuBar.setStringPainted(true);
 
             cpuBar.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+            JPanel panel = new JPanel();
+            panel.setBorder(new TitledBorder(null, "Tuning step", TitledBorder.LEADING, TitledBorder.TOP, null, null));
+            GridBagConstraints gbc_panel = new GridBagConstraints();
+            gbc_panel.fill = GridBagConstraints.BOTH;
+            gbc_panel.gridx = 0;
+            gbc_panel.gridy = 5;
+            rxCtlPanel.add(panel, gbc_panel);
+            GridBagLayout gbl_panel = new GridBagLayout();
+            gbl_panel.columnWidths = new int[] { 83, 0 };
+            gbl_panel.rowHeights = new int[] { 24, 0 };
+            gbl_panel.columnWeights = new double[] { 1.0, Double.MIN_VALUE };
+            gbl_panel.rowWeights = new double[] { 0.0, Double.MIN_VALUE };
+            panel.setLayout(gbl_panel);
+
+            tuningStepSpinner.addChangeListener(e -> setTuningStep((int) tuningStepSpinner.getValue()));
+            GridBagConstraints gbc_spinner = new GridBagConstraints();
+            gbc_spinner.fill = GridBagConstraints.HORIZONTAL;
+            gbc_spinner.anchor = GridBagConstraints.NORTH;
+            gbc_spinner.gridx = 0;
+            gbc_spinner.gridy = 0;
+            panel.add(tuningStepSpinner, gbc_spinner);
         }
 
         {
@@ -929,8 +953,6 @@ public class ReceiverWindow extends JFrame {
         for (TuneablePanel fftPanel : getPanels()) fftPanel.setFFTMax(f);
     }
 
-
-
     public void setFFTMin(float f) {
         for (TuneablePanel fftPanel : getPanels()) fftPanel.setFFTMin(f);
     }
@@ -1004,6 +1026,7 @@ public class ReceiverWindow extends JFrame {
 
     public void setTuningStep(int tuningStep) {
         for (TuneablePanel fftPanel : getPanels()) fftPanel.setTuningStep(tuningStep);
+        tuningStepSpinner.setValue(tuningStep);
     }
 
     public void setWaterfallTheme(Color[] theme) {
@@ -1085,6 +1108,7 @@ public class ReceiverWindow extends JFrame {
         analogBox.setEnabled(state);
         digitalBox.setEnabled(state);
         freqSpinner.setEnabled(state);
+        tuningStepSpinner.setEnabled(state);
     }
 
     private void updateCPU() {
