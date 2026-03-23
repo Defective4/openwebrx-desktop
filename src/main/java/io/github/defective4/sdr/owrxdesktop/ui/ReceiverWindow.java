@@ -712,20 +712,26 @@ public class ReceiverWindow extends JFrame {
             gbc_labelsPanel.gridx = 0;
             gbc_labelsPanel.gridy = 2;
             fftCtlPanel.add(labelsPanel, gbc_labelsPanel);
-            labelsPanel.setLayout(new FlowLayout(FlowLayout.LEFT, 0, 0));
 
             JCheckBox dialCheck = new JCheckBox("Dial frequencies");
             dialCheck.addActionListener(e -> fftPanel.setLabelRender(FFTLabel.Type.DIAL, dialCheck.isSelected()));
+            labelsPanel.setLayout(new BoxLayout(labelsPanel, BoxLayout.Y_AXIS));
             dialCheck.setSelected(true);
             labelsPanel.add(dialCheck);
 
             confirmComponentState(dialCheck);
 
-            JCheckBox bookmarksCheck = new JCheckBox("Bookmarks");
+            JCheckBox bookmarksCheck = new JCheckBox("Server bookmarks");
             bookmarksCheck.addActionListener(
                     e -> fftPanel.setLabelRender(FFTLabel.Type.SRV_BOOKMARK, bookmarksCheck.isSelected()));
             bookmarksCheck.setSelected(true);
             labelsPanel.add(bookmarksCheck);
+
+            JCheckBox clBookmarksCheck = new JCheckBox("Personal bookmarks");
+            clBookmarksCheck.addActionListener(
+                    e -> fftPanel.setLabelRender(FFTLabel.Type.CL_BOOKMARK, clBookmarksCheck.isSelected()));
+            clBookmarksCheck.setSelected(true);
+            labelsPanel.add(clBookmarksCheck);
         }
 
         {
