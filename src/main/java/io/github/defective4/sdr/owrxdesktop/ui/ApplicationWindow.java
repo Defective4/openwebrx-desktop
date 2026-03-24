@@ -15,6 +15,7 @@ import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
+import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
 import javax.swing.JTabbedPane;
@@ -119,6 +120,13 @@ public class ApplicationWindow extends JFrame {
         invalidate();
     }
 
+    public void removeEntry(ReceiverEntryComponent entry) {
+        userStorage.removeEntry(entry.getEntry());
+        updateEntries();
+        invalidate();
+        repaint();
+    }
+
     public void updateEntries() {
         rxContainer.removeAll();
         userStorage.getUserEntries().forEach(this::addPersonalEntry);
@@ -151,7 +159,20 @@ public class ApplicationWindow extends JFrame {
                 rxcpt.updateEntry();
                 updateEntryAsync(rxcpt);
             });
-            return List.of(connect, refresh);
+            JButton more = new JButton("...");
+            more.addActionListener(e -> {
+                JPopupMenu menu = new JPopupMenu();
+                JMenuItem editRx = new JMenuItem("Edit receiver settings...");
+                JMenuItem deleteRx = new JMenuItem("Remove");
+
+                deleteRx.addActionListener(e2 -> removeEntry(rxcpt));
+                editRx.addActionListener(e2 -> SettingsDialog.show(this, rxcpt.getEntry().getSettings()));
+
+                menu.add(editRx);
+                menu.add(deleteRx);
+                menu.show(more, 0, 0);
+            });
+            return List.of(connect, refresh, more);
         });
         return cpt;
     }

@@ -31,4 +31,8 @@ public class UserStorage {
         return Collections.unmodifiableList(userEntries);
     }
 
+    public void removeEntry(ReceiverEntry entry) {
+        userEntries.remove(entry);
+    }
+
 }
