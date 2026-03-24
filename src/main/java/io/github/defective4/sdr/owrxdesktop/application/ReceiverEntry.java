@@ -4,7 +4,9 @@ import java.awt.image.BufferedImage;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.net.MalformedURLException;
 import java.net.URI;
+import java.net.URL;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -26,8 +28,9 @@ public class ReceiverEntry {
     private final ReceiverUserSettings settings;
     private final UUID uuid = UUID.randomUUID();
 
-    public ReceiverEntry(String rootURL, ReceiverUserSettings settings) {
+    public ReceiverEntry(String rootURL, ReceiverUserSettings settings) throws MalformedURLException {
         if (!rootURL.endsWith("/")) rootURL += "/";
+        URI.create(rootURL).toURL();
         this.rootURL = rootURL;
         this.settings = settings;
     }
@@ -46,6 +49,18 @@ public class ReceiverEntry {
 
     public ReceiverUserSettings getSettings() {
         return settings;
+    }
+
+    public URI getWebsocketURI() {
+        try {
+            URL url = URI.create(rootURL).toURL();
+            String protocol = url.getProtocol();
+            String wsProtocol = protocol.equalsIgnoreCase("https") ? "wss" : "ws";
+            return URI.create(String.format("%s://%s%s/ws/", wsProtocol, url.getHost(),
+                    url.getPort() <= 0 ? "" : ":" + url.getPort()));
+        } catch (MalformedURLException e) {
+            throw new IllegalStateException(e);
+        }
     }
 
     public boolean isQuerying() {

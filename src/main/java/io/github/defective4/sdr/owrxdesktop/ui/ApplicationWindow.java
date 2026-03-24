@@ -4,9 +4,12 @@ import java.awt.BorderLayout;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.net.URI;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import javax.sound.sampled.LineUnavailableException;
+import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
@@ -17,6 +20,7 @@ import javax.swing.JSeparator;
 import javax.swing.JTabbedPane;
 import javax.swing.KeyStroke;
 
+import io.github.defective4.sdr.owrxdesktop.RadioReceiver;
 import io.github.defective4.sdr.owrxdesktop.application.ReceiverEntry;
 import io.github.defective4.sdr.owrxdesktop.application.UserStorage;
 import io.github.defective4.sdr.owrxdesktop.ui.component.ReceiverEntryComponent;
@@ -59,7 +63,7 @@ public class ApplicationWindow extends JFrame {
                         ReceiverEntry entry = new ReceiverEntry(url, userStorage.getDefaultSettings());
                         userStorage.addEntry(entry);
                         entry.setQuerying();
-                        ReceiverEntryComponent cpt = rxContainer.addEntry(entry);
+                        ReceiverEntryComponent cpt = addPersonalEntry(entry);
                         updateEntryAsync(cpt);
                     } catch (Exception e1) {
                         JOptionPane.showMessageDialog(this, "The URL address you entered is invalid", "Invalid URL",
@@ -117,7 +121,7 @@ public class ApplicationWindow extends JFrame {
 
     public void updateEntries() {
         rxContainer.removeAll();
-        userStorage.getUserEntries().forEach(rxContainer::addEntry);
+        userStorage.getUserEntries().forEach(this::addPersonalEntry);
     }
 
     public void updateEntryAsync(ReceiverEntryComponent cpt) {
@@ -125,5 +129,30 @@ public class ApplicationWindow extends JFrame {
             cpt.getEntry().query();
             cpt.updateEntry();
         });
+    }
+
+    private ReceiverEntryComponent addPersonalEntry(ReceiverEntry entry) {
+        ReceiverEntryComponent cpt = rxContainer.addEntry(entry, rxcpt -> {
+            JButton connect = new JButton("Connect");
+            connect.addActionListener(e -> {
+                setVisible(false);
+                ReceiverEntry rxEntry = rxcpt.getEntry();
+                try {
+                    RadioReceiver rx = new RadioReceiver(rxEntry.getWebsocketURI(), rxEntry.getSettings());
+                    rx.setVisible(true);
+                    rx.connect();
+                } catch (LineUnavailableException | InterruptedException e1) {
+                    e1.printStackTrace();
+                }
+            });
+            JButton refresh = new JButton("Refresh");
+            refresh.addActionListener(e -> {
+                rxcpt.getEntry().setQuerying();
+                rxcpt.updateEntry();
+                updateEntryAsync(rxcpt);
+            });
+            return List.of(connect, refresh);
+        });
+        return cpt;
     }
 }

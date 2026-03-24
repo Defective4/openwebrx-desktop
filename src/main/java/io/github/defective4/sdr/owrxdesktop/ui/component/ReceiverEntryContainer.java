@@ -7,10 +7,13 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.Function;
 
 import javax.imageio.ImageIO;
+import javax.swing.JButton;
 import javax.swing.JPanel;
 
 import io.github.defective4.sdr.owrxdesktop.application.ReceiverEntry;
@@ -33,8 +36,9 @@ public class ReceiverEntryContainer extends JPanel {
         setLayout(gbl_rxContainer);
     }
 
-    public ReceiverEntryComponent addEntry(ReceiverEntry entry) {
-        ReceiverEntryComponent component = new ReceiverEntryComponent(entry, rxPlaceholder);
+    public ReceiverEntryComponent addEntry(ReceiverEntry entry,
+            Function<ReceiverEntryComponent, Collection<JButton>> buttonFunction) {
+        ReceiverEntryComponent component = new ReceiverEntryComponent(entry, rxPlaceholder, buttonFunction);
         GridBagConstraints gbc_panel = new GridBagConstraints();
         gbc_panel.anchor = GridBagConstraints.WEST;
         gbc_panel.fill = GridBagConstraints.VERTICAL;

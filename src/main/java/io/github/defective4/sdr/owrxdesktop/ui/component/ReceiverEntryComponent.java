@@ -5,7 +5,10 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.image.BufferedImage;
+import java.util.Collection;
+import java.util.function.Function;
 
+import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
@@ -19,7 +22,7 @@ public class ReceiverEntryComponent extends JPanel {
     private final JLabel receiverName = new JLabel("");
     private final JLabel receiverSoftware = new JLabel("");
 
-    public ReceiverEntryComponent(ReceiverEntry entry, BufferedImage placeholder) {
+    public ReceiverEntryComponent(ReceiverEntry entry, BufferedImage placeholder, Function<ReceiverEntryComponent, Collection<JButton>> buttonFunction) {
         this.entry = entry;
         this.placeholder = placeholder;
         setBorder(new EmptyBorder(5, 5, 5, 5));
@@ -49,25 +52,36 @@ public class ReceiverEntryComponent extends JPanel {
         add(panel, gbc_panel);
         GridBagLayout gbl_panel = new GridBagLayout();
         gbl_panel.columnWidths = new int[] { 0, 0 };
-        gbl_panel.rowHeights = new int[] { 0, 0, 0 };
+        gbl_panel.rowHeights = new int[] { 0, 0, 0, 0 };
         gbl_panel.columnWeights = new double[] { 0.0, Double.MIN_VALUE };
-        gbl_panel.rowWeights = new double[] { 0.0, 0.0, Double.MIN_VALUE };
+        gbl_panel.rowWeights = new double[] { 0.0, 0.0, 0.0, Double.MIN_VALUE };
         panel.setLayout(gbl_panel);
         {
             receiverName.setFont(receiverName.getFont().deriveFont(19f));
             GridBagConstraints gbc_receiverName = new GridBagConstraints();
             gbc_receiverName.insets = new Insets(0, 0, 5, 0);
-            gbc_receiverName.anchor = GridBagConstraints.NORTHWEST;
+            gbc_receiverName.anchor = GridBagConstraints.WEST;
             gbc_receiverName.gridx = 0;
             gbc_receiverName.gridy = 0;
             panel.add(receiverName, gbc_receiverName);
         }
         {
             GridBagConstraints gbc_lblSoftware = new GridBagConstraints();
+            gbc_lblSoftware.insets = new Insets(0, 0, 5, 0);
             gbc_lblSoftware.anchor = GridBagConstraints.WEST;
             gbc_lblSoftware.gridx = 0;
             gbc_lblSoftware.gridy = 1;
             panel.add(receiverSoftware, gbc_lblSoftware);
+        }
+        {
+            JPanel controlsPanel = new JPanel();
+            GridBagConstraints gbc_panel_1 = new GridBagConstraints();
+            gbc_panel_1.insets = new Insets(0, 0, 5, 0);
+            gbc_panel_1.anchor = GridBagConstraints.NORTHWEST;
+            gbc_panel_1.gridx = 0;
+            gbc_panel_1.gridy = 2;
+            buttonFunction.apply(this).forEach(controlsPanel::add);
+            panel.add(controlsPanel, gbc_panel_1);
         }
 
         updateEntry();
