@@ -1,6 +1,7 @@
 # OpenWebRX Desktop
 
-![screen1](./img/screen1.png)
+<img title="" src="./img/screen1.png" width="45%" alt="screen1">
+<img title="" src="./img/screen2.png" width="45%" alt="screen2">
 
 A desktop client for OpenWebRX(+) receivers
 
