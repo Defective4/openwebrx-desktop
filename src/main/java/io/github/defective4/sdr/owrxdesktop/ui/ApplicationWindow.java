@@ -36,7 +36,8 @@ import io.github.defective4.sdr.owrxdesktop.RadioReceiver;
 import io.github.defective4.sdr.owrxdesktop.application.ReceiverEntry;
 import io.github.defective4.sdr.owrxdesktop.application.StatusResponse;
 import io.github.defective4.sdr.owrxdesktop.application.UserStorage;
-import io.github.defective4.sdr.owrxdesktop.application.integration.receiverbook.ReceiverbookReceiver;
+import io.github.defective4.sdr.owrxdesktop.application.integration.PublicReceiver;
+import io.github.defective4.sdr.owrxdesktop.application.integration.ReceiverScraper;
 import io.github.defective4.sdr.owrxdesktop.application.integration.receiverbook.ReceiverbookScraper;
 import io.github.defective4.sdr.owrxdesktop.ui.component.ReceiverEntryComponent;
 import io.github.defective4.sdr.owrxdesktop.ui.component.ReceiverEntryContainer;
@@ -44,7 +45,7 @@ import io.github.defective4.sdr.owrxdesktop.ui.component.ReceiverEntryContainer;
 public class ApplicationWindow extends JFrame {
     private final ReceiverEntryContainer publicContainer = new ReceiverEntryContainer();
     private final ReceiverEntryContainer rxContainer = new ReceiverEntryContainer();
-    private final ReceiverbookScraper scraper = new ReceiverbookScraper();
+    private final ReceiverScraper scraper = new ReceiverbookScraper();
     private final ExecutorService updateExecutor = Executors.newFixedThreadPool(1);
     private final UserStorage userStorage = new UserStorage();
 
@@ -211,7 +212,7 @@ public class ApplicationWindow extends JFrame {
             String phrase = searchField.getText();
             int limit = (int) limitSpinner.getValue();
 
-            List<ReceiverbookReceiver> rx = scraper.searchReceivers(phrase, limit);
+            List<PublicReceiver> rx = scraper.searchReceivers(phrase, limit);
             publicContainer.removeAll();
             rx.forEach(receiver -> {
                 try {

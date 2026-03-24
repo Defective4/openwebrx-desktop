@@ -17,7 +17,10 @@ import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonParser;
 
-public class ReceiverbookScraper {
+import io.github.defective4.sdr.owrxdesktop.application.integration.PublicReceiver;
+import io.github.defective4.sdr.owrxdesktop.application.integration.ReceiverScraper;
+
+public class ReceiverbookScraper implements ReceiverScraper {
     private static final Pattern JSON_PATTERN = Pattern.compile("^\\s*var\\s+receivers\\s+=\\s+(\\[.*\\]);\\s*$");
     private static final URL RXBOOK_URL;
     static {
@@ -30,21 +33,24 @@ public class ReceiverbookScraper {
 
     private final Gson gson = new Gson();
 
-    private final List<ReceiverbookReceiver> receivers = new ArrayList<>();
+    private final List<PublicReceiver> receivers = new ArrayList<>();
 
     public ReceiverbookScraper() {
-        receivers.add(new ReceiverbookReceiver("Test receiver", "Test", "https://localhost", "OpenWebRX"));
-        receivers.add(new ReceiverbookReceiver("Test receiver", "Test", "https://localhost", "OpenWebRX"));
+        receivers.add(new PublicReceiver("Test receiver", "Test", "https://localhost", "OpenWebRX"));
+        receivers.add(new PublicReceiver("Test receiver", "Test", "https://localhost", "OpenWebRX"));
     }
 
-    public List<ReceiverbookReceiver> getReceivers() {
+    @Override
+    public List<PublicReceiver> getReceivers() {
         return Collections.unmodifiableList(receivers);
     }
 
+    @Override
     public boolean hasScraped() {
         return !receivers.isEmpty();
     }
 
+    @Override
     public void scrapeReceivers() throws IOException {
         receivers.clear();
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(RXBOOK_URL.openStream()));
@@ -59,7 +65,7 @@ public class ReceiverbookScraper {
                         try {
                             ReceiverbookStation station = gson.fromJson(element, ReceiverbookStation.class);
                             if (station != null)
-                                for (ReceiverbookReceiver rx : station.receivers()) if ("OpenWebRX".equals(rx.type())) {
+                                for (PublicReceiver rx : station.receivers()) if ("OpenWebRX".equals(rx.type())) {
                                     receivers.add(rx);
                                 }
                         } catch (Exception e) {
@@ -72,7 +78,8 @@ public class ReceiverbookScraper {
         }
     }
 
-    public List<ReceiverbookReceiver> searchReceivers(String phrase, int limit) {
+    @Override
+    public List<PublicReceiver> searchReceivers(String phrase, int limit) {
         return receivers.stream().filter(rx -> rx.label().toLowerCase().contains(phrase.toLowerCase())).limit(limit)
                 .toList();
     }

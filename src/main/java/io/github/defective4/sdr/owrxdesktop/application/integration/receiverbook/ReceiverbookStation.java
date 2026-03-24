@@ -1,5 +1,7 @@
 package io.github.defective4.sdr.owrxdesktop.application.integration.receiverbook;
 
-public record ReceiverbookStation(String label, ReceiverbookReceiver[] receivers) {
+import io.github.defective4.sdr.owrxdesktop.application.integration.PublicReceiver;
+
+public record ReceiverbookStation(String label, PublicReceiver[] receivers) {
 
 }
