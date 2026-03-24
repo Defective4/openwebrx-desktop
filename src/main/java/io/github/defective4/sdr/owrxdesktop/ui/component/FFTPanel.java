@@ -101,6 +101,7 @@ public class FFTPanel extends BandplanPanel {
                         }
                     }
                     case MouseEvent.BUTTON3 -> {
+                        if(e.getY() >= getLineHeight()) break;
                         JMenuItem freqItem = new JMenuItem(getDisplayFrequencyAt(e.getX(), 100, true));
                         freqItem.setEnabled(false);
 
