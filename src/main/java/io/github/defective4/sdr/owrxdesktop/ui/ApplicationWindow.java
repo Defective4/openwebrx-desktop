@@ -225,8 +225,8 @@ public class ApplicationWindow extends JFrame {
                             setVisible(false);
                             ReceiverEntry rxEntry = cpt.getEntry();
                             try {
-                                RadioReceiver rx = new RadioReceiver(rxEntry.getWebsocketURI(), rxEntry.getSettings(), this,
-                                        rxEntry.getCache());
+                                RadioReceiver rx = new RadioReceiver(rxEntry.getWebsocketURI(), rxEntry.getSettings(),
+                                        this, rxEntry.getCache());
                                 rx.setVisible(true);
                                 rx.connect();
                             } catch (LineUnavailableException | InterruptedException e1) {
@@ -244,7 +244,15 @@ public class ApplicationWindow extends JFrame {
                             updateEntryAsync(newCpt);
                         });
 
-                        return List.of(connectButton, addButton);
+                        JButton queryButton = new JButton("Query");
+                        queryButton.addActionListener(e2 -> {
+                            ReceiverEntry rxEntry = cpt.getEntry();
+                            rxEntry.setQuerying();
+                            cpt.updateEntry();
+                            updateEntryAsync(cpt);
+                        });
+
+                        return List.of(connectButton, addButton, queryButton);
                     });
                 } catch (Exception e1) {
                     e1.printStackTrace();
