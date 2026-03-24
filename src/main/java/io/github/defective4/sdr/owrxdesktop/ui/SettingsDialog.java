@@ -173,7 +173,6 @@ public class SettingsDialog extends JDialog {
                         builtin.add(rdbtnBuiltin);
                         builtin.add(themesBox);
 
-                        themesBox.setSelectedItem(settings.getSelectedBuiltinWaterfallTheme());
                         GridBagConstraints gbc_rdbtnCustom = new GridBagConstraints();
                         gbc_rdbtnCustom.fill = GridBagConstraints.HORIZONTAL;
                         gbc_rdbtnCustom.insets = new Insets(0, 0, 5, 0);
@@ -195,6 +194,7 @@ public class SettingsDialog extends JDialog {
                         fftThemePanel.add(themeArea, gbc_themeArea);
                         themeArea.setText(String.join("\n", settings.getWaterfallCustomTheme().toArray(new String[0])));
                         for (BuiltinWaterfallTheme theme : BuiltinWaterfallTheme.values()) themesBox.addItem(theme);
+                        themesBox.setSelectedItem(settings.getSelectedBuiltinWaterfallTheme());
 
                         ButtonGroup themeGroup = new ButtonGroup();
 
