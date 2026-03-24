@@ -1,28 +1,17 @@
 package io.github.defective4.sdr.owrxdesktop.ui;
 
 import java.awt.BorderLayout;
-import java.awt.Component;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
-import java.awt.image.BufferedImage;
-import java.io.IOException;
-import java.io.InputStream;
 import java.net.URI;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import javax.imageio.ImageIO;
 import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
-import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
 import javax.swing.JTabbedPane;
@@ -31,23 +20,17 @@ import javax.swing.KeyStroke;
 import io.github.defective4.sdr.owrxdesktop.application.ReceiverEntry;
 import io.github.defective4.sdr.owrxdesktop.application.UserStorage;
 import io.github.defective4.sdr.owrxdesktop.ui.component.ReceiverEntryComponent;
+import io.github.defective4.sdr.owrxdesktop.ui.component.ReceiverEntryContainer;
 
 public class ApplicationWindow extends JFrame {
 
-    private final GridBagLayout gbl_rxContainer = new GridBagLayout();
-    private final JPanel rxContainer = new JPanel();
+    private final ReceiverEntryContainer rxContainer = new ReceiverEntryContainer();
 
-    private final BufferedImage rxPlaceholder;
     private final ExecutorService updateExecutor = Executors.newFixedThreadPool(1);
 
     private final UserStorage userStorage = new UserStorage();
 
     public ApplicationWindow() {
-        try (InputStream is = getClass().getResourceAsStream("/rx-null.png")) {
-            rxPlaceholder = ImageIO.read(is);
-        } catch (IOException e1) {
-            throw new IllegalStateException(e1);
-        }
         setBounds(100, 100, 768, 512);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
@@ -76,7 +59,7 @@ public class ApplicationWindow extends JFrame {
                         ReceiverEntry entry = new ReceiverEntry(url, userStorage.getDefaultSettings());
                         userStorage.addEntry(entry);
                         entry.setQuerying();
-                        ReceiverEntryComponent cpt = addEntry(entry);
+                        ReceiverEntryComponent cpt = rxContainer.addEntry(entry);
                         updateEntryAsync(cpt);
                     } catch (Exception e1) {
                         JOptionPane.showMessageDialog(this, "The URL address you entered is invalid", "Invalid URL",
@@ -118,39 +101,12 @@ public class ApplicationWindow extends JFrame {
             tabbedPane.addTab("Personal", null, scrollPane, null);
             scrollPane.setViewportView(rxContainer);
         }
-        gbl_rxContainer.columnWidths = new int[] { 0, 0 };
-        gbl_rxContainer.rowHeights = new int[] { 0, 0, 0, 0 };
-        gbl_rxContainer.columnWeights = new double[] { 0.0, Double.MIN_VALUE };
-        gbl_rxContainer.rowWeights = new double[] { 0.0, 0.0, 0.0, Double.MIN_VALUE };
-        rxContainer.setLayout(gbl_rxContainer);
 
         updateEntries();
     }
 
-    public ReceiverEntryComponent addEntry(ReceiverEntry entry) {
-        ReceiverEntryComponent component = new ReceiverEntryComponent(entry, rxPlaceholder);
-        GridBagConstraints gbc_panel = new GridBagConstraints();
-        gbc_panel.anchor = GridBagConstraints.WEST;
-        gbc_panel.fill = GridBagConstraints.VERTICAL;
-        gbc_panel.gridx = 0;
-        gbc_panel.gridy = rxContainer.getComponentCount();
-        double[] weight = new double[gbc_panel.gridy + 1];
-        weight[weight.length - 1] = Double.MIN_VALUE;
-        gbl_rxContainer.rowWeights = weight;
-        rxContainer.add(component, gbc_panel);
-        rxContainer.invalidate();
-        return component;
-    }
-
-    public List<ReceiverEntryComponent> getAllReceiverComponents() {
-        List<ReceiverEntryComponent> cpts = new ArrayList<>();
-        for (Component cpt : rxContainer.getComponents())
-            if (cpt instanceof ReceiverEntryComponent rxEntry) cpts.add(rxEntry);
-        return Collections.unmodifiableList(cpts);
-    }
-
     public void refreshPersonalReceivers() {
-        getAllReceiverComponents().forEach(cpt -> {
+        rxContainer.getAllReceiverComponents().forEach(cpt -> {
             ReceiverEntry entry = cpt.getEntry();
             entry.setQuerying();
             cpt.updateEntry();
@@ -161,10 +117,10 @@ public class ApplicationWindow extends JFrame {
 
     public void updateEntries() {
         rxContainer.removeAll();
-        userStorage.getUserEntries().forEach(this::addEntry);
+        userStorage.getUserEntries().forEach(rxContainer::addEntry);
     }
 
-    private void updateEntryAsync(ReceiverEntryComponent cpt) {
+    public void updateEntryAsync(ReceiverEntryComponent cpt) {
         updateExecutor.submit(() -> {
             cpt.getEntry().query();
             cpt.updateEntry();
