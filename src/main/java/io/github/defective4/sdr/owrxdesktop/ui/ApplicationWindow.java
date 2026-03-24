@@ -13,6 +13,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import javax.sound.sampled.LineUnavailableException;
+import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
@@ -39,6 +40,7 @@ import io.github.defective4.sdr.owrxdesktop.application.UserStorage;
 import io.github.defective4.sdr.owrxdesktop.application.integration.PublicReceiverEntry;
 import io.github.defective4.sdr.owrxdesktop.application.integration.ReceiverScraper;
 import io.github.defective4.sdr.owrxdesktop.application.integration.SearchSort;
+import io.github.defective4.sdr.owrxdesktop.application.integration.SearchSortOrder;
 import io.github.defective4.sdr.owrxdesktop.application.integration.receiverbook.ReceiverbookScraper;
 import io.github.defective4.sdr.owrxdesktop.ui.component.ReceiverEntryComponent;
 import io.github.defective4.sdr.owrxdesktop.ui.component.ReceiverEntryContainer;
@@ -150,9 +152,9 @@ public class ApplicationWindow extends JFrame {
         gbc_searchPanel.gridy = 0;
         publicPanel.add(searchPanel, gbc_searchPanel);
         GridBagLayout gbl_searchPanel = new GridBagLayout();
-        gbl_searchPanel.columnWidths = new int[] { 0, 0, 0, 0, 0, 0, 0, 0 };
+        gbl_searchPanel.columnWidths = new int[] { 0, 0, 0, 0, 0, 0, 0, 0, 0 };
         gbl_searchPanel.rowHeights = new int[] { 0 };
-        gbl_searchPanel.columnWeights = new double[] { 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE };
+        gbl_searchPanel.columnWeights = new double[] { 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE };
         gbl_searchPanel.rowWeights = new double[] { 0.0 };
         searchPanel.setLayout(gbl_searchPanel);
 
@@ -195,19 +197,27 @@ public class ApplicationWindow extends JFrame {
         gbc_lblSort.gridy = 0;
         searchPanel.add(lblSort, gbc_lblSort);
 
-        JComboBox<SearchSort> comboBox = new JComboBox<>();
-        for(SearchSort sort : SearchSort.sortedValues())
-            comboBox.addItem(sort);
+        JComboBox<SearchSort> sortBox = new JComboBox<>();
+        sortBox.setModel(new DefaultComboBoxModel<>(SearchSort.sortedValues()));
         GridBagConstraints gbc_comboBox = new GridBagConstraints();
         gbc_comboBox.insets = new Insets(0, 0, 0, 5);
         gbc_comboBox.fill = GridBagConstraints.HORIZONTAL;
         gbc_comboBox.gridx = 5;
         gbc_comboBox.gridy = 0;
-        searchPanel.add(comboBox, gbc_comboBox);
+        searchPanel.add(sortBox, gbc_comboBox);
+
+        JComboBox<SearchSortOrder> sortOrderBox = new JComboBox<>();
+        sortOrderBox.setModel(new DefaultComboBoxModel<>(SearchSortOrder.values()));
+        GridBagConstraints gbc_comboBox_1 = new GridBagConstraints();
+        gbc_comboBox_1.insets = new Insets(0, 0, 0, 5);
+        gbc_comboBox_1.fill = GridBagConstraints.HORIZONTAL;
+        gbc_comboBox_1.gridx = 6;
+        gbc_comboBox_1.gridy = 0;
+        searchPanel.add(sortOrderBox, gbc_comboBox_1);
 
         JButton btnSearch = new JButton("Search");
         GridBagConstraints gbc_btnSearch = new GridBagConstraints();
-        gbc_btnSearch.gridx = 6;
+        gbc_btnSearch.gridx = 7;
         gbc_btnSearch.gridy = 0;
         searchPanel.add(btnSearch, gbc_btnSearch);
 
@@ -235,7 +245,8 @@ public class ApplicationWindow extends JFrame {
                 String phrase = searchField.getText();
                 int limit = (int) limitSpinner.getValue();
 
-                List<PublicReceiverEntry> receivers = scraper.searchReceivers(phrase, limit, (SearchSort) comboBox.getSelectedItem());
+                List<PublicReceiverEntry> receivers = scraper.searchReceivers(phrase, limit, (SearchSort) sortBox.getSelectedItem(),
+                        (SearchSortOrder) sortOrderBox.getSelectedItem());
                 publicContainer.removeAll();
                 receivers.forEach(receiver -> {
                     try {

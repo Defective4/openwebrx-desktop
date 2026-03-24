@@ -23,9 +23,11 @@ import io.github.defective4.sdr.owrxdesktop.application.integration.PublicReceiv
 import io.github.defective4.sdr.owrxdesktop.application.integration.PublicReceiverEntry;
 import io.github.defective4.sdr.owrxdesktop.application.integration.ReceiverScraper;
 import io.github.defective4.sdr.owrxdesktop.application.integration.SearchSort;
+import io.github.defective4.sdr.owrxdesktop.application.integration.SearchSortOrder;
 import io.github.defective4.sdr.owrxdesktop.ui.ApplicationWindow;
 
 public class ReceiverbookScraper implements ReceiverScraper {
+    private static final double EARTH_RADIUS = 6371;
     private static final Pattern JSON_PATTERN = Pattern.compile("^\\s*var\\s+receivers\\s+=\\s+(\\[.*\\]);\\s*$");
     private static final URL RXBOOK_URL;
     static {
@@ -88,22 +90,42 @@ public class ReceiverbookScraper implements ReceiverScraper {
     }
 
     @Override
-    public List<PublicReceiverEntry> searchReceivers(String phrase, int limit, SearchSort sort) {
+    public List<PublicReceiverEntry> searchReceivers(String phrase, int limit, SearchSort sort, SearchSortOrder order) {
         Stream<PublicReceiverEntry> stream = receivers.stream()
                 .filter(rx -> rx.label().toLowerCase().contains(phrase.toLowerCase()));
         ReceiverGPS gps = application.getUserStorage().getApplicationSettings().getGPS();
         stream = switch (sort) {
-            case ALPHABETICAL -> stream.sorted((o1, o2) -> o1.label().compareTo(o2.label()));
+            case ALPHABETICAL -> stream.sorted((o1, o2) -> (order == SearchSortOrder.ASC ? o1 : o2).label()
+                    .compareTo((order == SearchSortOrder.ASC ? o2 : o1).label()));
             case DISTANCE ->
-                stream.sorted((o1, o2) -> (int) (distance(o1.location(), gps) - distance(o2.location(), gps)));
+                stream.sorted((o1, o2) -> (int) (distance((order == SearchSortOrder.ASC ? o1 : o2).location(), gps)
+                        - distance((order == SearchSortOrder.ASC ? o2 : o1).location(), gps)));
             default -> stream;
         };
         return stream.limit(limit).toList();
     }
 
     private static double distance(ReceiverGPS from, ReceiverGPS to) {
-        double x = to.lon() - from.lon();
-        double y = to.lat() - from.lat();
-        return Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2)) * 100;
+
+        double startLat = from.lat();
+        double endLat = to.lat();
+
+        double startLong = from.lon();
+        double endLong = to.lon();
+
+        double dLat = Math.toRadians(endLat - startLat);
+        double dLong = Math.toRadians(endLong - startLong);
+
+        startLat = Math.toRadians(startLat);
+        endLat = Math.toRadians(endLat);
+
+        double a = haversine(dLat) + Math.cos(startLat) * Math.cos(endLat) * haversine(dLong);
+        double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+        return EARTH_RADIUS * c * 1000;
+    }
+
+    private static double haversine(double val) {
+        return Math.pow(Math.sin(val / 2), 2);
     }
 }

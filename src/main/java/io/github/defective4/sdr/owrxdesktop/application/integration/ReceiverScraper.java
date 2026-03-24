@@ -10,5 +10,5 @@ public interface ReceiverScraper {
 
     public void scrapeReceivers() throws IOException;
 
-    public List<PublicReceiverEntry> searchReceivers(String phrase, int limit, SearchSort sort);
+    public List<PublicReceiverEntry> searchReceivers(String phrase, int limit, SearchSort sort, SearchSortOrder order);
 }
