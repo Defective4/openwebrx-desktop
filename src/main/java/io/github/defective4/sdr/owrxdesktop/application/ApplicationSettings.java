@@ -1,5 +1,7 @@
 package io.github.defective4.sdr.owrxdesktop.application;
 
+import io.github.defective4.sdr.owrxclient.model.ReceiverGPS;
+
 public class ApplicationSettings {
     private boolean autoDownloadPublicReceivers = true;
     private boolean autoRefreshPrivateReceivers = false;
@@ -7,6 +9,10 @@ public class ApplicationSettings {
 
     private double longitude = 0;
     private int maxNetworkWorkers = 3;
+
+    public ReceiverGPS getGPS() {
+        return new ReceiverGPS(latitude, longitude);
+    }
 
     public double getLatitude() {
         return latitude;

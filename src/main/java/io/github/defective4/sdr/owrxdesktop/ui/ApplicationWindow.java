@@ -38,6 +38,7 @@ import io.github.defective4.sdr.owrxdesktop.application.StatusResponse;
 import io.github.defective4.sdr.owrxdesktop.application.UserStorage;
 import io.github.defective4.sdr.owrxdesktop.application.integration.PublicReceiverEntry;
 import io.github.defective4.sdr.owrxdesktop.application.integration.ReceiverScraper;
+import io.github.defective4.sdr.owrxdesktop.application.integration.SearchSort;
 import io.github.defective4.sdr.owrxdesktop.application.integration.receiverbook.ReceiverbookScraper;
 import io.github.defective4.sdr.owrxdesktop.ui.component.ReceiverEntryComponent;
 import io.github.defective4.sdr.owrxdesktop.ui.component.ReceiverEntryContainer;
@@ -45,9 +46,11 @@ import io.github.defective4.sdr.owrxdesktop.ui.component.ReceiverEntryContainer;
 public class ApplicationWindow extends JFrame {
     private final ReceiverEntryContainer publicContainer = new ReceiverEntryContainer();
     private final ReceiverEntryContainer rxContainer = new ReceiverEntryContainer();
-    private final ReceiverScraper scraper = new ReceiverbookScraper();
+    private final ReceiverScraper scraper = new ReceiverbookScraper(this);
     private final ExecutorService updateExecutor;
     private final UserStorage userStorage = new UserStorage();
+
+
 
     public ApplicationWindow() {
         updateExecutor = Executors.newFixedThreadPool(userStorage.getApplicationSettings().getMaxNetworkWorkers());
@@ -192,7 +195,9 @@ public class ApplicationWindow extends JFrame {
         gbc_lblSort.gridy = 0;
         searchPanel.add(lblSort, gbc_lblSort);
 
-        JComboBox comboBox = new JComboBox();
+        JComboBox<SearchSort> comboBox = new JComboBox<>();
+        for(SearchSort sort : SearchSort.sortedValues())
+            comboBox.addItem(sort);
         GridBagConstraints gbc_comboBox = new GridBagConstraints();
         gbc_comboBox.insets = new Insets(0, 0, 0, 5);
         gbc_comboBox.fill = GridBagConstraints.HORIZONTAL;
@@ -230,7 +235,7 @@ public class ApplicationWindow extends JFrame {
                 String phrase = searchField.getText();
                 int limit = (int) limitSpinner.getValue();
 
-                List<PublicReceiverEntry> receivers = scraper.searchReceivers(phrase, limit);
+                List<PublicReceiverEntry> receivers = scraper.searchReceivers(phrase, limit, (SearchSort) comboBox.getSelectedItem());
                 publicContainer.removeAll();
                 receivers.forEach(receiver -> {
                     try {
@@ -293,6 +298,10 @@ public class ApplicationWindow extends JFrame {
         if (userStorage.getApplicationSettings().isAutoRefreshPrivateReceivers()) {
             refreshPersonalReceivers();
         }
+    }
+
+    public UserStorage getUserStorage() {
+        return userStorage;
     }
 
     public void refreshPersonalReceivers() {
