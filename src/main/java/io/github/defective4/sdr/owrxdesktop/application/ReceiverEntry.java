@@ -12,6 +12,8 @@ import javax.imageio.ImageIO;
 
 import com.google.gson.Gson;
 
+import io.github.defective4.sdr.owrxdesktop.ui.settings.ReceiverUserSettings;
+
 public class ReceiverEntry {
 
     private static final Gson GSON = new Gson();
@@ -21,11 +23,13 @@ public class ReceiverEntry {
     private StatusResponse receiverData;
     private BufferedImage receiverImage;
     private final String rootURL;
+    private final ReceiverUserSettings settings;
     private final UUID uuid = UUID.randomUUID();
 
-    public ReceiverEntry(String rootURL) {
+    public ReceiverEntry(String rootURL, ReceiverUserSettings settings) {
         if (!rootURL.endsWith("/")) rootURL += "/";
         this.rootURL = rootURL;
+        this.settings = settings;
     }
 
     public Exception getQueryException() {
@@ -38,6 +42,10 @@ public class ReceiverEntry {
 
     public Optional<BufferedImage> getReceiverImage() {
         return Optional.ofNullable(receiverImage);
+    }
+
+    public ReceiverUserSettings getSettings() {
+        return settings;
     }
 
     public boolean isQuerying() {
@@ -65,8 +73,10 @@ public class ReceiverEntry {
         }
     }
 
-    public void setQuerying(boolean querying) {
-        this.querying = querying;
+    public void setQuerying() {
+        querying = true;
+        receiverData = null;
+        receiverImage = null;
     }
 
     public void setReceiverData(StatusResponse receiverData) {

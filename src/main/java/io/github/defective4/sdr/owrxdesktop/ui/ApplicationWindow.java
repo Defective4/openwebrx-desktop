@@ -1,11 +1,16 @@
 package io.github.defective4.sdr.owrxdesktop.ui;
 
 import java.awt.BorderLayout;
+import java.awt.Component;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -15,8 +20,10 @@ import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JSeparator;
 import javax.swing.JTabbedPane;
 import javax.swing.KeyStroke;
 
@@ -52,6 +59,52 @@ public class ApplicationWindow extends JFrame {
             mntmQuit.addActionListener(e -> dispose());
             mntmQuit.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_Q, InputEvent.CTRL_DOWN_MASK));
             mnApplication.add(mntmQuit);
+
+            JMenu mnEdit = new JMenu("Edit");
+            menuBar.add(mnEdit);
+
+            JMenuItem mntmAddReceiver = new JMenuItem("Add receiver...");
+            mntmAddReceiver.addActionListener(e -> {
+                String url = JOptionPane.showInputDialog(this, "Enter the receiver's url:", "Adding a new receiver",
+                        JOptionPane.INFORMATION_MESSAGE);
+                if (url != null) {
+                    try {
+                        URI.create(url).toURL();
+                        ReceiverEntry entry = new ReceiverEntry(url, userStorage.getDefaultSettings());
+                        userStorage.addEntry(entry);
+                        entry.setQuerying();
+                        ReceiverEntryComponent cpt = addEntry(entry);
+                        updateEntryAsync(cpt);
+                    } catch (Exception e1) {
+                        JOptionPane.showMessageDialog(this, "The URL address you entered is invalid", "Invalid URL",
+                                JOptionPane.ERROR_MESSAGE);
+                    }
+                }
+            });
+            mntmAddReceiver.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_A, InputEvent.CTRL_DOWN_MASK));
+            mnEdit.add(mntmAddReceiver);
+
+            mnEdit.add(new JSeparator());
+
+            JMenuItem mntmDefaultReceiverSettings = new JMenuItem("Default receiver settings...");
+            mntmDefaultReceiverSettings.addActionListener(e -> {
+                if (SettingsDialog.show(this, userStorage.getDefaultSettings())) {
+                    JOptionPane.showMessageDialog(this,
+                            "These settings will only apply to new receivers.\n"
+                                    + "For existing receivers, you need to adjust the settings per receiver.",
+                            "New settings", JOptionPane.INFORMATION_MESSAGE);
+                }
+            });
+            mntmDefaultReceiverSettings
+                    .setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_D, InputEvent.CTRL_DOWN_MASK));
+            mnEdit.add(mntmDefaultReceiverSettings);
+
+            JSeparator separator = new JSeparator();
+            mnEdit.add(separator);
+
+            JMenuItem mntmRefreshAll = new JMenuItem("Refresh all");
+            mntmRefreshAll.addActionListener(e -> refreshPersonalReceivers());
+            mnEdit.add(mntmRefreshAll);
         }
 
         JTabbedPane tabbedPane = new JTabbedPane(JTabbedPane.TOP);
@@ -67,14 +120,39 @@ public class ApplicationWindow extends JFrame {
         updateEntries();
     }
 
-    public void addEntry(ReceiverEntry entry) {
+    public ReceiverEntryComponent addEntry(ReceiverEntry entry) {
         ReceiverEntryComponent component = new ReceiverEntryComponent(entry, rxPlaceholder);
         rxContainer.add(component);
         rxContainer.invalidate();
+        return component;
+    }
+
+    public List<ReceiverEntryComponent> getAllReceiverComponents() {
+        List<ReceiverEntryComponent> cpts = new ArrayList<>();
+        for (Component cpt : rxContainer.getComponents())
+            if (cpt instanceof ReceiverEntryComponent rxEntry) cpts.add(rxEntry);
+        return Collections.unmodifiableList(cpts);
+    }
+
+    public void refreshPersonalReceivers() {
+        getAllReceiverComponents().forEach(cpt -> {
+            ReceiverEntry entry = cpt.getEntry();
+            entry.setQuerying();
+            cpt.updateEntry();
+            updateEntryAsync(cpt);
+        });
+        invalidate();
     }
 
     public void updateEntries() {
         rxContainer.removeAll();
         userStorage.getUserEntries().forEach(this::addEntry);
+    }
+
+    private void updateEntryAsync(ReceiverEntryComponent cpt) {
+        updateExecutor.submit(() -> {
+            cpt.getEntry().query();
+            cpt.updateEntry();
+        });
     }
 }

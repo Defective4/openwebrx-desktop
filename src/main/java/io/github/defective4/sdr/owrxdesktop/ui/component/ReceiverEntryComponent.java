@@ -73,6 +73,10 @@ public class ReceiverEntryComponent extends JPanel {
         updateEntry();
     }
 
+    public ReceiverEntry getEntry() {
+        return entry;
+    }
+
     public synchronized void updateEntry() {
         entry.getReceiverData().ifPresentOrElse(data -> {
             receiverName.setText(data.receiver().name());

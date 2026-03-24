@@ -42,7 +42,9 @@ public class SettingsDialog extends JDialog {
     private final JRadioButton rdbtnBuiltin = new JRadioButton("Built-in: ");
     private final JRadioButton rdbtnCustom = new JRadioButton("Custom (One hex color per line, each starting with #):");
     private final JRadioButton rdbtnServerprovidedConfiguration = new JRadioButton("Server-provided configuration");
+    private boolean saved;
     private final JTextArea themeArea = new JTextArea();
+
     private final JComboBox<BuiltinWaterfallTheme> themesBox = new JComboBox<>();
 
     private SettingsDialog(Window parent, ReceiverUserSettings settings) {
@@ -282,6 +284,7 @@ public class SettingsDialog extends JDialog {
                     settings.setMagicKey(new String(magicKeyField.getPassword()));
                     settings.setEnableFreeTuning(freeTuningCheck.isSelected());
                     settings.setDynamicColorMixing(dynamicColorMixingCheck.isSelected());
+                    saved = true;
                     dispose();
                 });
                 buttonPane.add(okButton);
@@ -311,8 +314,9 @@ public class SettingsDialog extends JDialog {
         return true;
     }
 
-    public static void show(Window parent, ReceiverUserSettings initialSettings) {
+    public static boolean show(Window parent, ReceiverUserSettings initialSettings) {
         SettingsDialog dialog = new SettingsDialog(parent, initialSettings);
         dialog.setVisible(true);
+        return dialog.saved;
     }
 }
