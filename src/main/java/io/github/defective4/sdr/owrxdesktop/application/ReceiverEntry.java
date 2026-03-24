@@ -53,6 +53,14 @@ public class ReceiverEntry {
         return Optional.ofNullable(receiverImage);
     }
 
+    public URL getRootURL() {
+        try {
+            return URI.create(rootURL).toURL();
+        } catch (MalformedURLException e) {
+            throw new IllegalStateException(e);
+        }
+    }
+
     public ReceiverUserSettings getSettings() {
         return settings;
     }

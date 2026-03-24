@@ -36,8 +36,7 @@ public class ReceiverbookScraper implements ReceiverScraper {
     private final List<PublicReceiver> receivers = new ArrayList<>();
 
     public ReceiverbookScraper() {
-        receivers.add(new PublicReceiver("Test receiver", "Test", "https://localhost", "OpenWebRX"));
-        receivers.add(new PublicReceiver("Test receiver", "Test", "https://localhost", "OpenWebRX"));
+        receivers.add(new PublicReceiver("Defective's Radio", "Test", "http://radio.raspberry.local", "OpenWebRX"));
     }
 
     @Override

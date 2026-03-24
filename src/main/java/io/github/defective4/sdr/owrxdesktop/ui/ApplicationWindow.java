@@ -212,16 +212,39 @@ public class ApplicationWindow extends JFrame {
             String phrase = searchField.getText();
             int limit = (int) limitSpinner.getValue();
 
-            List<PublicReceiver> rx = scraper.searchReceivers(phrase, limit);
+            List<PublicReceiver> receivers = scraper.searchReceivers(phrase, limit);
             publicContainer.removeAll();
-            rx.forEach(receiver -> {
+            receivers.forEach(receiver -> {
                 try {
                     ReceiverEntry entry = new ReceiverEntry(receiver.url(), userStorage.getDefaultSettings().clone());
                     entry.setReceiverData(new StatusResponse(
                             new StatusResponse.Receiver(receiver.label(), null, null, null), receiver.version()));
                     publicContainer.addEntry(entry, cpt -> {
-                        // TODO buttons
-                        return List.of();
+                        JButton connectButton = new JButton("Connect");
+                        connectButton.addActionListener(e2 -> {
+                            setVisible(false);
+                            ReceiverEntry rxEntry = cpt.getEntry();
+                            try {
+                                RadioReceiver rx = new RadioReceiver(rxEntry.getWebsocketURI(), rxEntry.getSettings(), this,
+                                        rxEntry.getCache());
+                                rx.setVisible(true);
+                                rx.connect();
+                            } catch (LineUnavailableException | InterruptedException e1) {
+                                e1.printStackTrace();
+                            }
+                        });
+
+                        JButton addButton = new JButton("Add to personal");
+                        addButton.addActionListener(e2 -> {
+                            ReceiverEntry rxEntry = cpt.getEntry();
+                            userStorage.addEntry(rxEntry);
+                            ReceiverEntryComponent newCpt = addPersonalEntry(rxEntry);
+                            rxEntry.setQuerying();
+                            newCpt.updateEntry();
+                            updateEntryAsync(newCpt);
+                        });
+
+                        return List.of(connectButton, addButton);
                     });
                 } catch (Exception e1) {
                     e1.printStackTrace();
