@@ -49,6 +49,7 @@ public class ReceiverEntryContainer extends JPanel {
         gbl_rxContainer.rowWeights = weight;
         add(component, gbc_panel);
         invalidate();
+        repaint();
         return component;
     }
 

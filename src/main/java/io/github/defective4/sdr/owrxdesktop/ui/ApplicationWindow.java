@@ -6,6 +6,7 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
+import java.io.IOException;
 import java.net.URI;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -33,18 +34,19 @@ import javax.swing.border.EmptyBorder;
 
 import io.github.defective4.sdr.owrxdesktop.RadioReceiver;
 import io.github.defective4.sdr.owrxdesktop.application.ReceiverEntry;
+import io.github.defective4.sdr.owrxdesktop.application.StatusResponse;
 import io.github.defective4.sdr.owrxdesktop.application.UserStorage;
+import io.github.defective4.sdr.owrxdesktop.application.integration.receiverbook.ReceiverbookReceiver;
 import io.github.defective4.sdr.owrxdesktop.application.integration.receiverbook.ReceiverbookScraper;
 import io.github.defective4.sdr.owrxdesktop.ui.component.ReceiverEntryComponent;
 import io.github.defective4.sdr.owrxdesktop.ui.component.ReceiverEntryContainer;
 
 public class ApplicationWindow extends JFrame {
-    private final    ReceiverEntryContainer publicContainer = new ReceiverEntryContainer();
+    private final ReceiverEntryContainer publicContainer = new ReceiverEntryContainer();
     private final ReceiverEntryContainer rxContainer = new ReceiverEntryContainer();
     private final ReceiverbookScraper scraper = new ReceiverbookScraper();
-    private final JTextField textField;
     private final ExecutorService updateExecutor = Executors.newFixedThreadPool(1);
-private final UserStorage userStorage = new UserStorage();
+    private final UserStorage userStorage = new UserStorage();
 
     public ApplicationWindow() {
         setBounds(100, 100, 768, 512);
@@ -122,10 +124,10 @@ private final UserStorage userStorage = new UserStorage();
         JPanel publicPanel = new JPanel();
         tabbedPane.addTab("Public", null, publicPanel, null);
         GridBagLayout gbl_publicPanel = new GridBagLayout();
-        gbl_publicPanel.columnWidths = new int[]{0, 0};
-        gbl_publicPanel.rowHeights = new int[]{0, 0, 0};
-        gbl_publicPanel.columnWeights = new double[]{1.0, Double.MIN_VALUE};
-        gbl_publicPanel.rowWeights = new double[]{0.0, 1.0, Double.MIN_VALUE};
+        gbl_publicPanel.columnWidths = new int[] { 0, 0 };
+        gbl_publicPanel.rowHeights = new int[] { 0, 0, 0 };
+        gbl_publicPanel.columnWeights = new double[] { 1.0, Double.MIN_VALUE };
+        gbl_publicPanel.rowWeights = new double[] { 0.0, 1.0, Double.MIN_VALUE };
         publicPanel.setLayout(gbl_publicPanel);
 
         JPanel searchPanel = new JPanel();
@@ -137,10 +139,10 @@ private final UserStorage userStorage = new UserStorage();
         gbc_searchPanel.gridy = 0;
         publicPanel.add(searchPanel, gbc_searchPanel);
         GridBagLayout gbl_searchPanel = new GridBagLayout();
-        gbl_searchPanel.columnWidths = new int[]{0, 0, 0, 0, 0, 0, 0, 0};
-        gbl_searchPanel.rowHeights = new int[] {0, 0};
-        gbl_searchPanel.columnWeights = new double[]{0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE};
-        gbl_searchPanel.rowWeights = new double[]{0.0};
+        gbl_searchPanel.columnWidths = new int[] { 0, 0, 0, 0, 0, 0, 0, 0 };
+        gbl_searchPanel.rowHeights = new int[] { 0, 0 };
+        gbl_searchPanel.columnWeights = new double[] { 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE };
+        gbl_searchPanel.rowWeights = new double[] { 0.0 };
         searchPanel.setLayout(gbl_searchPanel);
 
         JLabel lblSearch = new JLabel("Search");
@@ -151,14 +153,13 @@ private final UserStorage userStorage = new UserStorage();
         gbc_lblSearch.gridy = 0;
         searchPanel.add(lblSearch, gbc_lblSearch);
 
-        textField = new JTextField();
+        JTextField searchField = new JTextField();
         GridBagConstraints gbc_textField = new GridBagConstraints();
         gbc_textField.insets = new Insets(0, 0, 0, 5);
         gbc_textField.fill = GridBagConstraints.HORIZONTAL;
         gbc_textField.gridx = 1;
         gbc_textField.gridy = 0;
-        searchPanel.add(textField, gbc_textField);
-        textField.setColumns(10);
+        searchPanel.add(searchField, gbc_textField);
 
         JLabel lblLimit = new JLabel("Limit");
         GridBagConstraints gbc_lblLimit = new GridBagConstraints();
@@ -167,13 +168,13 @@ private final UserStorage userStorage = new UserStorage();
         gbc_lblLimit.gridy = 0;
         searchPanel.add(lblLimit, gbc_lblLimit);
 
-        JSpinner spinner = new JSpinner();
-        spinner.setModel(new SpinnerNumberModel(10, 1, 500, 1));
+        JSpinner limitSpinner = new JSpinner();
+        limitSpinner.setModel(new SpinnerNumberModel(10, 1, 500, 1));
         GridBagConstraints gbc_spinner = new GridBagConstraints();
         gbc_spinner.insets = new Insets(0, 0, 0, 5);
         gbc_spinner.gridx = 3;
         gbc_spinner.gridy = 0;
-        searchPanel.add(spinner, gbc_spinner);
+        searchPanel.add(limitSpinner, gbc_spinner);
 
         JLabel lblSort = new JLabel("Sort");
         GridBagConstraints gbc_lblSort = new GridBagConstraints();
@@ -206,9 +207,41 @@ private final UserStorage userStorage = new UserStorage();
 
         scrollPane.setViewportView(publicContainer);
 
+        btnSearch.addActionListener(e -> {
+            String phrase = searchField.getText();
+            int limit = (int) limitSpinner.getValue();
+
+            List<ReceiverbookReceiver> rx = scraper.searchReceivers(phrase, limit);
+            publicContainer.removeAll();
+            rx.forEach(receiver -> {
+                try {
+                    ReceiverEntry entry = new ReceiverEntry(receiver.url(), userStorage.getDefaultSettings().clone());
+                    entry.setReceiverData(new StatusResponse(
+                            new StatusResponse.Receiver(receiver.label(), null, null, null), receiver.version()));
+                    publicContainer.addEntry(entry, cpt -> {
+                        // TODO buttons
+                        return List.of();
+                    });
+                } catch (Exception e1) {
+                    e1.printStackTrace();
+                }
+            });
+            invalidate();
+            repaint();
+        });
+
         tabbedPane.addChangeListener(e -> {
             if (tabbedPane.getSelectedIndex() == 1) {
-
+                ProgressDialog.show(this, "Downloading receivers...", (dialog) -> {
+                    try {
+                        if (!scraper.hasScraped()) scraper.scrapeReceivers();
+                    } catch (IOException e1) {
+                        e1.printStackTrace();
+                        JOptionPane.showMessageDialog(this, "Couldn't download receivers list:\n" + e1.toString(),
+                                "Error", JOptionPane.ERROR_MESSAGE);
+                    }
+                    return null;
+                }, t -> btnSearch.doClick());
             }
         });
 

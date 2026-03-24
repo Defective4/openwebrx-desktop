@@ -32,8 +32,17 @@ public class ReceiverbookScraper {
 
     private final List<ReceiverbookReceiver> receivers = new ArrayList<>();
 
+    public ReceiverbookScraper() {
+        receivers.add(new ReceiverbookReceiver("Test receiver", "Test", "https://localhost", "OpenWebRX"));
+        receivers.add(new ReceiverbookReceiver("Test receiver", "Test", "https://localhost", "OpenWebRX"));
+    }
+
     public List<ReceiverbookReceiver> getReceivers() {
         return Collections.unmodifiableList(receivers);
+    }
+
+    public boolean hasScraped() {
+        return !receivers.isEmpty();
     }
 
     public void scrapeReceivers() throws IOException {
@@ -61,5 +70,10 @@ public class ReceiverbookScraper {
                 }
             }
         }
+    }
+
+    public List<ReceiverbookReceiver> searchReceivers(String phrase, int limit) {
+        return receivers.stream().filter(rx -> rx.label().toLowerCase().contains(phrase.toLowerCase())).limit(limit)
+                .toList();
     }
 }
