@@ -10,7 +10,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 
-import io.github.defective4.sdr.owrxdesktop.ui.rx.ReceiverEntry;
+import io.github.defective4.sdr.owrxdesktop.application.ReceiverEntry;
 
 public class ReceiverEntryComponent extends JPanel {
     private final ReceiverEntry entry;

@@ -20,13 +20,17 @@ import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.KeyStroke;
 
+import io.github.defective4.sdr.owrxdesktop.application.ReceiverEntry;
+import io.github.defective4.sdr.owrxdesktop.application.UserStorage;
 import io.github.defective4.sdr.owrxdesktop.ui.component.ReceiverEntryComponent;
-import io.github.defective4.sdr.owrxdesktop.ui.rx.ReceiverEntry;
 
 public class ApplicationWindow extends JFrame {
 
+    private final JPanel rxContainer = new JPanel();
     private final BufferedImage rxPlaceholder;
+
     private final ExecutorService updateExecutor = Executors.newFixedThreadPool(1);
+    private final UserStorage userStorage = new UserStorage();
 
     public ApplicationWindow() {
         try (InputStream is = getClass().getResourceAsStream("/rx-null.png")) {
@@ -56,23 +60,21 @@ public class ApplicationWindow extends JFrame {
         {
             JScrollPane scrollPane = new JScrollPane();
             tabbedPane.addTab("Personal", null, scrollPane, null);
-
-            {
-                JPanel rxContainer = new JPanel();
-                scrollPane.setViewportView(rxContainer);
-                rxContainer.setLayout(new BoxLayout(rxContainer, BoxLayout.Y_AXIS));
-
-                ReceiverEntry entry = new ReceiverEntry("https://radio.raspberry.local/");
-                ReceiverEntryComponent component = new ReceiverEntryComponent(entry, rxPlaceholder);
-                rxContainer.add(component);
-
-                entry.setQuerying(true);
-                updateExecutor.submit(() -> {
-                    entry.query();
-                    component.updateEntry();
-                });
-                component.updateEntry();
-            }
+            scrollPane.setViewportView(rxContainer);
+            rxContainer.setLayout(new BoxLayout(rxContainer, BoxLayout.Y_AXIS));
         }
+
+        updateEntries();
+    }
+
+    public void addEntry(ReceiverEntry entry) {
+        ReceiverEntryComponent component = new ReceiverEntryComponent(entry, rxPlaceholder);
+        rxContainer.add(component);
+        rxContainer.invalidate();
+    }
+
+    public void updateEntries() {
+        rxContainer.removeAll();
+        userStorage.getUserEntries().forEach(this::addEntry);
     }
 }

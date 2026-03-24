@@ -1,4 +1,4 @@
-package io.github.defective4.sdr.owrxdesktop.ui.rx;
+package io.github.defective4.sdr.owrxdesktop.application;
 
 import java.awt.image.BufferedImage;
 import java.io.InputStream;
@@ -6,6 +6,7 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.net.URI;
 import java.util.Optional;
+import java.util.UUID;
 
 import javax.imageio.ImageIO;
 
@@ -20,6 +21,7 @@ public class ReceiverEntry {
     private StatusResponse receiverData;
     private BufferedImage receiverImage;
     private final String rootURL;
+    private final UUID uuid = UUID.randomUUID();
 
     public ReceiverEntry(String rootURL) {
         if (!rootURL.endsWith("/")) rootURL += "/";

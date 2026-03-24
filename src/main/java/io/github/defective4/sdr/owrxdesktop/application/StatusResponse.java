@@ -1,4 +1,4 @@
-package io.github.defective4.sdr.owrxdesktop.ui.rx;
+package io.github.defective4.sdr.owrxdesktop.application;
 
 import io.github.defective4.sdr.owrxclient.model.ReceiverGPS;
 
