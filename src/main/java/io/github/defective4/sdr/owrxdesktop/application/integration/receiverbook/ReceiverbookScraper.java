@@ -17,7 +17,9 @@ import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonParser;
 
+import io.github.defective4.sdr.owrxclient.model.ReceiverGPS;
 import io.github.defective4.sdr.owrxdesktop.application.integration.PublicReceiver;
+import io.github.defective4.sdr.owrxdesktop.application.integration.PublicReceiverEntry;
 import io.github.defective4.sdr.owrxdesktop.application.integration.ReceiverScraper;
 
 public class ReceiverbookScraper implements ReceiverScraper {
@@ -33,14 +35,15 @@ public class ReceiverbookScraper implements ReceiverScraper {
 
     private final Gson gson = new Gson();
 
-    private final List<PublicReceiver> receivers = new ArrayList<>();
+    private final List<PublicReceiverEntry> receivers = new ArrayList<>();
 
     public ReceiverbookScraper() {
-        receivers.add(new PublicReceiver("Defective's Radio", "Test", "http://radio.raspberry.local", "OpenWebRX"));
+        receivers.add(new PublicReceiverEntry("Defective's Radio", "Test", "http://radio.raspberry.local", "OpenWebRX",
+                new ReceiverGPS(0, 0)));
     }
 
     @Override
-    public List<PublicReceiver> getReceivers() {
+    public List<PublicReceiverEntry> getReceivers() {
         return Collections.unmodifiableList(receivers);
     }
 
@@ -65,7 +68,9 @@ public class ReceiverbookScraper implements ReceiverScraper {
                             ReceiverbookStation station = gson.fromJson(element, ReceiverbookStation.class);
                             if (station != null)
                                 for (PublicReceiver rx : station.receivers()) if ("OpenWebRX".equals(rx.type())) {
-                                    receivers.add(rx);
+                                    receivers.add(new PublicReceiverEntry(rx.label(), rx.version(), rx.url(), rx.type(),
+                                            new ReceiverGPS(station.location().coordinates()[1],
+                                                    station.location().coordinates()[0])));
                                 }
                         } catch (Exception e) {
                             e.printStackTrace();
@@ -78,7 +83,7 @@ public class ReceiverbookScraper implements ReceiverScraper {
     }
 
     @Override
-    public List<PublicReceiver> searchReceivers(String phrase, int limit) {
+    public List<PublicReceiverEntry> searchReceivers(String phrase, int limit) {
         return receivers.stream().filter(rx -> rx.label().toLowerCase().contains(phrase.toLowerCase())).limit(limit)
                 .toList();
     }

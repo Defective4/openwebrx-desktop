@@ -36,7 +36,7 @@ import io.github.defective4.sdr.owrxdesktop.RadioReceiver;
 import io.github.defective4.sdr.owrxdesktop.application.ReceiverEntry;
 import io.github.defective4.sdr.owrxdesktop.application.StatusResponse;
 import io.github.defective4.sdr.owrxdesktop.application.UserStorage;
-import io.github.defective4.sdr.owrxdesktop.application.integration.PublicReceiver;
+import io.github.defective4.sdr.owrxdesktop.application.integration.PublicReceiverEntry;
 import io.github.defective4.sdr.owrxdesktop.application.integration.ReceiverScraper;
 import io.github.defective4.sdr.owrxdesktop.application.integration.receiverbook.ReceiverbookScraper;
 import io.github.defective4.sdr.owrxdesktop.ui.component.ReceiverEntryComponent;
@@ -230,14 +230,14 @@ public class ApplicationWindow extends JFrame {
                 String phrase = searchField.getText();
                 int limit = (int) limitSpinner.getValue();
 
-                List<PublicReceiver> receivers = scraper.searchReceivers(phrase, limit);
+                List<PublicReceiverEntry> receivers = scraper.searchReceivers(phrase, limit);
                 publicContainer.removeAll();
                 receivers.forEach(receiver -> {
                     try {
                         ReceiverEntry entry = new ReceiverEntry(receiver.url(),
                                 userStorage.getDefaultSettings().clone());
                         entry.setReceiverData(new StatusResponse(
-                                new StatusResponse.Receiver(receiver.label(), null, null, null), receiver.version()));
+                                new StatusResponse.Receiver(receiver.label(), null, receiver.location(), null), receiver.version()));
                         publicContainer.addEntry(entry, cpt -> {
                             JButton connectButton = new JButton("Connect");
                             connectButton.addActionListener(e2 -> {
