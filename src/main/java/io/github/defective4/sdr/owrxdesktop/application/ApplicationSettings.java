@@ -3,7 +3,18 @@ package io.github.defective4.sdr.owrxdesktop.application;
 public class ApplicationSettings {
     private boolean autoDownloadPublicReceivers = true;
     private boolean autoRefreshPrivateReceivers = false;
+    private double latitude = 0;
+
+    private double longitude = 0;
     private int maxNetworkWorkers = 3;
+
+    public double getLatitude() {
+        return latitude;
+    }
+
+    public double getLongitude() {
+        return longitude;
+    }
 
     public int getMaxNetworkWorkers() {
         return maxNetworkWorkers;
@@ -23,6 +34,14 @@ public class ApplicationSettings {
 
     public void setAutoRefreshPrivateReceivers(boolean autoRefreshPrivateReceivers) {
         this.autoRefreshPrivateReceivers = autoRefreshPrivateReceivers;
+    }
+
+    public void setLatitude(double latitude) {
+        this.latitude = latitude;
+    }
+
+    public void setLongitude(double longitude) {
+        this.longitude = longitude;
     }
 
     public void setMaxNetworkWorkers(int maxNetworkWorkers) {

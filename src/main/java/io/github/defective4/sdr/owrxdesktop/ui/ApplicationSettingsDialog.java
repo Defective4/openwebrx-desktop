@@ -6,6 +6,7 @@ import java.awt.FlowLayout;
 import java.awt.Frame;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.GridLayout;
 import java.awt.Insets;
 
 import javax.swing.BoxLayout;
@@ -26,6 +27,8 @@ public class ApplicationSettingsDialog extends JDialog {
 
     private final JCheckBox autoDownloadCheck = new JCheckBox("Auto-download public receiver listings");
     private final JCheckBox autoRefreshCheck = new JCheckBox("Auto-refresh receivers on startup");
+    private final JSpinner latSpinner = new JSpinner();
+    private final JSpinner lonSpinner = new JSpinner();
     private final JSpinner networkWorkers = new JSpinner();
 
     public ApplicationSettingsDialog(Frame parent, ApplicationSettings settings) {
@@ -90,6 +93,42 @@ public class ApplicationSettingsDialog extends JDialog {
                     panel.add(autoDownloadCheck, gbc_chckbxAuto);
                 }
             }
+            {
+                JPanel panel = new JPanel();
+                tabbedPane.addTab("Listings", null, panel, null);
+                GridBagLayout gbl_panel = new GridBagLayout();
+                gbl_panel.columnWidths = new int[] { 0, 0 };
+                gbl_panel.rowHeights = new int[] { 0, 0 };
+                gbl_panel.columnWeights = new double[] { 1.0, Double.MIN_VALUE };
+                gbl_panel.rowWeights = new double[] { 0.0, Double.MIN_VALUE };
+                panel.setLayout(gbl_panel);
+                {
+                    JPanel panel_1 = new JPanel();
+                    panel_1.setBorder(new TitledBorder(null, "Your location", TitledBorder.LEADING, TitledBorder.TOP,
+                            null, null));
+                    GridBagConstraints gbc_panel_1 = new GridBagConstraints();
+                    gbc_panel_1.fill = GridBagConstraints.BOTH;
+                    gbc_panel_1.gridx = 0;
+                    gbc_panel_1.gridy = 0;
+                    panel.add(panel_1, gbc_panel_1);
+                    panel_1.setLayout(new BoxLayout(panel_1, BoxLayout.Y_AXIS));
+                    JPanel panel_2 = new JPanel();
+                    panel_2.setAlignmentX(Component.LEFT_ALIGNMENT);
+                    panel_1.add(panel_2);
+                    panel_2.setLayout(new GridLayout(2, 2, 0, 0));
+                    panel_2.add(new JLabel("Latitude"));
+                    panel_2.add(new JLabel("Longitude"));
+                    latSpinner.setModel(new SpinnerNumberModel(0.0, -90.0, 90.0, 1.0));
+                    panel_2.add(latSpinner);
+                    lonSpinner.setModel(new SpinnerNumberModel(0.0, -180.0, 180.0, 1.0));
+                    panel_2.add(lonSpinner);
+                    JLabel lblThisCanBe = new JLabel("This can be used to find nearest receivers");
+                    panel_1.add(lblThisCanBe);
+
+                    latSpinner.setValue(settings.getLatitude());
+                    lonSpinner.setValue(settings.getLongitude());
+                }
+            }
         }
         {
             JPanel buttonPane = new JPanel();
@@ -102,6 +141,9 @@ public class ApplicationSettingsDialog extends JDialog {
                     settings.setAutoDownloadPublicReceivers(autoDownloadCheck.isSelected());
                     settings.setAutoRefreshPrivateReceivers(autoRefreshCheck.isSelected());
                     settings.setMaxNetworkWorkers((int) networkWorkers.getValue());
+
+                    settings.setLatitude((double) latSpinner.getValue());
+                    settings.setLongitude((double) lonSpinner.getValue());
 
                     dispose();
                 });
