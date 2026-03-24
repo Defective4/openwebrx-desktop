@@ -46,10 +46,11 @@ public class ApplicationWindow extends JFrame {
     private final ReceiverEntryContainer publicContainer = new ReceiverEntryContainer();
     private final ReceiverEntryContainer rxContainer = new ReceiverEntryContainer();
     private final ReceiverScraper scraper = new ReceiverbookScraper();
-    private final ExecutorService updateExecutor = Executors.newFixedThreadPool(1);
+    private final ExecutorService updateExecutor;
     private final UserStorage userStorage = new UserStorage();
 
     public ApplicationWindow() {
+        updateExecutor = Executors.newFixedThreadPool(userStorage.getApplicationSettings().getMaxNetworkWorkers());
         setBounds(100, 100, 768, 512);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
@@ -100,6 +101,12 @@ public class ApplicationWindow extends JFrame {
                             "New settings", JOptionPane.INFORMATION_MESSAGE);
                 }
             });
+
+            JMenuItem mntmApplicationSettings = new JMenuItem("Application settings");
+            mntmApplicationSettings.addActionListener(
+                    e -> new ApplicationSettingsDialog(this, userStorage.getApplicationSettings()).setVisible(true));
+            mntmApplicationSettings.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_O, InputEvent.CTRL_DOWN_MASK));
+            mnEdit.add(mntmApplicationSettings);
             mntmDefaultReceiverSettings
                     .setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_D, InputEvent.CTRL_DOWN_MASK));
             mnEdit.add(mntmDefaultReceiverSettings);
@@ -141,7 +148,7 @@ public class ApplicationWindow extends JFrame {
         publicPanel.add(searchPanel, gbc_searchPanel);
         GridBagLayout gbl_searchPanel = new GridBagLayout();
         gbl_searchPanel.columnWidths = new int[] { 0, 0, 0, 0, 0, 0, 0, 0 };
-        gbl_searchPanel.rowHeights = new int[] { 0, 0 };
+        gbl_searchPanel.rowHeights = new int[] { 0 };
         gbl_searchPanel.columnWeights = new double[] { 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE };
         gbl_searchPanel.rowWeights = new double[] { 0.0 };
         searchPanel.setLayout(gbl_searchPanel);
@@ -209,75 +216,83 @@ public class ApplicationWindow extends JFrame {
         scrollPane.setViewportView(publicContainer);
 
         btnSearch.addActionListener(e -> {
-            String phrase = searchField.getText();
-            int limit = (int) limitSpinner.getValue();
-
-            List<PublicReceiver> receivers = scraper.searchReceivers(phrase, limit);
-            publicContainer.removeAll();
-            receivers.forEach(receiver -> {
+            ProgressDialog.show(this, "Downloading receivers...", (dialog) -> {
                 try {
-                    ReceiverEntry entry = new ReceiverEntry(receiver.url(), userStorage.getDefaultSettings().clone());
-                    entry.setReceiverData(new StatusResponse(
-                            new StatusResponse.Receiver(receiver.label(), null, null, null), receiver.version()));
-                    publicContainer.addEntry(entry, cpt -> {
-                        JButton connectButton = new JButton("Connect");
-                        connectButton.addActionListener(e2 -> {
-                            setVisible(false);
-                            ReceiverEntry rxEntry = cpt.getEntry();
-                            try {
-                                RadioReceiver rx = new RadioReceiver(rxEntry.getWebsocketURI(), rxEntry.getSettings(),
-                                        this, rxEntry.getCache());
-                                rx.setVisible(true);
-                                rx.connect();
-                            } catch (LineUnavailableException | InterruptedException e1) {
-                                e1.printStackTrace();
-                            }
-                        });
-
-                        JButton addButton = new JButton("Add to personal");
-                        addButton.addActionListener(e2 -> {
-                            ReceiverEntry rxEntry = cpt.getEntry();
-                            userStorage.addEntry(rxEntry);
-                            ReceiverEntryComponent newCpt = addPersonalEntry(rxEntry);
-                            rxEntry.setQuerying();
-                            newCpt.updateEntry();
-                            updateEntryAsync(newCpt);
-                        });
-
-                        JButton queryButton = new JButton("Query");
-                        queryButton.addActionListener(e2 -> {
-                            ReceiverEntry rxEntry = cpt.getEntry();
-                            rxEntry.setQuerying();
-                            cpt.updateEntry();
-                            updateEntryAsync(cpt);
-                        });
-
-                        return List.of(connectButton, addButton, queryButton);
-                    });
-                } catch (Exception e1) {
+                    if (!scraper.hasScraped()) scraper.scrapeReceivers();
+                } catch (IOException e1) {
                     e1.printStackTrace();
+                    JOptionPane.showMessageDialog(this, "Couldn't download receivers list:\n" + e1.toString(), "Error",
+                            JOptionPane.ERROR_MESSAGE);
                 }
+                return null;
+            }, t -> {
+
+                String phrase = searchField.getText();
+                int limit = (int) limitSpinner.getValue();
+
+                List<PublicReceiver> receivers = scraper.searchReceivers(phrase, limit);
+                publicContainer.removeAll();
+                receivers.forEach(receiver -> {
+                    try {
+                        ReceiverEntry entry = new ReceiverEntry(receiver.url(),
+                                userStorage.getDefaultSettings().clone());
+                        entry.setReceiverData(new StatusResponse(
+                                new StatusResponse.Receiver(receiver.label(), null, null, null), receiver.version()));
+                        publicContainer.addEntry(entry, cpt -> {
+                            JButton connectButton = new JButton("Connect");
+                            connectButton.addActionListener(e2 -> {
+                                setVisible(false);
+                                ReceiverEntry rxEntry = cpt.getEntry();
+                                try {
+                                    RadioReceiver rx = new RadioReceiver(rxEntry.getWebsocketURI(),
+                                            rxEntry.getSettings(), this, rxEntry.getCache());
+                                    rx.setVisible(true);
+                                    rx.connect();
+                                } catch (LineUnavailableException | InterruptedException e1) {
+                                    e1.printStackTrace();
+                                }
+                            });
+
+                            JButton addButton = new JButton("Add to personal");
+                            addButton.addActionListener(e2 -> {
+                                ReceiverEntry rxEntry = cpt.getEntry();
+                                userStorage.addEntry(rxEntry);
+                                ReceiverEntryComponent newCpt = addPersonalEntry(rxEntry);
+                                rxEntry.setQuerying();
+                                newCpt.updateEntry();
+                                updateEntryAsync(newCpt);
+                            });
+
+                            JButton queryButton = new JButton("Query");
+                            queryButton.addActionListener(e2 -> {
+                                ReceiverEntry rxEntry = cpt.getEntry();
+                                rxEntry.setQuerying();
+                                cpt.updateEntry();
+                                updateEntryAsync(cpt);
+                            });
+
+                            return List.of(connectButton, addButton, queryButton);
+                        });
+                    } catch (Exception e1) {
+                        e1.printStackTrace();
+                    }
+                });
             });
             invalidate();
             repaint();
         });
 
         tabbedPane.addChangeListener(e -> {
-            if (tabbedPane.getSelectedIndex() == 1) {
-                ProgressDialog.show(this, "Downloading receivers...", (dialog) -> {
-                    try {
-                        if (!scraper.hasScraped()) scraper.scrapeReceivers();
-                    } catch (IOException e1) {
-                        e1.printStackTrace();
-                        JOptionPane.showMessageDialog(this, "Couldn't download receivers list:\n" + e1.toString(),
-                                "Error", JOptionPane.ERROR_MESSAGE);
-                    }
-                    return null;
-                }, t -> btnSearch.doClick());
+            if (tabbedPane.getSelectedIndex() == 1
+                    && userStorage.getApplicationSettings().isAutoDownloadPublicReceivers()) {
+                btnSearch.doClick();
             }
         });
 
         updateEntries();
+        if (userStorage.getApplicationSettings().isAutoRefreshPrivateReceivers()) {
+            refreshPersonalReceivers();
+        }
     }
 
     public void refreshPersonalReceivers() {

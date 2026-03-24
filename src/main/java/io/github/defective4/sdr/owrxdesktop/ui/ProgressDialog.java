@@ -21,9 +21,8 @@ public class ProgressDialog extends JDialog {
 
     private ProgressDialog(Window parent, String text) {
         super(parent);
-        setModalityType(ModalityType.DOCUMENT_MODAL);
         setResizable(false);
-//        setModal(true);
+        setModal(true);
         setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
 
         JPanel panel = new JPanel();

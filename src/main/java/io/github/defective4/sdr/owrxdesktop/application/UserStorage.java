@@ -8,6 +8,7 @@ import java.util.List;
 import io.github.defective4.sdr.owrxdesktop.ui.settings.ReceiverUserSettings;
 
 public class UserStorage {
+    private final ApplicationSettings applicationSettings = new ApplicationSettings();
     private final ReceiverUserSettings defaultSettings = new ReceiverUserSettings();
     private final List<ReceiverEntry> userEntries = new ArrayList<>();
 
@@ -21,6 +22,10 @@ public class UserStorage {
 
     public boolean addEntry(ReceiverEntry e) {
         return userEntries.add(e);
+    }
+
+    public ApplicationSettings getApplicationSettings() {
+        return applicationSettings;
     }
 
     public ReceiverUserSettings getDefaultSettings() {
