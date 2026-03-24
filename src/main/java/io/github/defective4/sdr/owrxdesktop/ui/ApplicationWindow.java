@@ -1,6 +1,9 @@
 package io.github.defective4.sdr.owrxdesktop.ui;
 
 import java.awt.BorderLayout;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.net.URI;
@@ -10,30 +13,38 @@ import java.util.concurrent.Executors;
 
 import javax.sound.sampled.LineUnavailableException;
 import javax.swing.JButton;
+import javax.swing.JComboBox;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
+import javax.swing.JSpinner;
 import javax.swing.JTabbedPane;
+import javax.swing.JTextField;
 import javax.swing.KeyStroke;
+import javax.swing.SpinnerNumberModel;
+import javax.swing.border.EmptyBorder;
 
 import io.github.defective4.sdr.owrxdesktop.RadioReceiver;
 import io.github.defective4.sdr.owrxdesktop.application.ReceiverEntry;
 import io.github.defective4.sdr.owrxdesktop.application.UserStorage;
+import io.github.defective4.sdr.owrxdesktop.application.integration.receiverbook.ReceiverbookScraper;
 import io.github.defective4.sdr.owrxdesktop.ui.component.ReceiverEntryComponent;
 import io.github.defective4.sdr.owrxdesktop.ui.component.ReceiverEntryContainer;
 
 public class ApplicationWindow extends JFrame {
-
+    private final    ReceiverEntryContainer publicContainer = new ReceiverEntryContainer();
     private final ReceiverEntryContainer rxContainer = new ReceiverEntryContainer();
-
+    private final ReceiverbookScraper scraper = new ReceiverbookScraper();
+    private final JTextField textField;
     private final ExecutorService updateExecutor = Executors.newFixedThreadPool(1);
-
-    private final UserStorage userStorage = new UserStorage();
+private final UserStorage userStorage = new UserStorage();
 
     public ApplicationWindow() {
         setBounds(100, 100, 768, 512);
@@ -94,6 +105,7 @@ public class ApplicationWindow extends JFrame {
             mnEdit.add(separator);
 
             JMenuItem mntmRefreshAll = new JMenuItem("Refresh all");
+            mntmRefreshAll.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_R, InputEvent.CTRL_DOWN_MASK));
             mntmRefreshAll.addActionListener(e -> refreshPersonalReceivers());
             mnEdit.add(mntmRefreshAll);
         }
@@ -106,6 +118,99 @@ public class ApplicationWindow extends JFrame {
             tabbedPane.addTab("Personal", null, scrollPane, null);
             scrollPane.setViewportView(rxContainer);
         }
+
+        JPanel publicPanel = new JPanel();
+        tabbedPane.addTab("Public", null, publicPanel, null);
+        GridBagLayout gbl_publicPanel = new GridBagLayout();
+        gbl_publicPanel.columnWidths = new int[]{0, 0};
+        gbl_publicPanel.rowHeights = new int[]{0, 0, 0};
+        gbl_publicPanel.columnWeights = new double[]{1.0, Double.MIN_VALUE};
+        gbl_publicPanel.rowWeights = new double[]{0.0, 1.0, Double.MIN_VALUE};
+        publicPanel.setLayout(gbl_publicPanel);
+
+        JPanel searchPanel = new JPanel();
+        searchPanel.setBorder(new EmptyBorder(5, 5, 0, 5));
+        GridBagConstraints gbc_searchPanel = new GridBagConstraints();
+        gbc_searchPanel.insets = new Insets(0, 0, 5, 0);
+        gbc_searchPanel.fill = GridBagConstraints.BOTH;
+        gbc_searchPanel.gridx = 0;
+        gbc_searchPanel.gridy = 0;
+        publicPanel.add(searchPanel, gbc_searchPanel);
+        GridBagLayout gbl_searchPanel = new GridBagLayout();
+        gbl_searchPanel.columnWidths = new int[]{0, 0, 0, 0, 0, 0, 0, 0};
+        gbl_searchPanel.rowHeights = new int[] {0, 0};
+        gbl_searchPanel.columnWeights = new double[]{0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE};
+        gbl_searchPanel.rowWeights = new double[]{0.0};
+        searchPanel.setLayout(gbl_searchPanel);
+
+        JLabel lblSearch = new JLabel("Search");
+        GridBagConstraints gbc_lblSearch = new GridBagConstraints();
+        gbc_lblSearch.insets = new Insets(0, 0, 0, 5);
+        gbc_lblSearch.anchor = GridBagConstraints.EAST;
+        gbc_lblSearch.gridx = 0;
+        gbc_lblSearch.gridy = 0;
+        searchPanel.add(lblSearch, gbc_lblSearch);
+
+        textField = new JTextField();
+        GridBagConstraints gbc_textField = new GridBagConstraints();
+        gbc_textField.insets = new Insets(0, 0, 0, 5);
+        gbc_textField.fill = GridBagConstraints.HORIZONTAL;
+        gbc_textField.gridx = 1;
+        gbc_textField.gridy = 0;
+        searchPanel.add(textField, gbc_textField);
+        textField.setColumns(10);
+
+        JLabel lblLimit = new JLabel("Limit");
+        GridBagConstraints gbc_lblLimit = new GridBagConstraints();
+        gbc_lblLimit.insets = new Insets(0, 0, 0, 5);
+        gbc_lblLimit.gridx = 2;
+        gbc_lblLimit.gridy = 0;
+        searchPanel.add(lblLimit, gbc_lblLimit);
+
+        JSpinner spinner = new JSpinner();
+        spinner.setModel(new SpinnerNumberModel(10, 1, 500, 1));
+        GridBagConstraints gbc_spinner = new GridBagConstraints();
+        gbc_spinner.insets = new Insets(0, 0, 0, 5);
+        gbc_spinner.gridx = 3;
+        gbc_spinner.gridy = 0;
+        searchPanel.add(spinner, gbc_spinner);
+
+        JLabel lblSort = new JLabel("Sort");
+        GridBagConstraints gbc_lblSort = new GridBagConstraints();
+        gbc_lblSort.anchor = GridBagConstraints.EAST;
+        gbc_lblSort.insets = new Insets(0, 0, 0, 5);
+        gbc_lblSort.gridx = 4;
+        gbc_lblSort.gridy = 0;
+        searchPanel.add(lblSort, gbc_lblSort);
+
+        JComboBox comboBox = new JComboBox();
+        GridBagConstraints gbc_comboBox = new GridBagConstraints();
+        gbc_comboBox.insets = new Insets(0, 0, 0, 5);
+        gbc_comboBox.fill = GridBagConstraints.HORIZONTAL;
+        gbc_comboBox.gridx = 5;
+        gbc_comboBox.gridy = 0;
+        searchPanel.add(comboBox, gbc_comboBox);
+
+        JButton btnSearch = new JButton("Search");
+        GridBagConstraints gbc_btnSearch = new GridBagConstraints();
+        gbc_btnSearch.gridx = 6;
+        gbc_btnSearch.gridy = 0;
+        searchPanel.add(btnSearch, gbc_btnSearch);
+
+        JScrollPane scrollPane = new JScrollPane();
+        GridBagConstraints gbc_scrollPane = new GridBagConstraints();
+        gbc_scrollPane.fill = GridBagConstraints.BOTH;
+        gbc_scrollPane.gridx = 0;
+        gbc_scrollPane.gridy = 1;
+        publicPanel.add(scrollPane, gbc_scrollPane);
+
+        scrollPane.setViewportView(publicContainer);
+
+        tabbedPane.addChangeListener(e -> {
+            if (tabbedPane.getSelectedIndex() == 1) {
+
+            }
+        });
 
         updateEntries();
     }
