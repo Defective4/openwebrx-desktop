@@ -146,7 +146,8 @@ public class ApplicationWindow extends JFrame {
                 setVisible(false);
                 ReceiverEntry rxEntry = rxcpt.getEntry();
                 try {
-                    RadioReceiver rx = new RadioReceiver(rxEntry.getWebsocketURI(), rxEntry.getSettings(), this);
+                    RadioReceiver rx = new RadioReceiver(rxEntry.getWebsocketURI(), rxEntry.getSettings(), this,
+                            rxEntry.getCache());
                     rx.setVisible(true);
                     rx.connect();
                 } catch (LineUnavailableException | InterruptedException e1) {

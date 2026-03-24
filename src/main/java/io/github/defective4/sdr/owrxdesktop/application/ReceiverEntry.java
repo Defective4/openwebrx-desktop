@@ -14,12 +14,14 @@ import javax.imageio.ImageIO;
 
 import com.google.gson.Gson;
 
+import io.github.defective4.sdr.owrxdesktop.cache.ReceiverCache;
 import io.github.defective4.sdr.owrxdesktop.ui.settings.ReceiverUserSettings;
 
 public class ReceiverEntry {
 
     private static final Gson GSON = new Gson();
 
+    private final ReceiverCache cache = new ReceiverCache();
     private Exception queryException = null;
     private boolean querying = false;
     private StatusResponse receiverData;
@@ -33,6 +35,10 @@ public class ReceiverEntry {
         URI.create(rootURL).toURL();
         this.rootURL = rootURL;
         this.settings = settings;
+    }
+
+    public ReceiverCache getCache() {
+        return cache;
     }
 
     public Exception getQueryException() {

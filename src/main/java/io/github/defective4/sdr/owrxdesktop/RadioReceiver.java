@@ -44,7 +44,7 @@ public class RadioReceiver {
     private final ApplicationWindow app;
     private final AudioSinkManager audioSinkManager;
 
-    private final ReceiverCache cache = new ReceiverCache();
+    private final ReceiverCache cache;
     private final OpenWebRXClient client;
     private boolean freeTuned;
     private int jumpFreq = -1;
@@ -57,7 +57,8 @@ public class RadioReceiver {
 
     private final URI uri;
 
-    public RadioReceiver(URI uri, ReceiverUserSettings settings, ApplicationWindow app) throws LineUnavailableException {
+    public RadioReceiver(URI uri, ReceiverUserSettings settings, ApplicationWindow app, ReceiverCache cache) throws LineUnavailableException {
+        this.cache = cache;
         this.settings = settings;
         audioSinkManager = new AudioSinkManager();
         this.uri = uri;
