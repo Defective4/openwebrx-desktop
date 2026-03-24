@@ -3,6 +3,9 @@ package io.github.defective4.sdr.owrxdesktop.ui.settings;
 import java.awt.Color;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -51,6 +54,21 @@ public class ReceiverUserSettings {
 
     }
 
+    @Override
+    public ReceiverUserSettings clone() {
+        ReceiverUserSettings settings = new ReceiverUserSettings();
+        for (Field field : getClass().getDeclaredFields()) if (!Modifier.isFinal(field.getModifiers())) {
+            Object val;
+            try {
+                val = field.get(this);
+                field.set(settings, val);
+            } catch (IllegalArgumentException | IllegalAccessException e) {
+                throw new IllegalStateException(e);
+            }
+        }
+        return settings;
+    }
+
     public String getMagicKey() {
         return magicKey == null ? "" : magicKey;
     }
@@ -60,7 +78,7 @@ public class ReceiverUserSettings {
     }
 
     public List<String> getWaterfallCustomTheme() {
-        return waterfallCustomTheme;
+        return Collections.unmodifiableList(waterfallCustomTheme);
     }
 
     public WaterfallThemeMode getWaterfallThemeMode() {
@@ -92,7 +110,7 @@ public class ReceiverUserSettings {
     }
 
     public void setWaterfallCustomTheme(List<String> waterfallCustomTheme) {
-        this.waterfallCustomTheme = Objects.requireNonNull(waterfallCustomTheme);
+        this.waterfallCustomTheme = Objects.requireNonNull(List.copyOf(waterfallCustomTheme));
     }
 
     public void setWaterfallThemeMode(WaterfallThemeMode waterfallThemeMode) {
@@ -102,5 +120,4 @@ public class ReceiverUserSettings {
     public static Optional<Color[]> getTheme(String index) {
         return Optional.ofNullable(themeIndex.get(index));
     }
-
 }

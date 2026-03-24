@@ -1,6 +1,8 @@
 package io.github.defective4.sdr.owrxdesktop;
 
 import java.awt.Color;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.net.URI;
 import java.util.Arrays;
 import java.util.List;
@@ -24,6 +26,7 @@ import io.github.defective4.sdr.owrxclient.model.ServerConfig;
 import io.github.defective4.sdr.owrxdesktop.audio.AudioSinkManager;
 import io.github.defective4.sdr.owrxdesktop.bandplan.Bandplan;
 import io.github.defective4.sdr.owrxdesktop.cache.ReceiverCache;
+import io.github.defective4.sdr.owrxdesktop.ui.ApplicationWindow;
 import io.github.defective4.sdr.owrxdesktop.ui.BookmarkEditorDialog;
 import io.github.defective4.sdr.owrxdesktop.ui.BookmarksDialog.MergedLabel;
 import io.github.defective4.sdr.owrxdesktop.ui.ReceiverWindow;
@@ -38,26 +41,36 @@ import io.github.defective4.sdr.owrxdesktop.ui.settings.waterfall.WaterfallTheme
 public class RadioReceiver {
 
     protected Color[] waterfallTheme = { Color.black, Color.white };
+    private final ApplicationWindow app;
     private final AudioSinkManager audioSinkManager;
-    private final ReceiverCache cache = new ReceiverCache();
 
+    private final ReceiverCache cache = new ReceiverCache();
     private final OpenWebRXClient client;
     private boolean freeTuned;
     private int jumpFreq = -1;
+
     private String jumpMode;
-
     private String modulation, profileId;
-    private final ReceiverWindow rxWindow;
 
+    private final ReceiverWindow rxWindow;
     private final ReceiverUserSettings settings;
+
     private final URI uri;
 
-    public RadioReceiver(URI uri, ReceiverUserSettings settings) throws LineUnavailableException {
+    public RadioReceiver(URI uri, ReceiverUserSettings settings, ApplicationWindow app) throws LineUnavailableException {
         this.settings = settings;
         audioSinkManager = new AudioSinkManager();
         this.uri = uri;
         rxWindow = new ReceiverWindow(settings, cache);
+        rxWindow.addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosed(WindowEvent e) {
+                client.close();
+                app.setVisible(true);
+            }
+        });
         client = prepareClient();
+        this.app = app;
         rxWindow.addListener(new UserInteractionListener() {
 
             @Override

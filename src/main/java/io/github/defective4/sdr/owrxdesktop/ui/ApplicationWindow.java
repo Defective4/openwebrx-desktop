@@ -60,7 +60,7 @@ public class ApplicationWindow extends JFrame {
                 if (url != null) {
                     try {
                         URI.create(url).toURL();
-                        ReceiverEntry entry = new ReceiverEntry(url, userStorage.getDefaultSettings());
+                        ReceiverEntry entry = new ReceiverEntry(url, userStorage.getDefaultSettings().clone());
                         userStorage.addEntry(entry);
                         entry.setQuerying();
                         ReceiverEntryComponent cpt = addPersonalEntry(entry);
@@ -138,7 +138,7 @@ public class ApplicationWindow extends JFrame {
                 setVisible(false);
                 ReceiverEntry rxEntry = rxcpt.getEntry();
                 try {
-                    RadioReceiver rx = new RadioReceiver(rxEntry.getWebsocketURI(), rxEntry.getSettings());
+                    RadioReceiver rx = new RadioReceiver(rxEntry.getWebsocketURI(), rxEntry.getSettings(), this);
                     rx.setVisible(true);
                     rx.connect();
                 } catch (LineUnavailableException | InterruptedException e1) {

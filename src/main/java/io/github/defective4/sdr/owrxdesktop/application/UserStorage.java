@@ -13,7 +13,7 @@ public class UserStorage {
 
     public UserStorage() {
         try {
-            userEntries.add(new ReceiverEntry("http://radio.raspberry.local", defaultSettings));
+            userEntries.add(new ReceiverEntry("http://radio.raspberry.local", defaultSettings.clone()));
         } catch (MalformedURLException e) {
             e.printStackTrace();
         }

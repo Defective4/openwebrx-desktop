@@ -1095,10 +1095,18 @@ public class ReceiverWindow extends JFrame {
 
     private void exit() {
         if (exiting) return;
-        if (JOptionPane.showOptionDialog(this, "Are you sure you want to close the receiver?", "Exiting",
-                JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, null, null) == JOptionPane.YES_OPTION) {
-            exiting = true;
-            System.exit(0);
+        switch (JOptionPane.showOptionDialog(this, "Are you sure you want to close the receiver?", "Exiting",
+                JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null,
+                new String[] { "Close the application", "Return to receivers list", "Cancel" }, null)) {
+            case 0 -> {
+                exiting = true;
+                System.exit(0);
+            }
+            case 1 -> {
+                exiting = true;
+                dispose();
+            }
+            default -> {}
         }
     }
 
