@@ -198,9 +198,7 @@ public class FFTPanel extends BandplanPanel {
 
     public void setDrawMaxValues(boolean drawMaxValues) {
         this.drawMaxValues = drawMaxValues;
-        if (!drawMaxValues) {
-            fftValuesMax = new float[0];
-        }
+        fftValuesMax = new float[0];
     }
 
     @Override

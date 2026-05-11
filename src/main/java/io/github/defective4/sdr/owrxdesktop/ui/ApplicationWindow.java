@@ -52,8 +52,6 @@ public class ApplicationWindow extends JFrame {
     private final ExecutorService updateExecutor;
     private final UserStorage userStorage = new UserStorage();
 
-
-
     public ApplicationWindow() {
         updateExecutor = Executors.newFixedThreadPool(userStorage.getApplicationSettings().getMaxNetworkWorkers());
         setBounds(100, 100, 768, 512);
