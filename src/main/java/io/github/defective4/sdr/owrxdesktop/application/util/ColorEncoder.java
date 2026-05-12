@@ -6,7 +6,8 @@ public class ColorEncoder {
     private ColorEncoder() {}
 
     public static String toHex(Color color) {
-        return String.format("#%s%s%s", color.getRed(), color.getGreen(), color.getBlue());
+        return String.format("#%s%s%s", formatHex(color.getRed()), formatHex(color.getGreen()),
+                formatHex(color.getBlue()));
     }
 
     private static String formatHex(int i) {

@@ -25,7 +25,7 @@ import io.github.defective4.sdr.owrxdesktop.ui.settings.waterfall.WaterfallTheme
 
 public class ReceiverUserSettings {
 
-    private static final int BANDPLAN_SERVER = 1;
+    private static final int BANDPLAN_SERVER = -1;
 
     private static final Bandplan SERVER_BANDPLAN = new Bandplan();
 
@@ -53,7 +53,7 @@ public class ReceiverUserSettings {
     private List<SerializedBandplan> importedBandplans = List.of();
     private String magicKey;
 
-    private int selectedBandplan = -BANDPLAN_SERVER;
+    private int selectedBandplan = BANDPLAN_SERVER;
     private BuiltinWaterfallTheme selectedBuiltinWaterfallTheme = BuiltinWaterfallTheme.TURBO;
     private List<String> waterfallCustomTheme = List.of("#000000", "#ffffff");
     private WaterfallThemeMode waterfallThemeMode = WaterfallThemeMode.SERVER;

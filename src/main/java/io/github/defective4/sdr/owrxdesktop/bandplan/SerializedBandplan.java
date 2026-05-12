@@ -9,6 +9,6 @@ public record SerializedBandplan(List<SerializedBand> list, Map<String, String> 
     public Bandplan deserialize() {
         Map<String, Color> colors = new HashMap<>();
         this.colors.forEach((s, c) -> colors.put(s, Color.decode(c)));
-        return new Bandplan(null, colors, name);
+        return new Bandplan(list.stream().map(SerializedBand::deserialize).toList(), colors, name);
     }
 }

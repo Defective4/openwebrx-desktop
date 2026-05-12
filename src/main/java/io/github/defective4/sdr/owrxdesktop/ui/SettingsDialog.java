@@ -10,6 +10,10 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.Window;
 import java.awt.event.ActionListener;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.BoxLayout;
@@ -18,10 +22,13 @@ import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JDialog;
+import javax.swing.JFileChooser;
 import javax.swing.JLabel;
+import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPasswordField;
+import javax.swing.JPopupMenu;
 import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
@@ -29,8 +36,10 @@ import javax.swing.JTabbedPane;
 import javax.swing.JTextArea;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
+import javax.swing.filechooser.FileNameExtensionFilter;
 
 import io.github.defective4.sdr.owrxdesktop.bandplan.BandplanListRenderer;
+import io.github.defective4.sdr.owrxdesktop.bandplan.GQRXBandplanReader;
 import io.github.defective4.sdr.owrxdesktop.bandplan.SerializedBandplan;
 import io.github.defective4.sdr.owrxdesktop.ui.settings.ReceiverUserSettings;
 import io.github.defective4.sdr.owrxdesktop.ui.settings.waterfall.BuiltinWaterfallTheme;
@@ -230,7 +239,6 @@ public class SettingsDialog extends JDialog {
                                 bandplanBox.setEnabled(enable);
                             };
                             {
-
                                 rdbtnServerBandplanButton.setSelected(settings.getBandplan().isServerSide());
                                 GridBagConstraints gbc_rdbtnNewRadioButton = new GridBagConstraints();
                                 gbc_rdbtnNewRadioButton.insets = new Insets(0, 0, 5, 0);
@@ -272,17 +280,51 @@ public class SettingsDialog extends JDialog {
                                 panel.add(panel_1, gbc_panel_1);
                                 {
                                     bandplanBox.setRenderer(new BandplanListRenderer());
-                                    if (settings.getImportedBandplans().isEmpty()) bandplanBox.addItem(null);
-                                    settings.getImportedBandplans().forEach(i -> bandplanBox.addItem(i));
-                                    if (settings.getBandplan().isServerSide()) {
-                                        bandplanBox.setSelectedIndex(0);
-                                    } else {
-                                        bandplanBox.setSelectedItem(settings.getBandplan());
+                                    if (settings.getImportedBandplans().isEmpty())
+                                        bandplanBox.addItem(null);
+                                    else {
+                                        settings.getImportedBandplans().forEach(i -> bandplanBox.addItem(i));
+                                        bandplanBox.setSelectedIndex(Math.max(0, Math
+                                                .min(bandplanBox.getItemCount() - 1, settings.getSelectedBandplan())));
                                     }
                                     panel_1.add(bandplanBox);
                                 }
                                 {
                                     bandplanImport = new JButton("Import");
+                                    bandplanImport.addActionListener(e -> {
+                                        JPopupMenu menu = new JPopupMenu();
+                                        JMenuItem gqrx = new JMenuItem("GQRX CSV file");
+
+                                        gqrx.addActionListener(e2 -> {
+                                            JFileChooser chooser = new JFileChooser();
+                                            chooser.setAcceptAllFileFilterUsed(true);
+                                            chooser.setFileFilter(new FileNameExtensionFilter("GQRX CSV Files", "csv"));
+
+                                            if (chooser.showDialog(this, "Load") == JFileChooser.APPROVE_OPTION) {
+                                                File selected = chooser.getSelectedFile();
+                                                try (GQRXBandplanReader reader = new GQRXBandplanReader(
+                                                        new FileReader(selected))) {
+                                                    List<SerializedBandplan> bps = new ArrayList<>(
+                                                            settings.getImportedBandplans());
+                                                    bps.add(reader.readBandplan("[GQRX] " + selected.getName())
+                                                            .serialize());
+                                                    settings.setImportedBandplans(bps);
+                                                    bandplanBox.removeAllItems();
+                                                    settings.getImportedBandplans()
+                                                            .forEach(i -> bandplanBox.addItem(i));
+                                                    bandplanBox.setSelectedIndex(bandplanBox.getItemCount() - 1);
+                                                } catch (IOException e1) {
+                                                    e1.printStackTrace();
+                                                    JOptionPane.showMessageDialog(this,
+                                                            "This is not a valid GQRX bandplan file", "Error",
+                                                            JOptionPane.ERROR_MESSAGE);
+                                                }
+                                            }
+                                        });
+
+                                        menu.add(gqrx);
+                                        menu.show(bandplanImport, 0, bandplanImport.getHeight());
+                                    });
                                     panel_1.add(bandplanImport);
                                 }
                             }
@@ -365,6 +407,10 @@ public class SettingsDialog extends JDialog {
                     settings.setMagicKey(new String(magicKeyField.getPassword()));
                     settings.setEnableFreeTuning(freeTuningCheck.isSelected());
                     settings.setDynamicColorMixing(dynamicColorMixingCheck.isSelected());
+
+                    settings.setSelectedBandplan(
+                            rdbtnServerBandplanButton.isSelected() || settings.getImportedBandplans().isEmpty() ? -1
+                                    : bandplanBox.getSelectedIndex());
                     saved = true;
                     dispose();
                 });
