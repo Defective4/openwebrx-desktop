@@ -39,8 +39,8 @@ import javax.swing.border.TitledBorder;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 import io.github.defective4.sdr.owrxdesktop.bandplan.BandplanListRenderer;
-import io.github.defective4.sdr.owrxdesktop.bandplan.GQRXBandplanReader;
 import io.github.defective4.sdr.owrxdesktop.bandplan.SerializedBandplan;
+import io.github.defective4.sdr.owrxdesktop.bandplan.reader.GQRXBandplanReader;
 import io.github.defective4.sdr.owrxdesktop.ui.settings.ReceiverUserSettings;
 import io.github.defective4.sdr.owrxdesktop.ui.settings.waterfall.BuiltinWaterfallTheme;
 import io.github.defective4.sdr.owrxdesktop.ui.settings.waterfall.WaterfallThemeMode;
@@ -228,9 +228,9 @@ public class SettingsDialog extends JDialog {
                             fftTabs.addTab("Bandplan", null, panel, null);
                             GridBagLayout gbl_panel = new GridBagLayout();
                             gbl_panel.columnWidths = new int[] { 0, 0 };
-                            gbl_panel.rowHeights = new int[] { 0, 0, 0, 0, 0 };
+                            gbl_panel.rowHeights = new int[] { 0, 0, 0, 0, 0, 0 };
                             gbl_panel.columnWeights = new double[] { 1.0, Double.MIN_VALUE };
-                            gbl_panel.rowWeights = new double[] { 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE };
+                            gbl_panel.rowWeights = new double[] { 0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE };
                             panel.setLayout(gbl_panel);
                             ButtonGroup bandplanGroup = new ButtonGroup();
                             ActionListener bandplanBtnListener = e -> {
@@ -271,12 +271,22 @@ public class SettingsDialog extends JDialog {
                                 rdbtnCustomBandplanButton.addActionListener(bandplanBtnListener);
                             }
                             {
+                                JLabel lblGqrxBandplansAre = new JLabel("GQRX bandplans are supported");
+                                lblGqrxBandplansAre.setEnabled(false);
+                                GridBagConstraints gbc_lblGqrxBandplansAre = new GridBagConstraints();
+                                gbc_lblGqrxBandplansAre.anchor = GridBagConstraints.NORTHWEST;
+                                gbc_lblGqrxBandplansAre.insets = new Insets(0, 0, 5, 0);
+                                gbc_lblGqrxBandplansAre.gridx = 0;
+                                gbc_lblGqrxBandplansAre.gridy = 3;
+                                panel.add(lblGqrxBandplansAre, gbc_lblGqrxBandplansAre);
+                            }
+                            {
                                 JPanel panel_1 = new JPanel();
                                 GridBagConstraints gbc_panel_1 = new GridBagConstraints();
                                 gbc_panel_1.anchor = GridBagConstraints.WEST;
                                 gbc_panel_1.fill = GridBagConstraints.VERTICAL;
                                 gbc_panel_1.gridx = 0;
-                                gbc_panel_1.gridy = 3;
+                                gbc_panel_1.gridy = 4;
                                 panel.add(panel_1, gbc_panel_1);
                                 {
                                     bandplanBox.setRenderer(new BandplanListRenderer());

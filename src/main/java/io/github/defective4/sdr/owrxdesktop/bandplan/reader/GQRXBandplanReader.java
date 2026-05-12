@@ -1,4 +1,4 @@
-package io.github.defective4.sdr.owrxdesktop.bandplan;
+package io.github.defective4.sdr.owrxdesktop.bandplan.reader;
 
 import java.awt.Color;
 import java.io.BufferedReader;
@@ -9,6 +9,9 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import io.github.defective4.sdr.owrxdesktop.bandplan.Band;
+import io.github.defective4.sdr.owrxdesktop.bandplan.Bandplan;
 
 public class GQRXBandplanReader extends BandplanReader {
 
@@ -40,11 +43,15 @@ public class GQRXBandplanReader extends BandplanReader {
                     bands.add(new Band((int) start, (int) end, corrected, label));
                 } catch (Exception e) {
                     e.printStackTrace();
-                    break;
+                    continue;
                 }
             }
         }
-        return new Bandplan(bands, colors, name);
+        try {
+            return new Bandplan(bands, colors, name);
+        } catch (Exception e) {
+            throw new IOException(e);
+        }
     }
 
 }

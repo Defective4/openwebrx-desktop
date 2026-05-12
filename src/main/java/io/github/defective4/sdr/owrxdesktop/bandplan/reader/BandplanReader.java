@@ -1,7 +1,9 @@
-package io.github.defective4.sdr.owrxdesktop.bandplan;
+package io.github.defective4.sdr.owrxdesktop.bandplan.reader;
 
 import java.io.IOException;
 import java.io.Reader;
+
+import io.github.defective4.sdr.owrxdesktop.bandplan.Bandplan;
 
 public abstract class BandplanReader implements AutoCloseable {
 

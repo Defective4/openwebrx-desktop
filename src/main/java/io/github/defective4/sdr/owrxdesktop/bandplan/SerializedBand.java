@@ -10,6 +10,6 @@ public record SerializedBand(int startFreq, int endFreq, String hex, String name
     }
 
     public Band deserialize() {
-        return new Band(startFreq, endFreq, Color.decode(hex), name);
+        return new Band(startFreq, endFreq, ColorEncoder.setColorAlpha(Color.decode(hex), 100), name);
     }
 }

@@ -68,7 +68,7 @@ import io.github.defective4.sdr.owrxdesktop.ui.settings.ReceiverUserSettings;
 public class ReceiverWindow extends JFrame {
 
     private final JComboBox<ReceiverMode> analogBox = new JComboBox<>();
-    private final Bandplan bandplan = new Bandplan();
+    private final Bandplan bandplan;
 
     private int bandwidth;
 
@@ -123,6 +123,7 @@ public class ReceiverWindow extends JFrame {
     private final WaterfallPanel waterfallPanel;
 
     public ReceiverWindow(ReceiverUserSettings settings, ReceiverCache cache) {
+        bandplan = settings.getBandplan();
         userSettings = settings;
         resetAutoFFT();
         setBounds(100, 100, 768, 600);

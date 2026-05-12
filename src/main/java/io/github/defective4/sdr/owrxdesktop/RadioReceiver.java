@@ -57,7 +57,8 @@ public class RadioReceiver {
 
     private final URI uri;
 
-    public RadioReceiver(URI uri, ReceiverUserSettings settings, ApplicationWindow app, ReceiverCache cache) throws LineUnavailableException {
+    public RadioReceiver(URI uri, ReceiverUserSettings settings, ApplicationWindow app, ReceiverCache cache)
+            throws LineUnavailableException {
         this.cache = cache;
         this.settings = settings;
         audioSinkManager = new AudioSinkManager();
@@ -214,18 +215,20 @@ public class RadioReceiver {
             @Override
             public void bandsUpdated(Band[] bands) {
                 Bandplan bandplan = rxWindow.getBandplan();
-                bandplan.setBands(Arrays.stream(bands).map(band -> {
-                    Color color = bandplan.getDefaultTagColor();
-                    if (band.tags() != null && band.tags().length > 0) for (String tag : band.tags()) {
-                        Optional<Color> tagColor = bandplan.getColorForTag(tag);
-                        if (tagColor.isPresent()) {
-                            color = tagColor.get();
-                            break;
+                if (bandplan.isServerSide()) {
+                    bandplan.setBands(Arrays.stream(bands).map(band -> {
+                        Color color = bandplan.getDefaultTagColor();
+                        if (band.tags() != null && band.tags().length > 0) for (String tag : band.tags()) {
+                            Optional<Color> tagColor = bandplan.getColorForTag(tag);
+                            if (tagColor.isPresent()) {
+                                color = tagColor.get();
+                                break;
+                            }
                         }
-                    }
-                    return new io.github.defective4.sdr.owrxdesktop.bandplan.Band(band.lowerFrequency(),
-                            band.higherFrequency(), color, band.name());
-                }).collect(Collectors.toSet()));
+                        return new io.github.defective4.sdr.owrxdesktop.bandplan.Band(band.lowerFrequency(),
+                                band.higherFrequency(), color, band.name());
+                    }).collect(Collectors.toSet()));
+                }
                 rxWindow.updateBandplan();
             }
 

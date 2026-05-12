@@ -26,9 +26,7 @@ public class Bandplan {
         Map<String, Color> tagged = new HashMap<>();
 
         for (Entry<String, String> entry : COLORS.entrySet()) {
-            Color decoded = Color.decode(entry.getValue());
-            Color corrected = new Color(decoded.getRed(), decoded.getGreen(), decoded.getBlue(), 200);
-            tagged.put(entry.getKey(), corrected);
+            tagged.put(entry.getKey(), ColorEncoder.setColorAlpha(Color.decode(entry.getValue()), 200));
         }
         colorTags = Collections.unmodifiableMap(tagged);
         defaultTagColor = colorTags.get("public");
