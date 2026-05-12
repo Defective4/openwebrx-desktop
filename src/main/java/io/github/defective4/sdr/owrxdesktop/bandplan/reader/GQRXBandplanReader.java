@@ -14,6 +14,7 @@ import io.github.defective4.sdr.owrxdesktop.bandplan.Band;
 import io.github.defective4.sdr.owrxdesktop.bandplan.Bandplan;
 
 public class GQRXBandplanReader extends BandplanReader {
+    public static final BandplanReaderFactory<GQRXBandplanReader> FACTORY = GQRXBandplanReader::new;
 
     public GQRXBandplanReader(Reader reader) {
         super(reader);
@@ -48,7 +49,8 @@ public class GQRXBandplanReader extends BandplanReader {
             }
         }
         try {
-            return new Bandplan(bands, colors, name);
+            if (bands.isEmpty()) throw new IllegalStateException();
+            return new Bandplan(bands, colors, "[GQRX] " + name);
         } catch (Exception e) {
             throw new IOException(e);
         }
