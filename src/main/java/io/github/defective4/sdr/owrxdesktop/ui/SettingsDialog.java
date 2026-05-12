@@ -12,9 +12,11 @@ import java.awt.Window;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.FileReader;
-import java.io.IOException;
+import java.nio.file.Files;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.swing.BoxLayout;
 import javax.swing.ButtonGroup;
@@ -37,6 +39,9 @@ import javax.swing.JTextArea;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
 import javax.swing.filechooser.FileNameExtensionFilter;
+
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 
 import io.github.defective4.sdr.owrxdesktop.bandplan.BandplanListRenderer;
 import io.github.defective4.sdr.owrxdesktop.bandplan.SerializedBandplan;
@@ -430,19 +435,59 @@ public class SettingsDialog extends JDialog {
     private void showBandplanChooser(ReceiverUserSettings settings, String extensionName, String extension,
             String genericErrorMessage, BandplanReaderFactory<?> factory) {
         JFileChooser chooser = new JFileChooser();
+        chooser.setDialogTitle("Load band plan");
         chooser.setAcceptAllFileFilterUsed(true);
         chooser.setFileFilter(new FileNameExtensionFilter(extensionName, extension));
 
         if (chooser.showDialog(this, "Load") == JFileChooser.APPROVE_OPTION) {
             File selected = chooser.getSelectedFile();
             try (BandplanReader reader = factory.create(new FileReader(selected))) {
+                if (reader instanceof SDRPPBandplanReader sdrpp) {
+                    while (true) {
+                        if (JOptionPane.showOptionDialog(this,
+                                "Do you want to load a custom color map for this SDR++ band plan?\n"
+                                        + "If your band plan does not come with one and you don't know what this means, press \"No\"",
+                                "Custom color map", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, null,
+                                0) == JOptionPane.YES_OPTION) {
+                            JFileChooser mapChooser = new JFileChooser();
+                            mapChooser.setDialogTitle("Loading SDR++ color map");
+                            if (mapChooser.showDialog(this, "Load") == JFileChooser.APPROVE_OPTION) {
+                                try {
+                                    File selectedMap = mapChooser.getSelectedFile();
+                                    String fs = Files.readString(selectedMap.toPath()).trim();
+                                    if (fs.endsWith(",")) fs = fs.substring(0, fs.length() - 1);
+                                    String json = String.format("{ %s }", fs);
+                                    JsonObject obj = JsonParser.parseString(json).getAsJsonObject();
+                                    Map<String, Color> colors = new HashMap<>();
+                                    obj.asMap().forEach((key, val) -> {
+                                        try {
+                                            String v = val.getAsString();
+                                            if (v.length() == 9 && v.startsWith("#"))
+                                                v = v.substring(0, v.length() - 2);
+                                            colors.put(key, Color.decode(v));
+                                        } catch (Exception e) {
+                                            e.printStackTrace();
+                                        }
+                                    });
+                                    sdrpp.setColors(colors);
+                                    break;
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                    JOptionPane.showMessageDialog(this, "Failed to load SDR++ color map", "Error",
+                                            JOptionPane.ERROR_MESSAGE);
+                                }
+                            }
+                        } else
+                            break;
+                    }
+                }
                 List<SerializedBandplan> bps = new ArrayList<>(settings.getImportedBandplans());
                 bps.add(reader.readBandplan(selected.getName()).serialize());
                 settings.setImportedBandplans(bps);
                 bandplanBox.removeAllItems();
                 settings.getImportedBandplans().forEach(i -> bandplanBox.addItem(i));
                 bandplanBox.setSelectedIndex(bandplanBox.getItemCount() - 1);
-            } catch (IOException e1) {
+            } catch (Exception e1) {
                 e1.printStackTrace();
                 JOptionPane.showMessageDialog(this, genericErrorMessage, "Error", JOptionPane.ERROR_MESSAGE);
             }

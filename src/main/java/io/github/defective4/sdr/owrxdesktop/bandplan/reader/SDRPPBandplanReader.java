@@ -26,6 +26,8 @@ public class SDRPPBandplanReader extends BandplanReader {
     private static final Map<String, Color> DEFAULT_COLORS = Map.of("amateur", Color.red, "aviation", Color.green,
             "broadcast", Color.blue, "marine", Color.decode("#00FFFF"), "military", Color.decode("#FFFF00"));
 
+    private Map<String, Color> colors = DEFAULT_COLORS;
+
     public SDRPPBandplanReader(Reader reader) {
         super(reader);
     }
@@ -42,12 +44,16 @@ public class SDRPPBandplanReader extends BandplanReader {
                 long start = b.start();
                 long end = b.end();
                 if (start > Integer.MAX_VALUE || end > Integer.MAX_VALUE) continue;
-                band.add(new Band((int) start, (int) end, DEFAULT_COLORS.getOrDefault(b.type(), Color.red), b.name()));
+                band.add(new Band((int) start, (int) end, colors.getOrDefault(b.type(), Color.red), b.name()));
             }
-            return new Bandplan(band, DEFAULT_COLORS, name);
+            return new Bandplan(band, colors, name);
         } catch (RuntimeException e) {
             throw new IOException(e);
         }
+    }
+
+    public void setColors(Map<String, Color> colors) {
+        this.colors = colors;
     }
 
 }
