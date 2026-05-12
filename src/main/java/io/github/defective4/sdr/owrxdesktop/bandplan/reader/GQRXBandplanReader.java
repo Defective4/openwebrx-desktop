@@ -48,12 +48,8 @@ public class GQRXBandplanReader extends BandplanReader {
                 }
             }
         }
-        try {
-            if (bands.isEmpty()) throw new IllegalStateException();
-            return new Bandplan(bands, colors, "[GQRX] " + name);
-        } catch (Exception e) {
-            throw new IOException(e);
-        }
+        if (bands.isEmpty()) throw new IllegalStateException();
+        return new Bandplan(bands, colors, "[GQRX] " + name);
     }
 
 }

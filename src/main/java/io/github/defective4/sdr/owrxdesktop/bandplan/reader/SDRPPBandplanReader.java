@@ -34,22 +34,17 @@ public class SDRPPBandplanReader extends BandplanReader {
 
     @Override
     public Bandplan readBandplan(String n) throws IOException {
-        try {
-            SDRPPBandplan plan = new Gson().fromJson(reader, SDRPPBandplan.class);
-            String name = String.format("[SDR++] %s by %s", plan.name,
-                    plan.author() == null ? "Unknown" : plan.author());
-            List<Band> band = new ArrayList<>();
-            for (SDRPPBand b : plan.bands()) {
-                if (b.name() == null || b.type() == null) continue;
-                long start = b.start();
-                long end = b.end();
-                if (start > Integer.MAX_VALUE || end > Integer.MAX_VALUE) continue;
-                band.add(new Band((int) start, (int) end, colors.getOrDefault(b.type(), Color.red), b.name()));
-            }
-            return new Bandplan(band, colors, name);
-        } catch (RuntimeException e) {
-            throw new IOException(e);
+        SDRPPBandplan plan = new Gson().fromJson(reader, SDRPPBandplan.class);
+        String name = String.format("[SDR++] %s by %s", plan.name, plan.author() == null ? "Unknown" : plan.author());
+        List<Band> band = new ArrayList<>();
+        for (SDRPPBand b : plan.bands()) {
+            if (b.name() == null || b.type() == null) continue;
+            long start = b.start();
+            long end = b.end();
+            if (start > Integer.MAX_VALUE || end > Integer.MAX_VALUE) continue;
+            band.add(new Band((int) start, (int) end, colors.getOrDefault(b.type(), Color.red), b.name()));
         }
+        return new Bandplan(band, colors, name);
     }
 
     public void setColors(Map<String, Color> colors) {

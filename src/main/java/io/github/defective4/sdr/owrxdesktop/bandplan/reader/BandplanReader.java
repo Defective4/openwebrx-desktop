@@ -18,6 +18,6 @@ public abstract class BandplanReader implements AutoCloseable {
         reader.close();
     }
 
-    public abstract Bandplan readBandplan(String name) throws IOException;
+    public abstract Bandplan readBandplan(String name) throws Exception;
 
 }

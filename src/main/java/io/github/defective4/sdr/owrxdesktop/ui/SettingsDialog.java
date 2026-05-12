@@ -49,6 +49,7 @@ import io.github.defective4.sdr.owrxdesktop.bandplan.reader.BandplanReader;
 import io.github.defective4.sdr.owrxdesktop.bandplan.reader.BandplanReaderFactory;
 import io.github.defective4.sdr.owrxdesktop.bandplan.reader.GQRXBandplanReader;
 import io.github.defective4.sdr.owrxdesktop.bandplan.reader.SDRPPBandplanReader;
+import io.github.defective4.sdr.owrxdesktop.bandplan.reader.SDRSharpBandplanReader;
 import io.github.defective4.sdr.owrxdesktop.ui.settings.ReceiverUserSettings;
 import io.github.defective4.sdr.owrxdesktop.ui.settings.waterfall.BuiltinWaterfallTheme;
 import io.github.defective4.sdr.owrxdesktop.ui.settings.waterfall.WaterfallThemeMode;
@@ -279,7 +280,7 @@ public class SettingsDialog extends JDialog {
                                 rdbtnCustomBandplanButton.addActionListener(bandplanBtnListener);
                             }
                             {
-                                JLabel lblGqrxBandplansAre = new JLabel("GQRX and SDR++ bandplans are supported");
+                                JLabel lblGqrxBandplansAre = new JLabel("GQRX, SDR++, and SDR# bandplans are supported");
                                 lblGqrxBandplansAre.setEnabled(false);
                                 GridBagConstraints gbc_lblGqrxBandplansAre = new GridBagConstraints();
                                 gbc_lblGqrxBandplansAre.anchor = GridBagConstraints.NORTHWEST;
@@ -327,8 +328,17 @@ public class SettingsDialog extends JDialog {
                                                     SDRPPBandplanReader.FACTORY);
                                         });
 
+                                        JMenuItem sdrsharp = new JMenuItem("SDR# XML file");
+
+                                        sdrsharp.addActionListener(e2 -> {
+                                            showBandplanChooser(settings, "SDR# XML Files", "xml",
+                                                    "This is not a valid SDR# bandplan file",
+                                                    SDRSharpBandplanReader.FACTORY);
+                                        });
+
                                         menu.add(gqrx);
                                         menu.add(sdrpp);
+                                        menu.add(sdrsharp);
                                         menu.show(bandplanImport, 0, bandplanImport.getHeight());
                                     });
                                     panel_1.add(bandplanImport);
