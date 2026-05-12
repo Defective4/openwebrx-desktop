@@ -1,0 +1,17 @@
+package io.github.defective4.sdr.owrxdesktop.application.util;
+
+import java.awt.Color;
+
+public class ColorEncoder {
+    private ColorEncoder() {}
+
+    public static String toHex(Color color) {
+        return String.format("#%s%s%s", color.getRed(), color.getGreen(), color.getBlue());
+    }
+
+    private static String formatHex(int i) {
+        String hex = Integer.toHexString(i);
+        if (hex.length() < 2) hex = "0" + hex;
+        return hex;
+    }
+}

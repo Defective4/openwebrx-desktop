@@ -18,12 +18,18 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
+import io.github.defective4.sdr.owrxdesktop.bandplan.Bandplan;
+import io.github.defective4.sdr.owrxdesktop.bandplan.SerializedBandplan;
 import io.github.defective4.sdr.owrxdesktop.ui.settings.waterfall.BuiltinWaterfallTheme;
 import io.github.defective4.sdr.owrxdesktop.ui.settings.waterfall.WaterfallThemeMode;
 
 public class ReceiverUserSettings {
 
-    private static final Map<String, Color[]> themeIndex = new HashMap<>();
+    private static final int BANDPLAN_SERVER = 1;
+
+    private static final Bandplan SERVER_BANDPLAN = new Bandplan();
+
+    private static final Map<String, Color[]> THEME_INDEX = new HashMap<>();
 
     static {
         try (Reader reader = new InputStreamReader(ReceiverUserSettings.class.getResourceAsStream("/themes.json"))) {
@@ -33,7 +39,7 @@ public class ReceiverUserSettings {
                     String key = entry.getKey();
                     Color[] colors = array.asList().stream().map(el -> Color.decode(el.getAsString()))
                             .toArray(Color[]::new);
-                    themeIndex.put(key, colors);
+                    THEME_INDEX.put(key, colors);
                 }
             }
         } catch (Exception e) {
@@ -42,17 +48,15 @@ public class ReceiverUserSettings {
     }
 
     private boolean dynamicColorMixing = true;
-    private boolean enableFreeTuning;
 
+    private boolean enableFreeTuning;
+    private List<SerializedBandplan> importedBandplans = List.of();
     private String magicKey;
+
+    private int selectedBandplan = -BANDPLAN_SERVER;
     private BuiltinWaterfallTheme selectedBuiltinWaterfallTheme = BuiltinWaterfallTheme.TURBO;
     private List<String> waterfallCustomTheme = List.of("#000000", "#ffffff");
-
     private WaterfallThemeMode waterfallThemeMode = WaterfallThemeMode.SERVER;
-
-    public ReceiverUserSettings() {
-
-    }
 
     @Override
     public ReceiverUserSettings clone() {
@@ -69,8 +73,23 @@ public class ReceiverUserSettings {
         return settings;
     }
 
+    public Bandplan getBandplan() {
+        if (selectedBandplan <= BANDPLAN_SERVER || importedBandplans.isEmpty()) {
+            return SERVER_BANDPLAN;
+        }
+        return importedBandplans.get(Math.min(importedBandplans.size() - 1, selectedBandplan)).deserialize();
+    }
+
+    public List<SerializedBandplan> getImportedBandplans() {
+        return importedBandplans;
+    }
+
     public String getMagicKey() {
         return magicKey == null ? "" : magicKey;
+    }
+
+    public int getSelectedBandplan() {
+        return selectedBandplan;
     }
 
     public BuiltinWaterfallTheme getSelectedBuiltinWaterfallTheme() {
@@ -101,8 +120,16 @@ public class ReceiverUserSettings {
         this.enableFreeTuning = enableFreeTuning;
     }
 
+    public void setImportedBandplans(List<SerializedBandplan> importedBandplans) {
+        this.importedBandplans = importedBandplans;
+    }
+
     public void setMagicKey(String magicKey) {
         this.magicKey = magicKey;
+    }
+
+    public void setSelectedBandplan(int selectedBandplan) {
+        this.selectedBandplan = selectedBandplan;
     }
 
     public void setSelectedBuiltinWaterfallTheme(BuiltinWaterfallTheme selectedBuiltinWaterfallTheme) {
@@ -118,6 +145,6 @@ public class ReceiverUserSettings {
     }
 
     public static Optional<Color[]> getTheme(String index) {
-        return Optional.ofNullable(themeIndex.get(index));
+        return Optional.ofNullable(THEME_INDEX.get(index));
     }
 }

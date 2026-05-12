@@ -30,21 +30,27 @@ import javax.swing.JTextArea;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
 
+import io.github.defective4.sdr.owrxdesktop.bandplan.BandplanListRenderer;
+import io.github.defective4.sdr.owrxdesktop.bandplan.SerializedBandplan;
 import io.github.defective4.sdr.owrxdesktop.ui.settings.ReceiverUserSettings;
 import io.github.defective4.sdr.owrxdesktop.ui.settings.waterfall.BuiltinWaterfallTheme;
 import io.github.defective4.sdr.owrxdesktop.ui.settings.waterfall.WaterfallThemeMode;
 
 public class SettingsDialog extends JDialog {
 
+    private final JComboBox<SerializedBandplan> bandplanBox = new JComboBox<>();
+    private JButton bandplanImport = new JButton("Import");
     private final JCheckBox dynamicColorMixingCheck = new JCheckBox("Dynamic color mixing");
     private final JCheckBox freeTuningCheck = new JCheckBox("Enable free tuning");
     private final JPasswordField magicKeyField = new JPasswordField();
     private final JRadioButton rdbtnBuiltin = new JRadioButton("Built-in: ");
     private final JRadioButton rdbtnCustom = new JRadioButton("Custom (One hex color per line, each starting with #):");
+    private final JRadioButton rdbtnCustomBandplanButton = new JRadioButton("Use a custom bandplan:");
+
+    private final JRadioButton rdbtnServerBandplanButton = new JRadioButton("Use server bandplan");
     private final JRadioButton rdbtnServerprovidedConfiguration = new JRadioButton("Server-provided configuration");
     private boolean saved;
     private final JTextArea themeArea = new JTextArea();
-
     private final JComboBox<BuiltinWaterfallTheme> themesBox = new JComboBox<>();
 
     private SettingsDialog(Window parent, ReceiverUserSettings settings) {
@@ -207,6 +213,81 @@ public class SettingsDialog extends JDialog {
                         rdbtnBuiltin.addActionListener(ls);
                         themeGroup.add(rdbtnBuiltin);
                         themeGroup.add(rdbtnServerprovidedConfiguration);
+                        {
+                            JPanel panel = new JPanel();
+                            panel.setBorder(new EmptyBorder(16, 8, 16, 8));
+                            fftTabs.addTab("Bandplan", null, panel, null);
+                            GridBagLayout gbl_panel = new GridBagLayout();
+                            gbl_panel.columnWidths = new int[] { 0, 0 };
+                            gbl_panel.rowHeights = new int[] { 0, 0, 0, 0, 0 };
+                            gbl_panel.columnWeights = new double[] { 1.0, Double.MIN_VALUE };
+                            gbl_panel.rowWeights = new double[] { 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE };
+                            panel.setLayout(gbl_panel);
+                            ButtonGroup bandplanGroup = new ButtonGroup();
+                            ActionListener bandplanBtnListener = e -> {
+                                boolean enable = rdbtnCustomBandplanButton.isSelected();
+                                bandplanImport.setEnabled(enable);
+                                bandplanBox.setEnabled(enable);
+                            };
+                            {
+
+                                rdbtnServerBandplanButton.setSelected(settings.getBandplan().isServerSide());
+                                GridBagConstraints gbc_rdbtnNewRadioButton = new GridBagConstraints();
+                                gbc_rdbtnNewRadioButton.insets = new Insets(0, 0, 5, 0);
+                                gbc_rdbtnNewRadioButton.anchor = GridBagConstraints.NORTHWEST;
+                                gbc_rdbtnNewRadioButton.gridx = 0;
+                                gbc_rdbtnNewRadioButton.gridy = 0;
+                                panel.add(rdbtnServerBandplanButton, gbc_rdbtnNewRadioButton);
+                                bandplanGroup.add(rdbtnServerBandplanButton);
+                                rdbtnServerBandplanButton.addActionListener(bandplanBtnListener);
+                            }
+                            {
+                                JLabel lblNewLabel = new JLabel("Use a bandplan provided by the server");
+                                lblNewLabel.setEnabled(false);
+                                GridBagConstraints gbc_lblNewLabel = new GridBagConstraints();
+                                gbc_lblNewLabel.anchor = GridBagConstraints.WEST;
+                                gbc_lblNewLabel.insets = new Insets(0, 0, 18, 0);
+                                gbc_lblNewLabel.gridx = 0;
+                                gbc_lblNewLabel.gridy = 1;
+                                panel.add(lblNewLabel, gbc_lblNewLabel);
+                            }
+                            {
+                                rdbtnCustomBandplanButton.setSelected(!settings.getBandplan().isServerSide());
+                                GridBagConstraints gbc_rdbtnNewRadioButton_1 = new GridBagConstraints();
+                                gbc_rdbtnNewRadioButton_1.insets = new Insets(0, 0, 5, 0);
+                                gbc_rdbtnNewRadioButton_1.anchor = GridBagConstraints.WEST;
+                                gbc_rdbtnNewRadioButton_1.gridx = 0;
+                                gbc_rdbtnNewRadioButton_1.gridy = 2;
+                                panel.add(rdbtnCustomBandplanButton, gbc_rdbtnNewRadioButton_1);
+                                bandplanGroup.add(rdbtnCustomBandplanButton);
+                                rdbtnCustomBandplanButton.addActionListener(bandplanBtnListener);
+                            }
+                            {
+                                JPanel panel_1 = new JPanel();
+                                GridBagConstraints gbc_panel_1 = new GridBagConstraints();
+                                gbc_panel_1.anchor = GridBagConstraints.WEST;
+                                gbc_panel_1.fill = GridBagConstraints.VERTICAL;
+                                gbc_panel_1.gridx = 0;
+                                gbc_panel_1.gridy = 3;
+                                panel.add(panel_1, gbc_panel_1);
+                                {
+                                    bandplanBox.setRenderer(new BandplanListRenderer());
+                                    if (settings.getImportedBandplans().isEmpty()) bandplanBox.addItem(null);
+                                    settings.getImportedBandplans().forEach(i -> bandplanBox.addItem(i));
+                                    if (settings.getBandplan().isServerSide()) {
+                                        bandplanBox.setSelectedIndex(0);
+                                    } else {
+                                        bandplanBox.setSelectedItem(settings.getBandplan());
+                                    }
+                                    panel_1.add(bandplanBox);
+                                }
+                                {
+                                    bandplanImport = new JButton("Import");
+                                    panel_1.add(bandplanImport);
+                                }
+                            }
+                            bandplanBtnListener.actionPerformed(null);
+                        }
                         {
                             JPanel panel = new JPanel();
                             panel.setBorder(new EmptyBorder(16, 16, 0, 16));

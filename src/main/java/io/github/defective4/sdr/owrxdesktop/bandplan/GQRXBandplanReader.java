@@ -17,7 +17,7 @@ public class GQRXBandplanReader extends BandplanReader {
     }
 
     @Override
-    public Bandplan readBandplan() throws IOException {
+    public Bandplan readBandplan(String name) throws IOException {
         List<Band> bands = new ArrayList<>();
         Map<String, Color> colors = new HashMap<>();
         try (BufferedReader br = new BufferedReader(reader)) {
@@ -44,7 +44,7 @@ public class GQRXBandplanReader extends BandplanReader {
                 }
             }
         }
-        return new Bandplan(bands, colors);
+        return new Bandplan(bands, colors, name);
     }
 
 }
