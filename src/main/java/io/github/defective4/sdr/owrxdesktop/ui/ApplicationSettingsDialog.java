@@ -4,11 +4,11 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.FlowLayout;
-import java.awt.Frame;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.GridLayout;
 import java.awt.Insets;
+import java.awt.Window;
 import java.io.File;
 import java.io.FileReader;
 import java.nio.file.Files;
@@ -58,8 +58,9 @@ public class ApplicationSettingsDialog extends JDialog {
     private final JSpinner latSpinner = new JSpinner();
     private final JSpinner lonSpinner = new JSpinner();
     private final JSpinner networkWorkers = new JSpinner();
+    private final JTabbedPane tabbedPane = new JTabbedPane(JTabbedPane.TOP);
 
-    public ApplicationSettingsDialog(Frame parent, ApplicationSettings settings) {
+    public ApplicationSettingsDialog(Window parent, ApplicationSettings settings) {
         super(parent);
         setTitle("Application settings");
         setModal(true);
@@ -70,7 +71,6 @@ public class ApplicationSettingsDialog extends JDialog {
         getContentPane().add(contentPanel, BorderLayout.CENTER);
         contentPanel.setLayout(new BorderLayout(0, 0));
         {
-            JTabbedPane tabbedPane = new JTabbedPane(JTabbedPane.TOP);
             contentPanel.add(tabbedPane, BorderLayout.CENTER);
             {
                 JPanel panel = new JPanel();
@@ -195,6 +195,22 @@ public class ApplicationSettingsDialog extends JDialog {
                         menu.add(sdrsharp);
                         menu.show(importButton, 0, importButton.getHeight());
                     });
+
+                    delButton.addActionListener(e -> {
+                        delButton.setEnabled(false);
+                        List<SerializedBandplan> bands = new ArrayList<>(settings.getLoadedBandplans());
+                        SerializedBandplan value = bandsList.getSelectedValue();
+                        bandsModel.removeElement(value);
+                        bands.remove(value);
+                        settings.setLoadedBandplans(bands);
+                    });
+
+                    bandsList.addListSelectionListener(e -> {
+                        if (!e.getValueIsAdjusting()) {
+                            SerializedBandplan value = bandsList.getSelectedValue();
+                            delButton.setEnabled(value != null);
+                        }
+                    });
                 }
             }
             {
@@ -264,6 +280,10 @@ public class ApplicationSettingsDialog extends JDialog {
         }
         pack();
         setLocationRelativeTo(parent);
+    }
+
+    public void setSelectedIndex(int index) {
+        tabbedPane.setSelectedIndex(index);
     }
 
     private void showBandplanChooser(ApplicationSettings settings, String extensionName, String extension,
