@@ -28,6 +28,7 @@ import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
+import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JMenu;
@@ -42,6 +43,7 @@ import javax.swing.JSpinner;
 import javax.swing.JSpinner.NumberEditor;
 import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
+import javax.swing.JTextField;
 import javax.swing.KeyStroke;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.ChangeEvent;
@@ -59,6 +61,7 @@ import io.github.defective4.sdr.owrxdesktop.ui.component.FFTLabel;
 import io.github.defective4.sdr.owrxdesktop.ui.component.FFTPanel;
 import io.github.defective4.sdr.owrxdesktop.ui.component.FFTPanel.FFTPanelListener;
 import io.github.defective4.sdr.owrxdesktop.ui.component.JFrequencySpinner;
+import io.github.defective4.sdr.owrxdesktop.ui.component.JLinkLabel;
 import io.github.defective4.sdr.owrxdesktop.ui.component.TuneablePanel;
 import io.github.defective4.sdr.owrxdesktop.ui.component.WaterfallPanel;
 import io.github.defective4.sdr.owrxdesktop.ui.event.TuningAdapter;
@@ -733,13 +736,14 @@ public class ReceiverWindow extends JFrame {
             controlTabs.addTab("Audio", null, audioCtlPanel, null);
             GridBagLayout gbl_audioCtlPanel = new GridBagLayout();
             gbl_audioCtlPanel.columnWidths = new int[] { 0, 0 };
-            gbl_audioCtlPanel.rowHeights = new int[] { 0, 0 };
-            gbl_audioCtlPanel.columnWeights = new double[] { 0.0, Double.MIN_VALUE };
-            gbl_audioCtlPanel.rowWeights = new double[] { 0.0, Double.MIN_VALUE };
+            gbl_audioCtlPanel.rowHeights = new int[] { 0, 0, 0 };
+            gbl_audioCtlPanel.columnWeights = new double[] { 1.0, Double.MIN_VALUE };
+            gbl_audioCtlPanel.rowWeights = new double[] { 0.0, 0.0, Double.MIN_VALUE };
             audioCtlPanel.setLayout(gbl_audioCtlPanel);
 
             JPanel audioPanel = new JPanel();
             GridBagConstraints gbc_audioPanel = new GridBagConstraints();
+            gbc_audioPanel.insets = new Insets(0, 0, 5, 0);
             gbc_audioPanel.fill = GridBagConstraints.HORIZONTAL;
             gbc_audioPanel.gridx = 0;
             gbc_audioPanel.gridy = 0;
@@ -770,6 +774,89 @@ public class ReceiverWindow extends JFrame {
                     .addChangeListener(e -> listeners.forEach(ls -> ls.volumeChanged(volumeSlider.getValue() / 100f)));
 
             confirmComponentState(muteCheck);
+
+            JPanel panel = new JPanel();
+            panel.setBorder(new TitledBorder(null, "Recording", TitledBorder.LEADING, TitledBorder.TOP, null, null));
+            GridBagConstraints gbc_panel = new GridBagConstraints();
+            gbc_panel.fill = GridBagConstraints.BOTH;
+            gbc_panel.gridx = 0;
+            gbc_panel.gridy = 1;
+            audioCtlPanel.add(panel, gbc_panel);
+            GridBagLayout gbl_panel = new GridBagLayout();
+            gbl_panel.columnWidths = new int[] { 0, 0, 0 };
+            gbl_panel.rowHeights = new int[] { 0, 0, 0, 0, 0, 0, 0 };
+            gbl_panel.columnWeights = new double[] { 1.0, 0.0, Double.MIN_VALUE };
+            gbl_panel.rowWeights = new double[] { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE };
+            panel.setLayout(gbl_panel);
+
+            JCheckBox chckbxRecordToMp = new JCheckBox("Record to MP3");
+            chckbxRecordToMp.setEnabled(false);
+            GridBagConstraints gbc_chckbxRecordToMp = new GridBagConstraints();
+            gbc_chckbxRecordToMp.anchor = GridBagConstraints.WEST;
+            gbc_chckbxRecordToMp.gridx = 0;
+            gbc_chckbxRecordToMp.gridy = 0;
+            panel.add(chckbxRecordToMp, gbc_chckbxRecordToMp);
+
+            JLabel lblThisRequiredFfmpeg = new JLabel("This requires ffmpeg");
+            lblThisRequiredFfmpeg.setEnabled(false);
+            GridBagConstraints gbc_lblThisRequiredFfmpeg = new GridBagConstraints();
+            gbc_lblThisRequiredFfmpeg.anchor = GridBagConstraints.WEST;
+            gbc_lblThisRequiredFfmpeg.gridx = 0;
+            gbc_lblThisRequiredFfmpeg.gridy = 1;
+            panel.add(lblThisRequiredFfmpeg, gbc_lblThisRequiredFfmpeg);
+
+            JLinkLabel ffmpegLabel = new JLinkLabel("Configure", e -> {
+                new ApplicationSettingsDialog(this, appSettings).setVisible(true);
+            });
+            GridBagConstraints gbc_linkLabel = new GridBagConstraints();
+            gbc_linkLabel.anchor = GridBagConstraints.NORTHWEST;
+            gbc_linkLabel.insets = new Insets(0, 0, 16, 0);
+            gbc_linkLabel.gridx = 0;
+            gbc_linkLabel.gridy = 2;
+            panel.add(ffmpegLabel, gbc_linkLabel);
+
+            JLabel lblTargetDirectory = new JLabel("Target directory");
+            GridBagConstraints gbc_lblTargetDirectory = new GridBagConstraints();
+            gbc_lblTargetDirectory.anchor = GridBagConstraints.WEST;
+            gbc_lblTargetDirectory.insets = new Insets(0, 0, 5, 5);
+            gbc_lblTargetDirectory.gridx = 0;
+            gbc_lblTargetDirectory.gridy = 3;
+            panel.add(lblTargetDirectory, gbc_lblTargetDirectory);
+
+            JTextField textField = new JTextField();
+            textField.setText(System.getProperty("user.home"));
+            textField.setEditable(false);
+            GridBagConstraints gbc_textField = new GridBagConstraints();
+            gbc_textField.insets = new Insets(0, 0, 5, 5);
+            gbc_textField.fill = GridBagConstraints.HORIZONTAL;
+            gbc_textField.gridx = 0;
+            gbc_textField.gridy = 4;
+            panel.add(textField, gbc_textField);
+            textField.setColumns(10);
+
+            JButton btnChoose = new JButton("Choose...");
+            GridBagConstraints gbc_btnChoose = new GridBagConstraints();
+            gbc_btnChoose.insets = new Insets(0, 0, 5, 0);
+            gbc_btnChoose.gridx = 1;
+            gbc_btnChoose.gridy = 4;
+            panel.add(btnChoose, gbc_btnChoose);
+
+            btnChoose.addActionListener(e -> {
+                JFileChooser chooser = new JFileChooser();
+                chooser.setDialogTitle("Choose target directory");
+                chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+                if (chooser.showDialog(this, "Select") == JFileChooser.APPROVE_OPTION) {
+                    textField.setText(chooser.getSelectedFile().getAbsolutePath());
+                }
+            });
+
+            JButton btnRecord = new JButton("Record");
+            GridBagConstraints gbc_btnRecord = new GridBagConstraints();
+            gbc_btnRecord.anchor = GridBagConstraints.WEST;
+            gbc_btnRecord.insets = new Insets(0, 0, 0, 5);
+            gbc_btnRecord.gridx = 0;
+            gbc_btnRecord.gridy = 5;
+            panel.add(btnRecord, gbc_btnRecord);
 
             JMenuBar menuBar = new JMenuBar();
             setJMenuBar(menuBar);
