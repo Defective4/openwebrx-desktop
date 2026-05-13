@@ -1,5 +1,7 @@
 package io.github.defective4.sdr.owrxdesktop.ui;
 
+import static io.github.defective4.sdr.owrxdesktop.ui.text.FontAwesome.*;
+
 import java.awt.BorderLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -129,12 +131,12 @@ public class ApplicationWindow extends JFrame {
 
         {
             JScrollPane scrollPane = new JScrollPane();
-            tabbedPane.addTab("Personal", null, scrollPane, null);
+            tabbedPane.addTab("Personal", ICO_USER, scrollPane, null);
             scrollPane.setViewportView(rxContainer);
         }
 
         JPanel publicPanel = new JPanel();
-        tabbedPane.addTab("Public", null, publicPanel, null);
+        tabbedPane.addTab("Public", ICO_GLOBE, publicPanel, null);
         GridBagLayout gbl_publicPanel = new GridBagLayout();
         gbl_publicPanel.columnWidths = new int[] { 0, 0 };
         gbl_publicPanel.rowHeights = new int[] { 0, 0, 0 };
@@ -255,7 +257,7 @@ public class ApplicationWindow extends JFrame {
                                 new StatusResponse.Receiver(receiver.label(), null, receiver.location(), null),
                                 receiver.version()));
                         publicContainer.addEntry(entry, cpt -> {
-                            JButton connectButton = new JButton("Connect");
+                            JButton connectButton = new JButton("Connect", FontAwesome.ICO_SIGN_IN);
                             connectButton.addActionListener(e2 -> {
                                 setVisible(false);
                                 ReceiverEntry rxEntry = cpt.getEntry();
@@ -269,7 +271,7 @@ public class ApplicationWindow extends JFrame {
                                 }
                             });
 
-                            JButton addButton = new JButton("Add to personal");
+                            JButton addButton = new JButton("Add to personal", ICO_PLUS);
                             addButton.addActionListener(e2 -> {
                                 ReceiverEntry rxEntry = cpt.getEntry();
                                 userStorage.addEntry(rxEntry);
@@ -279,7 +281,7 @@ public class ApplicationWindow extends JFrame {
                                 updateEntryAsync(newCpt);
                             });
 
-                            JButton queryButton = new JButton("Query");
+                            JButton queryButton = new JButton("Query", ICO_SYNC);
                             queryButton.addActionListener(e2 -> {
                                 ReceiverEntry rxEntry = cpt.getEntry();
                                 rxEntry.setQuerying();
@@ -346,7 +348,7 @@ public class ApplicationWindow extends JFrame {
 
     private ReceiverEntryComponent addPersonalEntry(ReceiverEntry entry) {
         ReceiverEntryComponent cpt = rxContainer.addEntry(entry, rxcpt -> {
-            JButton connect = new JButton("Connect");
+            JButton connect = new JButton("Connect", ICO_SIGN_IN);
             connect.addActionListener(e -> {
                 setVisible(false);
                 ReceiverEntry rxEntry = rxcpt.getEntry();
@@ -359,13 +361,13 @@ public class ApplicationWindow extends JFrame {
                     e1.printStackTrace();
                 }
             });
-            JButton refresh = new JButton("Refresh");
+            JButton refresh = new JButton("Refresh", ICO_SYNC);
             refresh.addActionListener(e -> {
                 rxcpt.getEntry().setQuerying();
                 rxcpt.updateEntry();
                 updateEntryAsync(rxcpt);
             });
-            JButton more = new JButton("\uf013");
+            JButton more = new JButton(FontAwesome.FA_COG);
             FontAwesome.setFontAwesomeFont(more);
             more.addActionListener(e -> {
                 JPopupMenu menu = new JPopupMenu();
@@ -373,7 +375,8 @@ public class ApplicationWindow extends JFrame {
                 JMenuItem deleteRx = new JMenuItem("Remove");
 
                 deleteRx.addActionListener(e2 -> removeEntry(rxcpt));
-                editRx.addActionListener(e2 -> SettingsDialog.show(this, rxcpt.getEntry().getSettings(), userStorage.getApplicationSettings()));
+                editRx.addActionListener(e2 -> SettingsDialog.show(this, rxcpt.getEntry().getSettings(),
+                        userStorage.getApplicationSettings()));
 
                 menu.add(editRx);
                 menu.add(deleteRx);

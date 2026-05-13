@@ -1,5 +1,7 @@
 package io.github.defective4.sdr.owrxdesktop.ui;
 
+import static io.github.defective4.sdr.owrxdesktop.ui.text.FontAwesome.*;
+
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
@@ -37,6 +39,7 @@ import io.github.defective4.sdr.owrxdesktop.ui.component.JLinkLabel;
 import io.github.defective4.sdr.owrxdesktop.ui.settings.ReceiverUserSettings;
 import io.github.defective4.sdr.owrxdesktop.ui.settings.waterfall.BuiltinWaterfallTheme;
 import io.github.defective4.sdr.owrxdesktop.ui.settings.waterfall.WaterfallThemeMode;
+import io.github.defective4.sdr.owrxdesktop.ui.text.FontAwesome;
 
 public class SettingsDialog extends JDialog {
 
@@ -77,7 +80,7 @@ public class SettingsDialog extends JDialog {
             contentPanel.add(tabbedPane);
             {
                 JTabbedPane rxTabs = new JTabbedPane(JTabbedPane.TOP);
-                tabbedPane.addTab("Receiver", null, rxTabs, null);
+                tabbedPane.addTab("Receiver", ICO_BROADCAST, rxTabs, null);
                 {
                     JPanel mainPanel = new JPanel();
                     mainPanel.setBorder(new EmptyBorder(16, 8, 0, 8));
@@ -93,6 +96,7 @@ public class SettingsDialog extends JDialog {
                         panel.setBorder(new TitledBorder(null, "Free tuning", TitledBorder.LEADING, TitledBorder.TOP,
                                 null, null));
                         GridBagConstraints gbc_panel = new GridBagConstraints();
+                        gbc_panel.insets = new Insets(0, 0, 0, 16);
                         gbc_panel.anchor = GridBagConstraints.NORTH;
                         gbc_panel.fill = GridBagConstraints.HORIZONTAL;
                         gbc_panel.gridx = 0;
@@ -152,10 +156,10 @@ public class SettingsDialog extends JDialog {
             }
             {
                 JTabbedPane fftTabs = new JTabbedPane(JTabbedPane.TOP);
-                tabbedPane.addTab("FFT", null, fftTabs, null);
+                tabbedPane.addTab("FFT", ICO_CHART, fftTabs, null);
                 {
                     JScrollPane scrollPane = new JScrollPane();
-                    fftTabs.addTab("Waterfall theme", null, scrollPane, null);
+                    fftTabs.addTab("Waterfall theme", FontAwesome.ICO_AREA_CHART, scrollPane, null);
                     {
                         JPanel fftThemePanel = new JPanel();
                         fftThemePanel.setBorder(new EmptyBorder(16, 8, 8, 8));
@@ -221,7 +225,7 @@ public class SettingsDialog extends JDialog {
                         {
                             JPanel panel = new JPanel();
                             panel.setBorder(new EmptyBorder(16, 8, 16, 8));
-                            fftTabs.addTab("Bandplan", null, panel, null);
+                            fftTabs.addTab("Bandplan", ICO_TAGS, panel, null);
                             GridBagLayout gbl_panel = new GridBagLayout();
                             gbl_panel.columnWidths = new int[] { 0, 0 };
                             gbl_panel.rowHeights = new int[] { 0, 0, 0, 0, 0, 0 };
@@ -312,7 +316,7 @@ public class SettingsDialog extends JDialog {
                         {
                             JPanel panel = new JPanel();
                             panel.setBorder(new EmptyBorder(16, 16, 0, 16));
-                            fftTabs.addTab("Style", null, panel, null);
+                            fftTabs.addTab("Style", ICO_PALETTE, panel, null);
                             GridBagLayout gbl_panel = new GridBagLayout();
                             gbl_panel.columnWidths = new int[] { 0, 0 };
                             gbl_panel.rowHeights = new int[] { 0, 0, 0, 0 };

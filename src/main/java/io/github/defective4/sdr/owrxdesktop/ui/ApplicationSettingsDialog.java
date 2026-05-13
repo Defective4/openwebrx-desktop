@@ -1,5 +1,6 @@
 package io.github.defective4.sdr.owrxdesktop.ui;
 
+import static io.github.defective4.sdr.owrxdesktop.ui.text.FontAwesome.*;
 import static java.nio.charset.StandardCharsets.*;
 
 import java.awt.BorderLayout;
@@ -60,6 +61,7 @@ import io.github.defective4.sdr.owrxdesktop.bandplan.reader.SDRConsoleBandplanRe
 import io.github.defective4.sdr.owrxdesktop.bandplan.reader.SDRPPBandplanReader;
 import io.github.defective4.sdr.owrxdesktop.bandplan.reader.SDRSharpBandplanReader;
 import io.github.defective4.sdr.owrxdesktop.bandplan.render.BandplanListRenderer;
+import io.github.defective4.sdr.owrxdesktop.ui.text.FontAwesome;
 
 public class ApplicationSettingsDialog extends JDialog {
 
@@ -88,7 +90,7 @@ public class ApplicationSettingsDialog extends JDialog {
             {
                 JPanel panel = new JPanel();
                 panel.setBorder(new EmptyBorder(0, 5, 0, 5));
-                tabbedPane.addTab("Network", null, panel, null);
+                tabbedPane.addTab("Network", ICO_NETWORK, panel, null);
                 GridBagLayout gbl_panel = new GridBagLayout();
                 gbl_panel.columnWidths = new int[] { 0, 0 };
                 gbl_panel.rowHeights = new int[] { 0, 0, 0, 0 };
@@ -137,7 +139,7 @@ public class ApplicationSettingsDialog extends JDialog {
             {
                 JPanel panel = new JPanel();
                 panel.setBorder(new EmptyBorder(16, 8, 16, 8));
-                tabbedPane.addTab("Bandplan", null, panel, null);
+                tabbedPane.addTab("Bandplan", ICO_TAGS, panel, null);
                 GridBagLayout gbl_panel = new GridBagLayout();
                 gbl_panel.columnWidths = new int[] { 0, 0, 0 };
                 gbl_panel.rowHeights = new int[] { 0, 0 };
@@ -167,10 +169,11 @@ public class ApplicationSettingsDialog extends JDialog {
                     gbc_panel_1.gridy = 0;
                     panel.add(panel_1, gbc_panel_1);
                     panel_1.setLayout(new BoxLayout(panel_1, BoxLayout.Y_AXIS));
-                    JButton importButton = new JButton("+");
+                    JButton importButton = new JButton(FA_PLUS);
+                    setFontAwesomeFont(importButton);
                     panel_1.add(importButton);
-                    panel_1.add(new JLabel(" "));
-                    JButton delButton = new JButton("-");
+                    JButton delButton = new JButton(FA_MINUS);
+                    setFontAwesomeFont(delButton);
                     delButton.setEnabled(false);
                     panel_1.add(delButton);
 
@@ -255,7 +258,7 @@ public class ApplicationSettingsDialog extends JDialog {
             }
             {
                 JPanel panel = new JPanel();
-                tabbedPane.addTab("Listings", null, panel, null);
+                tabbedPane.addTab("Listings", FontAwesome.ICO_TASKS, panel, null);
                 GridBagLayout gbl_panel = new GridBagLayout();
                 gbl_panel.columnWidths = new int[] { 0, 0 };
                 gbl_panel.rowHeights = new int[] { 0, 0 };
@@ -292,7 +295,7 @@ public class ApplicationSettingsDialog extends JDialog {
         }
 
         JPanel panel = new JPanel();
-        tabbedPane.addTab("Audio", null, panel, null);
+        tabbedPane.addTab("Audio", FontAwesome.ICO_AUDIO, panel, null);
         GridBagLayout gbl_panel = new GridBagLayout();
         gbl_panel.columnWidths = new int[] { 0, 0 };
         gbl_panel.rowHeights = new int[] { 0, 0 };
