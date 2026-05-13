@@ -15,9 +15,12 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.IOException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -56,6 +59,7 @@ import io.github.defective4.sdr.owrxclient.model.ReceiverMode;
 import io.github.defective4.sdr.owrxclient.model.ReceiverProfile;
 import io.github.defective4.sdr.owrxclient.model.WaterfallLevels;
 import io.github.defective4.sdr.owrxdesktop.application.ApplicationSettings;
+import io.github.defective4.sdr.owrxdesktop.audio.AudioRecorder;
 import io.github.defective4.sdr.owrxdesktop.bandplan.Bandplan;
 import io.github.defective4.sdr.owrxdesktop.cache.ReceiverCache;
 import io.github.defective4.sdr.owrxdesktop.ui.BookmarksDialog.MergedLabel;
@@ -72,19 +76,20 @@ import io.github.defective4.sdr.owrxdesktop.ui.rendering.ReceiverModeRenderer;
 import io.github.defective4.sdr.owrxdesktop.ui.settings.ReceiverUserSettings;
 
 public class ReceiverWindow extends JFrame {
-
     private final JComboBox<ReceiverMode> analogBox = new JComboBox<>();
+
     private final ApplicationSettings appSettings;
+    private final AudioRecorder audioRecorder = new AudioRecorder();
 
     private final Bandplan bandplan;
 
     private int bandwidth;
 
     private final ReceiverCache cache;
+
     private int centerFrequency;
 
     private final JProgressBar clientsBar = new JProgressBar();
-
     private final JProgressBar cpuBar = new JProgressBar();
 
     private float cpuUsage = Integer.MIN_VALUE;
@@ -92,21 +97,23 @@ public class ReceiverWindow extends JFrame {
     private final JComboBox<ReceiverMode> digitalBox = new JComboBox<>();
 
     private boolean exiting;
+
     private final float fftMax = -20;
 
     private final float fftMin = -88;
-
     private final FFTPanel fftPanel;
+
+    private final DateFormat fmt = new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss");
+
     private final JSpinner freqSpinner = new JFrequencySpinner();
     private final JRadioButton ftlAuto = new JRadioButton("Auto");
-
     private final JRadioButton ftlServer = new JRadioButton("Server");
 
     private long lastFFTDraw;
+
     private final List<UserInteractionListener> listeners = new CopyOnWriteArrayList<>();
     private int maxFPS = -1;
     private float minFFT, maxFFT;
-
     private final JMenuItem mntmBookmarks = new JMenuItem("Bookmarks");
 
     private int offset;
@@ -120,15 +127,15 @@ public class ReceiverWindow extends JFrame {
     private int scopeLower;
 
     private int scopeUpper;
-    private WaterfallLevels serverLevels = new WaterfallLevels(-88, -20);
 
+    private WaterfallLevels serverLevels = new WaterfallLevels(-88, -20);
     private final JProgressBar signalBar = new JProgressBar();
 
     private int temperatureC = Integer.MIN_VALUE;
+
     private final JFrequencySpinner tuningStepSpinner = new JFrequencySpinner();
     private final ReceiverUserSettings userSettings;
     private final WaterfallPanel waterfallPanel;
-
     public ReceiverWindow(ReceiverUserSettings settings, ReceiverCache cache, ApplicationSettings appSettings) {
         this.appSettings = appSettings;
         bandplan = settings.getBandplan();
@@ -861,18 +868,35 @@ public class ReceiverWindow extends JFrame {
             panel.add(btnRecord, gbc_btnRecord);
 
             btnRecord.addActionListener(e -> {
-                boolean enabled = listeners.stream().map(ls -> {
-                    try {
-                        return ls.recordingToggled(new File(audioDirField.getText()));
-                    } catch (IOException e1) {
-                        e1.printStackTrace();
-                        JOptionPane.showMessageDialog(this, "Failed to start audio recording", "Recording failed",
-                                JOptionPane.ERROR_MESSAGE);
-                        return false;
+//                boolean enabled = listeners.stream().map(ls -> {
+//                    try {
+//                        return ls.recordingToggled();
+//                    } catch (IOException e1) {
+//                        e1.printStackTrace();
+//                        JOptionPane.showMessageDialog(this, "Failed to start audio recording", "Recording failed",
+//                                JOptionPane.ERROR_MESSAGE);
+//                        return false;
+//                    }
+//                }).findAny().orElse(false);
+
+                try {
+                    boolean enabled = audioRecorder.isStarted();
+                    File dir = new File(audioDirField.getText());
+                    dir.mkdirs();
+                    File target = new File(dir,
+                            "Recording_%s.wav".formatted(fmt.format(new Date(System.currentTimeMillis()))));
+                    if (enabled) {
+                        audioRecorder.stop();
+                    } else {
+                        audioRecorder.start(target);
                     }
-                }).findAny().orElse(false);
-                btnRecord.setText(enabled ? "Stop recording" : "Record");
-                btnChoose.setEnabled(!enabled);
+                    btnRecord.setText(!enabled ? "Stop recording" : "Record");
+                    btnChoose.setEnabled(!enabled);
+                } catch (Exception e2) {
+                    e2.printStackTrace();
+                    JOptionPane.showMessageDialog(this, "Failed to start audio recorder", "Recording failed",
+                            JOptionPane.ERROR_MESSAGE);
+                }
             });
 
             JMenuBar menuBar = new JMenuBar();
@@ -960,6 +984,10 @@ public class ReceiverWindow extends JFrame {
             mode.add(analogBox.getItemAt(i));
         }
         return Collections.unmodifiableList(mode);
+    }
+
+    public AudioRecorder getAudioRecorder() {
+        return audioRecorder;
     }
 
     public Bandplan getBandplan() {
@@ -1210,7 +1238,7 @@ public class ReceiverWindow extends JFrame {
                 exiting = true;
                 listeners.forEach(ls -> {
                     try {
-                        ls.appExit();
+                        audioRecorder.stop();
                     } catch (IOException e) {
                         e.printStackTrace();
                     }

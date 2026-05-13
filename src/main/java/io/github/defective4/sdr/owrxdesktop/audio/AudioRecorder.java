@@ -14,12 +14,20 @@ import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 
 public class AudioRecorder {
-
+    private FFMpeg ffmpeg = new FFMpeg("/bin/ffmpeg");
     private OutputStream output;
     private File target;
 
+    public FFMpeg getFfmpeg() {
+        return ffmpeg;
+    }
+
     public boolean isStarted() {
         return output != null;
+    }
+
+    public void setFfmpeg(FFMpeg ffmpeg) {
+        this.ffmpeg = ffmpeg;
     }
 
     public void start(File target) throws FileNotFoundException {
@@ -39,6 +47,10 @@ public class AudioRecorder {
                     len)) {
                 AudioSystem.write(in, Type.WAVE, target);
             }
+            tmp.delete();
+            File mp3File = new File(target.getPath().substring(0, target.getPath().length() - 4) + ".mp3");
+            ffmpeg.convertToMP3(target, mp3File);
+            target.delete();
         }
     }
 
