@@ -99,9 +99,12 @@ public class AudioRecorder {
                                 resampled.position(pos - 10);
                                 short point1 = resampled.getShort();
 
-                                short p1 = (short) (point2 * 0.75 + point1 * 0.25);
+                                short upper = (short) Math.max(point2, point1);
+                                short lower = (short) Math.min(point2, point1);
+
+                                short p1 = (short) (upper * 0.75 + lower * 0.25);
                                 short p2 = (short) ((point2 + point1) / 2);
-                                short p3 = (short) (point2 * 0.25 + point1 * 0.75);
+                                short p3 = (short) (upper * 0.25 + lower * 0.75);
 
                                 resampled.putShort(p1);
                                 resampled.putShort(p2);
