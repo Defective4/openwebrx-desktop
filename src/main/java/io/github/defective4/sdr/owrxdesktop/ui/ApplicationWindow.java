@@ -44,6 +44,7 @@ import io.github.defective4.sdr.owrxdesktop.application.integration.SearchSortOr
 import io.github.defective4.sdr.owrxdesktop.application.integration.receiverbook.ReceiverbookScraper;
 import io.github.defective4.sdr.owrxdesktop.ui.component.ReceiverEntryComponent;
 import io.github.defective4.sdr.owrxdesktop.ui.component.ReceiverEntryContainer;
+import io.github.defective4.sdr.owrxdesktop.ui.text.FontAwesome;
 
 public class ApplicationWindow extends JFrame {
     private final ReceiverEntryContainer publicContainer = new ReceiverEntryContainer();
@@ -364,7 +365,8 @@ public class ApplicationWindow extends JFrame {
                 rxcpt.updateEntry();
                 updateEntryAsync(rxcpt);
             });
-            JButton more = new JButton("...");
+            JButton more = new JButton("\uf013");
+            FontAwesome.setFontAwesomeFont(more);
             more.addActionListener(e -> {
                 JPopupMenu menu = new JPopupMenu();
                 JMenuItem editRx = new JMenuItem("Edit receiver settings...");
@@ -375,7 +377,7 @@ public class ApplicationWindow extends JFrame {
 
                 menu.add(editRx);
                 menu.add(deleteRx);
-                menu.show(more, 0, 0);
+                menu.show(more, 0, more.getHeight());
             });
             return List.of(connect, refresh, more);
         });

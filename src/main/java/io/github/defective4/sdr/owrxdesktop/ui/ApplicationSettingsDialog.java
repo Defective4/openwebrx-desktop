@@ -71,7 +71,7 @@ public class ApplicationSettingsDialog extends JDialog {
     private final JSpinner latSpinner = new JSpinner();
     private final JSpinner lonSpinner = new JSpinner();
     private final JSpinner networkWorkers = new JSpinner();
-    private final JTabbedPane tabbedPane = new JTabbedPane(JTabbedPane.TOP);
+    private final JTabbedPane tabbedPane = new JTabbedPane(JTabbedPane.LEFT);
 
     public ApplicationSettingsDialog(Window parent, ApplicationSettings settings) {
         super(parent);
