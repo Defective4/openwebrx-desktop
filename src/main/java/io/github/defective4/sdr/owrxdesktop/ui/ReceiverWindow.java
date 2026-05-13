@@ -874,17 +874,6 @@ public class ReceiverWindow extends JFrame {
             panel.add(btnRecord, gbc_btnRecord);
 
             btnRecord.addActionListener(e -> {
-//                boolean enabled = listeners.stream().map(ls -> {
-//                    try {
-//                        return ls.recordingToggled();
-//                    } catch (IOException e1) {
-//                        e1.printStackTrace();
-//                        JOptionPane.showMessageDialog(this, "Failed to start audio recording", "Recording failed",
-//                                JOptionPane.ERROR_MESSAGE);
-//                        return false;
-//                    }
-//                }).findAny().orElse(false);
-
                 try {
                     boolean enabled = audioRecorder.isStarted();
                     File dir = new File(audioDirField.getText());
@@ -894,7 +883,7 @@ public class ReceiverWindow extends JFrame {
                     if (enabled) {
                         audioRecorder.stop();
                     } else {
-                        audioRecorder.start(target);
+                        audioRecorder.start(target, true);
                     }
                     btnRecord.setText(!enabled ? "Stop recording" : "Record");
                     btnChoose.setEnabled(!enabled);
