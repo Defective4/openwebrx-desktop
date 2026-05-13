@@ -37,15 +37,19 @@ import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
 import javax.swing.JSpinner;
 import javax.swing.JTabbedPane;
+import javax.swing.JTextField;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
 import io.github.defective4.sdr.owrxdesktop.application.ApplicationSettings;
+import io.github.defective4.sdr.owrxdesktop.audio.FFMpeg;
 import io.github.defective4.sdr.owrxdesktop.bandplan.Bandplan;
 import io.github.defective4.sdr.owrxdesktop.bandplan.SerializedBandplan;
 import io.github.defective4.sdr.owrxdesktop.bandplan.reader.BandplanReader;
@@ -63,6 +67,7 @@ public class ApplicationSettingsDialog extends JDialog {
     private final JCheckBox autoRefreshCheck = new JCheckBox("Auto-refresh receivers on startup");
     private final JList<SerializedBandplan> bandsList = new JList<>();
     private final DefaultListModel<SerializedBandplan> bandsModel = new DefaultListModel<>();
+    private final JTextField ffmpegPath;
     private final JSpinner latSpinner = new JSpinner();
     private final JSpinner lonSpinner = new JSpinner();
     private final JSpinner networkWorkers = new JSpinner();
@@ -285,6 +290,68 @@ public class ApplicationSettingsDialog extends JDialog {
                 }
             }
         }
+
+        JPanel panel = new JPanel();
+        tabbedPane.addTab("Audio", null, panel, null);
+        GridBagLayout gbl_panel = new GridBagLayout();
+        gbl_panel.columnWidths = new int[] { 0, 0 };
+        gbl_panel.rowHeights = new int[] { 0, 0 };
+        gbl_panel.columnWeights = new double[] { 1.0, Double.MIN_VALUE };
+        gbl_panel.rowWeights = new double[] { 0.0, Double.MIN_VALUE };
+        panel.setLayout(gbl_panel);
+
+        JPanel panel_1 = new JPanel();
+        panel_1.setBorder(new TitledBorder(null, "Recording", TitledBorder.LEADING, TitledBorder.TOP, null, null));
+        GridBagConstraints gbc_panel_1 = new GridBagConstraints();
+        gbc_panel_1.fill = GridBagConstraints.BOTH;
+        gbc_panel_1.gridx = 0;
+        gbc_panel_1.gridy = 0;
+        panel.add(panel_1, gbc_panel_1);
+        panel_1.setLayout(new BoxLayout(panel_1, BoxLayout.Y_AXIS));
+
+        JLabel lblFfmpegPath = new JLabel("ffmpeg path");
+        panel_1.add(lblFfmpegPath);
+
+        JPanel panel_2 = new JPanel();
+        panel_2.setAlignmentX(Component.LEFT_ALIGNMENT);
+        panel_1.add(panel_2);
+        panel_2.setLayout(new BoxLayout(panel_2, BoxLayout.X_AXIS));
+
+        ffmpegPath = new JTextField(settings.getFfmpegPath());
+        panel_2.add(ffmpegPath);
+        ffmpegPath.setAlignmentX(Component.LEFT_ALIGNMENT);
+        ffmpegPath.setColumns(10);
+
+        panel_2.add(new JLabel(" "));
+
+        JButton btnFFmpegCheck = new JButton("Check");
+        btnFFmpegCheck.addActionListener(e -> {
+            boolean available = new FFMpeg(ffmpegPath.getText()).isAvailable();
+            btnFFmpegCheck.setEnabled(!available);
+            btnFFmpegCheck.setText(available ? "OK" : "Error!");
+        });
+        ffmpegPath.getDocument().addDocumentListener(new DocumentListener() {
+            @Override
+            public void changedUpdate(DocumentEvent e) {
+                update(btnFFmpegCheck);
+            }
+
+            @Override
+            public void insertUpdate(DocumentEvent e) {
+                update(btnFFmpegCheck);
+            }
+
+            @Override
+            public void removeUpdate(DocumentEvent e) {
+                update(btnFFmpegCheck);
+            }
+
+            private void update(JButton btnFFmpegCheck) {
+                btnFFmpegCheck.setEnabled(true);
+                btnFFmpegCheck.setText("Check");
+            }
+        });
+        panel_2.add(btnFFmpegCheck);
         {
             JPanel buttonPane = new JPanel();
             buttonPane.setLayout(new FlowLayout(FlowLayout.RIGHT));
@@ -299,6 +366,8 @@ public class ApplicationSettingsDialog extends JDialog {
 
                     settings.setLatitude((double) latSpinner.getValue());
                     settings.setLongitude((double) lonSpinner.getValue());
+
+                    settings.setFfmpegPath(ffmpegPath.getText());
 
                     dispose();
                 });

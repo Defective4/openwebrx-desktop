@@ -5,17 +5,23 @@ import java.util.List;
 import java.util.Objects;
 
 import io.github.defective4.sdr.owrxclient.model.ReceiverGPS;
+import io.github.defective4.sdr.owrxdesktop.audio.FFMpeg;
 import io.github.defective4.sdr.owrxdesktop.bandplan.SerializedBandplan;
 
 public class ApplicationSettings {
     private boolean autoDownloadPublicReceivers = true;
     private boolean autoRefreshPrivateReceivers = false;
+    private String ffmpegPath = FFMpeg.probeFFMpeg().orElse("");
+
     private double latitude = 0;
-
     private List<SerializedBandplan> loadedBandplans = List.of();
-    private double longitude = 0;
 
+    private double longitude = 0;
     private int maxNetworkWorkers = 3;
+
+    public String getFfmpegPath() {
+        return ffmpegPath;
+    }
 
     public ReceiverGPS getGPS() {
         return new ReceiverGPS(latitude, longitude);
@@ -51,6 +57,10 @@ public class ApplicationSettings {
 
     public void setAutoRefreshPrivateReceivers(boolean autoRefreshPrivateReceivers) {
         this.autoRefreshPrivateReceivers = autoRefreshPrivateReceivers;
+    }
+
+    public void setFfmpegPath(String ffmpegPath) {
+        this.ffmpegPath = ffmpegPath;
     }
 
     public void setLatitude(double latitude) {

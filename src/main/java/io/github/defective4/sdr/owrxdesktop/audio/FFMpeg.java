@@ -3,8 +3,11 @@ package io.github.defective4.sdr.owrxdesktop.audio;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
+import java.util.Optional;
 
 public class FFMpeg {
+    private static final List<String> FFMPEG_PATHES = List.of("/bin/ffmpeg", "/sbin/ffmpeg", "ffmpeg", "ffmpeg.exe");
     private final String path;
 
     public FFMpeg(String path) {
@@ -39,5 +42,12 @@ public class FFMpeg {
             e.printStackTrace();
             return false;
         }
+    }
+
+    public static Optional<String> probeFFMpeg() {
+        for (String path : FFMPEG_PATHES) {
+            if (new FFMpeg(path).isAvailable()) return Optional.of(path);
+        }
+        return Optional.empty();
     }
 }

@@ -61,6 +61,7 @@ import io.github.defective4.sdr.owrxclient.model.ReceiverProfile;
 import io.github.defective4.sdr.owrxclient.model.WaterfallLevels;
 import io.github.defective4.sdr.owrxdesktop.application.ApplicationSettings;
 import io.github.defective4.sdr.owrxdesktop.audio.AudioRecorder;
+import io.github.defective4.sdr.owrxdesktop.audio.FFMpeg;
 import io.github.defective4.sdr.owrxdesktop.audio.RecorderQuality;
 import io.github.defective4.sdr.owrxdesktop.bandplan.Bandplan;
 import io.github.defective4.sdr.owrxdesktop.cache.ReceiverCache;
@@ -80,7 +81,7 @@ import io.github.defective4.sdr.owrxdesktop.ui.settings.ReceiverUserSettings;
 public class ReceiverWindow extends JFrame {
     private final JComboBox<ReceiverMode> analogBox = new JComboBox<>();
     private final ApplicationSettings appSettings;
-    private final AudioRecorder audioRecorder = new AudioRecorder();
+    private final AudioRecorder audioRecorder;
     private final Bandplan bandplan;
     private int bandwidth;
 
@@ -144,6 +145,7 @@ public class ReceiverWindow extends JFrame {
 
     public ReceiverWindow(ReceiverUserSettings settings, ReceiverCache cache, ApplicationSettings appSettings) {
         this.appSettings = appSettings;
+        audioRecorder = new AudioRecorder(appSettings.getFfmpegPath());
         bandplan = settings.getBandplan();
         userSettings = settings;
         resetAutoFFT();
@@ -810,7 +812,13 @@ public class ReceiverWindow extends JFrame {
             gbc_chckbxRecordToMp.anchor = GridBagConstraints.WEST;
             gbc_chckbxRecordToMp.gridx = 0;
             gbc_chckbxRecordToMp.gridy = 0;
-            chckbxRecordToMp.addActionListener(e -> audioRecorder.setProcessMP3(chckbxRecordToMp.isSelected()));
+            chckbxRecordToMp.addActionListener(e -> {
+                boolean available = audioRecorder.getFfmpeg().isAvailable();
+                audioRecorder.setProcessMP3(chckbxRecordToMp.isSelected() && available);
+                chckbxRecordToMp.setEnabled(available);
+                if(!available)
+                    chckbxRecordToMp.setSelected(false);
+            });
 
             if (!audioRecorder.getFfmpeg().isAvailable()) {
                 chckbxRecordToMp.setEnabled(false);
@@ -823,7 +831,13 @@ public class ReceiverWindow extends JFrame {
                 panel.add(lblThisRequiredFfmpeg, gbc_lblThisRequiredFfmpeg);
 
                 JLinkLabel ffmpegLabel = new JLinkLabel("Configure", e -> {
-                    new ApplicationSettingsDialog(this, appSettings).setVisible(true);
+                    ApplicationSettingsDialog dialog = new ApplicationSettingsDialog(this, appSettings);
+                    dialog.setSelectedIndex(3);
+                    dialog.setVisible(true);
+                    FFMpeg ffmpeg = new FFMpeg(appSettings.getFfmpegPath());
+                    chckbxRecordToMp.setEnabled(ffmpeg.isAvailable());
+                    audioRecorder.setFfmpeg(ffmpeg);
+                    audioRecorder.setProcessMP3(chckbxRecordToMp.isSelected() && chckbxRecordToMp.isEnabled());
                 });
                 GridBagConstraints gbc_linkLabel = new GridBagConstraints();
                 gbc_linkLabel.anchor = GridBagConstraints.NORTHWEST;

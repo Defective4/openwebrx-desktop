@@ -17,13 +17,17 @@ import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 
 public class AudioRecorder {
-    private FFMpeg ffmpeg = new FFMpeg("/bin/ffmpeg");
+    private FFMpeg ffmpeg;
     private boolean hi = false;
     private OutputStream output;
     private boolean processMP3 = false;
     private final ByteBuffer resamplingBuffer = ByteBuffer.allocate(40960);
 
     private File target;
+
+    public AudioRecorder(String ffmpegPath) {
+        ffmpeg = new FFMpeg(ffmpegPath);
+    }
 
     public FFMpeg getFfmpeg() {
         return ffmpeg;
