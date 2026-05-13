@@ -799,7 +799,7 @@ public class ReceiverWindow extends JFrame {
             gbl_panel.rowWeights = new double[] { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE };
             panel.setLayout(gbl_panel);
 
-            JCheckBox chckbxRecordToMp = new JCheckBox("Record to MP3");
+            JCheckBox chckbxRecordToMp = new JCheckBox("Save to MP3");
             GridBagConstraints gbc_chckbxRecordToMp = new GridBagConstraints();
             gbc_chckbxRecordToMp.anchor = GridBagConstraints.WEST;
             gbc_chckbxRecordToMp.gridx = 0;
