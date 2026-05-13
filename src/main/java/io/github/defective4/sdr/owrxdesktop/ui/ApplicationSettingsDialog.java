@@ -1,5 +1,7 @@
 package io.github.defective4.sdr.owrxdesktop.ui;
 
+import static java.nio.charset.StandardCharsets.*;
+
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
@@ -11,6 +13,7 @@ import java.awt.Insets;
 import java.awt.Window;
 import java.io.File;
 import java.io.FileReader;
+import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -47,6 +50,7 @@ import io.github.defective4.sdr.owrxdesktop.bandplan.reader.BandplanReader;
 import io.github.defective4.sdr.owrxdesktop.bandplan.reader.BandplanReaderFactory;
 import io.github.defective4.sdr.owrxdesktop.bandplan.reader.GQRXBandplanReader;
 import io.github.defective4.sdr.owrxdesktop.bandplan.reader.OWRXBandplanReader;
+import io.github.defective4.sdr.owrxdesktop.bandplan.reader.SDRConsoleBandplanReader;
 import io.github.defective4.sdr.owrxdesktop.bandplan.reader.SDRPPBandplanReader;
 import io.github.defective4.sdr.owrxdesktop.bandplan.reader.SDRSharpBandplanReader;
 import io.github.defective4.sdr.owrxdesktop.bandplan.render.BandplanListRenderer;
@@ -163,11 +167,7 @@ public class ApplicationSettingsDialog extends JDialog {
                     delButton.setEnabled(false);
                     panel_1.add(delButton);
 
-                    if (settings.getLoadedBandplans().isEmpty())
-                        bandsModel.addElement(null);
-                    else {
-                        settings.getLoadedBandplans().forEach(i -> bandsModel.addElement(i));
-                    }
+                    settings.getLoadedBandplans().forEach(i -> bandsModel.addElement(i));
 
                     importButton.addActionListener(e -> {
                         JPopupMenu menu = new JPopupMenu();
@@ -175,33 +175,42 @@ public class ApplicationSettingsDialog extends JDialog {
 
                         gqrx.addActionListener(e2 -> {
                             showBandplanChooser(settings, "GQRX CSV Files", "csv",
-                                    "This is not a valid GQRX bandplan file", GQRXBandplanReader.FACTORY);
+                                    "This is not a valid GQRX bandplan file", GQRXBandplanReader.FACTORY, UTF_8);
                         });
 
                         JMenuItem sdrpp = new JMenuItem("SDR++ JSON file");
 
                         sdrpp.addActionListener(e2 -> {
                             showBandplanChooser(settings, "SDR++ JSON Files", "json",
-                                    "This is not a valid SDR++ bandplan file", SDRPPBandplanReader.FACTORY);
+                                    "This is not a valid SDR++ bandplan file", SDRPPBandplanReader.FACTORY, UTF_8);
                         });
 
                         JMenuItem sdrsharp = new JMenuItem("SDR# XML file");
 
                         sdrsharp.addActionListener(e2 -> {
                             showBandplanChooser(settings, "SDR# XML Files", "xml",
-                                    "This is not a valid SDR# bandplan file", SDRSharpBandplanReader.FACTORY);
+                                    "This is not a valid SDR# bandplan file", SDRSharpBandplanReader.FACTORY, UTF_8);
+                        });
+
+                        JMenuItem sdrconsole = new JMenuItem("SDR Console XML file");
+
+                        sdrconsole.addActionListener(e2 -> {
+                            showBandplanChooser(settings, "SDR Console XML Files", "xml",
+                                    "This is not a valid SDR Console bandplan file", SDRConsoleBandplanReader.FACTORY,
+                                    UTF_16LE);
                         });
 
                         JMenuItem owrx = new JMenuItem("OpenWebRX JSON file");
 
                         owrx.addActionListener(e2 -> {
                             showBandplanChooser(settings, "OpenWebRX JSON Files", "json",
-                                    "This is not a valid OpenWebRX bandplan file", OWRXBandplanReader.FACTORY);
+                                    "This is not a valid OpenWebRX bandplan file", OWRXBandplanReader.FACTORY, UTF_8);
                         });
 
                         menu.add(gqrx);
                         menu.add(sdrpp);
                         menu.add(sdrsharp);
+                        menu.add(sdrconsole);
                         menu.add(new JSeparator());
                         menu.add(owrx);
                         menu.show(importButton, 0, importButton.getHeight());
@@ -298,7 +307,7 @@ public class ApplicationSettingsDialog extends JDialog {
     }
 
     private void showBandplanChooser(ApplicationSettings settings, String extensionName, String extension,
-            String genericErrorMessage, BandplanReaderFactory<?> factory) {
+            String genericErrorMessage, BandplanReaderFactory<?> factory, Charset charset) {
         JFileChooser chooser = new JFileChooser();
         chooser.setDialogTitle("Load band plan");
         chooser.setAcceptAllFileFilterUsed(true);
@@ -306,7 +315,7 @@ public class ApplicationSettingsDialog extends JDialog {
 
         if (chooser.showDialog(this, "Load") == JFileChooser.APPROVE_OPTION) {
             File selected = chooser.getSelectedFile();
-            try (BandplanReader reader = factory.create(new FileReader(selected))) {
+            try (BandplanReader reader = factory.create(new FileReader(selected, charset))) {
                 if (reader instanceof SDRPPBandplanReader sdrpp) {
                     while (true) {
                         if (JOptionPane.showOptionDialog(this,

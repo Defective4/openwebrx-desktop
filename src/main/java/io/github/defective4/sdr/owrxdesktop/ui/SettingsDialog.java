@@ -273,7 +273,7 @@ public class SettingsDialog extends JDialog {
                                 gbc_panel_1.gridy = 3;
                                 panel.add(panel_1, gbc_panel_1);
                                 {
-                                    JLabel lblNewLabel_1 = new JLabel("You can import custom band plans in");
+                                    JLabel lblNewLabel_1 = new JLabel("You can manage custom band plans in");
                                     lblNewLabel_1.setEnabled(false);
                                     panel_1.add(lblNewLabel_1);
                                 }
