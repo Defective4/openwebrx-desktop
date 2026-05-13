@@ -3,8 +3,13 @@ package io.github.defective4.sdr.owrxdesktop;
 import java.awt.Color;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.io.File;
+import java.io.IOException;
 import java.net.URI;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -24,6 +29,7 @@ import io.github.defective4.sdr.owrxclient.model.DialFrequency;
 import io.github.defective4.sdr.owrxclient.model.ReceiverMode;
 import io.github.defective4.sdr.owrxclient.model.ReceiverProfile;
 import io.github.defective4.sdr.owrxclient.model.ServerConfig;
+import io.github.defective4.sdr.owrxdesktop.audio.AudioRecorder;
 import io.github.defective4.sdr.owrxdesktop.audio.AudioSinkManager;
 import io.github.defective4.sdr.owrxdesktop.bandplan.Bandplan;
 import io.github.defective4.sdr.owrxdesktop.cache.ReceiverCache;
@@ -43,6 +49,7 @@ public class RadioReceiver {
 
     protected Color[] waterfallTheme = { Color.black, Color.white };
     private final ApplicationWindow app;
+    private final AudioRecorder audioRecorder = new AudioRecorder();
     private final AudioSinkManager audioSinkManager;
 
     private final ReceiverCache cache;
@@ -71,12 +78,24 @@ public class RadioReceiver {
             @Override
             public void windowClosed(WindowEvent e) {
                 client.close();
+                try {
+                    audioRecorder.stop();
+                } catch (IOException e1) {
+                    e1.printStackTrace();
+                }
                 app.setVisible(true);
             }
         });
         client = prepareClient();
         this.app = app;
         rxWindow.addListener(new UserInteractionListener() {
+
+            private final DateFormat fmt = new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss");
+
+            @Override
+            public void appExit() throws IOException {
+                audioRecorder.stop();
+            }
 
             @Override
             public void bookmarkJumped(MergedLabel label) {
@@ -131,6 +150,20 @@ public class RadioReceiver {
             @Override
             public void profileChanged(ReceiverProfile profile) {
                 client.switchProfile(profile);
+            }
+
+            @Override
+            public boolean recordingToggled(File file) throws IOException {
+                boolean enabled = audioRecorder.isStarted();
+                file.mkdirs();
+                File target = new File(file,
+                        "Recording %s.wav".formatted(fmt.format(new Date(System.currentTimeMillis()))));
+                if (enabled) {
+                    audioRecorder.stop();
+                } else {
+                    audioRecorder.start(target);
+                }
+                return !enabled;
             }
 
             @Override
@@ -212,6 +245,10 @@ public class RadioReceiver {
         client.connect();
     }
 
+    public AudioRecorder getAudioRecorder() {
+        return audioRecorder;
+    }
+
     public void setVisible(boolean b) {
         rxWindow.setVisible(b);
     }
@@ -281,7 +318,8 @@ public class RadioReceiver {
             public void highQualityAudioReceived(byte[] data) {
                 try {
                     audioSinkManager.writeHighSamples(data);
-                } catch (LineUnavailableException e) {
+                    audioRecorder.writeData(data);
+                } catch (LineUnavailableException | IOException e) {
                     e.printStackTrace();
                 }
             }
@@ -290,6 +328,7 @@ public class RadioReceiver {
             public void lowQualityAudioReceived(byte[] data) {
                 try {
                     audioSinkManager.writeLowSamples(data);
+//                    audioRecorder.writeData(data);
                 } catch (LineUnavailableException e) {
                     e.printStackTrace();
                 }

@@ -10,6 +10,9 @@ import javax.sound.sampled.SourceDataLine;
 
 public class AudioSinkManager {
 
+    public static final AudioFormat HI_FORMAT = new AudioFormat(48000, 16, 1, true, false);
+    public static final AudioFormat LO_FORMAT = new AudioFormat(12000, 16, 1, true, false);
+
     private final SourceDataLine hiSDL, loSDL;
 
     private long lastHighSample, lastLowSample;
@@ -19,8 +22,8 @@ public class AudioSinkManager {
     private float volume = 1f;
 
     public AudioSinkManager() throws LineUnavailableException {
-        hiSDL = AudioSystem.getSourceDataLine(new AudioFormat(48000, 16, 1, true, false));
-        loSDL = AudioSystem.getSourceDataLine(new AudioFormat(12000, 16, 1, true, false));
+        hiSDL = AudioSystem.getSourceDataLine(HI_FORMAT);
+        loSDL = AudioSystem.getSourceDataLine(LO_FORMAT);
 
         new Timer(true).scheduleAtFixedRate(new TimerTask() {
             @Override

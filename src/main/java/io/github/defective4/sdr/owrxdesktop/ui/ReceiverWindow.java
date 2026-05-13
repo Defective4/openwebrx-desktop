@@ -13,6 +13,8 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -823,16 +825,16 @@ public class ReceiverWindow extends JFrame {
             gbc_lblTargetDirectory.gridy = 3;
             panel.add(lblTargetDirectory, gbc_lblTargetDirectory);
 
-            JTextField textField = new JTextField();
-            textField.setText(System.getProperty("user.home"));
-            textField.setEditable(false);
+            JTextField audioDirField = new JTextField();
+            audioDirField.setText(System.getProperty("user.home"));
+            audioDirField.setEditable(false);
             GridBagConstraints gbc_textField = new GridBagConstraints();
             gbc_textField.insets = new Insets(0, 0, 5, 5);
             gbc_textField.fill = GridBagConstraints.HORIZONTAL;
             gbc_textField.gridx = 0;
             gbc_textField.gridy = 4;
-            panel.add(textField, gbc_textField);
-            textField.setColumns(10);
+            panel.add(audioDirField, gbc_textField);
+            audioDirField.setColumns(10);
 
             JButton btnChoose = new JButton("Choose...");
             GridBagConstraints gbc_btnChoose = new GridBagConstraints();
@@ -846,7 +848,7 @@ public class ReceiverWindow extends JFrame {
                 chooser.setDialogTitle("Choose target directory");
                 chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
                 if (chooser.showDialog(this, "Select") == JFileChooser.APPROVE_OPTION) {
-                    textField.setText(chooser.getSelectedFile().getAbsolutePath());
+                    audioDirField.setText(chooser.getSelectedFile().getAbsolutePath());
                 }
             });
 
@@ -857,6 +859,21 @@ public class ReceiverWindow extends JFrame {
             gbc_btnRecord.gridx = 0;
             gbc_btnRecord.gridy = 5;
             panel.add(btnRecord, gbc_btnRecord);
+
+            btnRecord.addActionListener(e -> {
+                boolean enabled = listeners.stream().map(ls -> {
+                    try {
+                        return ls.recordingToggled(new File(audioDirField.getText()));
+                    } catch (IOException e1) {
+                        e1.printStackTrace();
+                        JOptionPane.showMessageDialog(this, "Failed to start audio recording", "Recording failed",
+                                JOptionPane.ERROR_MESSAGE);
+                        return false;
+                    }
+                }).findAny().orElse(false);
+                btnRecord.setText(enabled ? "Stop recording" : "Record");
+                btnChoose.setEnabled(!enabled);
+            });
 
             JMenuBar menuBar = new JMenuBar();
             setJMenuBar(menuBar);
@@ -1191,6 +1208,13 @@ public class ReceiverWindow extends JFrame {
                 new String[] { "Close the application", "Return to receivers list", "Cancel" }, null)) {
             case 0 -> {
                 exiting = true;
+                listeners.forEach(ls -> {
+                    try {
+                        ls.appExit();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                });
                 System.exit(0);
             }
             case 1 -> {
