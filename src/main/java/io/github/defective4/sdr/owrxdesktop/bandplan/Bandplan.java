@@ -14,7 +14,7 @@ import java.util.stream.Collectors;
 import io.github.defective4.sdr.owrxdesktop.application.util.ColorEncoder;
 
 public class Bandplan {
-    private static final Map<String, String> COLORS = Map.of("hamradio", "#006000", "broadcast", "#000080", "public",
+    public static final Map<String, String> COLORS = Map.of("hamradio", "#006000", "broadcast", "#000080", "public",
             "#400040", "service", "#800000");
     private final Set<Band> bands = new HashSet<>();
     private final Map<String, Color> colorTags;

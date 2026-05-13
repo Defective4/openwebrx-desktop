@@ -30,6 +30,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
+import javax.swing.JSeparator;
 import javax.swing.JSpinner;
 import javax.swing.JTabbedPane;
 import javax.swing.SpinnerNumberModel;
@@ -45,6 +46,7 @@ import io.github.defective4.sdr.owrxdesktop.bandplan.SerializedBandplan;
 import io.github.defective4.sdr.owrxdesktop.bandplan.reader.BandplanReader;
 import io.github.defective4.sdr.owrxdesktop.bandplan.reader.BandplanReaderFactory;
 import io.github.defective4.sdr.owrxdesktop.bandplan.reader.GQRXBandplanReader;
+import io.github.defective4.sdr.owrxdesktop.bandplan.reader.OWRXBandplanReader;
 import io.github.defective4.sdr.owrxdesktop.bandplan.reader.SDRPPBandplanReader;
 import io.github.defective4.sdr.owrxdesktop.bandplan.reader.SDRSharpBandplanReader;
 import io.github.defective4.sdr.owrxdesktop.bandplan.render.BandplanListRenderer;
@@ -190,9 +192,18 @@ public class ApplicationSettingsDialog extends JDialog {
                                     "This is not a valid SDR# bandplan file", SDRSharpBandplanReader.FACTORY);
                         });
 
+                        JMenuItem owrx = new JMenuItem("OpenWebRX JSON file");
+
+                        owrx.addActionListener(e2 -> {
+                            showBandplanChooser(settings, "OpenWebRX JSON Files", "json",
+                                    "This is not a valid OpenWebRX bandplan file", OWRXBandplanReader.FACTORY);
+                        });
+
                         menu.add(gqrx);
                         menu.add(sdrpp);
                         menu.add(sdrsharp);
+                        menu.add(new JSeparator());
+                        menu.add(owrx);
                         menu.show(importButton, 0, importButton.getHeight());
                     });
 
