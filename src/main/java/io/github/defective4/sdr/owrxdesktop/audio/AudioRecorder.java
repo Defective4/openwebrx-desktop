@@ -16,10 +16,15 @@ import javax.sound.sampled.AudioSystem;
 public class AudioRecorder {
     private FFMpeg ffmpeg = new FFMpeg("/bin/ffmpeg");
     private OutputStream output;
+    private boolean processMP3 = false;
     private File target;
 
     public FFMpeg getFfmpeg() {
         return ffmpeg;
+    }
+
+    public boolean isProcessMP3() {
+        return processMP3;
     }
 
     public boolean isStarted() {
@@ -28,6 +33,10 @@ public class AudioRecorder {
 
     public void setFfmpeg(FFMpeg ffmpeg) {
         this.ffmpeg = ffmpeg;
+    }
+
+    public void setProcessMP3(boolean processMP3) {
+        this.processMP3 = processMP3;
     }
 
     public void start(File target) throws FileNotFoundException {
@@ -39,7 +48,7 @@ public class AudioRecorder {
         if (output != null) output.close();
         output = null;
 
-        if (target.isFile()) {
+        if (target != null && target.isFile()) {
             File tmp = Files.createTempFile("owrxrecord", ".wav").toFile();
             long len = target.length() / 2;
             Files.move(target.toPath(), tmp.toPath(), StandardCopyOption.REPLACE_EXISTING);
@@ -48,10 +57,13 @@ public class AudioRecorder {
                 AudioSystem.write(in, Type.WAVE, target);
             }
             tmp.delete();
-            File mp3File = new File(target.getPath().substring(0, target.getPath().length() - 4) + ".mp3");
-            ffmpeg.convertToMP3(target, mp3File);
-            target.delete();
+            if (processMP3) {
+                File mp3File = new File(target.getPath().substring(0, target.getPath().length() - 4) + ".mp3");
+                ffmpeg.convertToMP3(target, mp3File);
+                target.delete();
+            }
         }
+        target = null;
     }
 
     public void writeData(byte[] data) throws IOException {

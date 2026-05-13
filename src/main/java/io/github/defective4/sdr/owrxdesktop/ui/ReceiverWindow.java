@@ -136,6 +136,7 @@ public class ReceiverWindow extends JFrame {
     private final JFrequencySpinner tuningStepSpinner = new JFrequencySpinner();
     private final ReceiverUserSettings userSettings;
     private final WaterfallPanel waterfallPanel;
+
     public ReceiverWindow(ReceiverUserSettings settings, ReceiverCache cache, ApplicationSettings appSettings) {
         this.appSettings = appSettings;
         bandplan = settings.getBandplan();
@@ -799,30 +800,35 @@ public class ReceiverWindow extends JFrame {
             panel.setLayout(gbl_panel);
 
             JCheckBox chckbxRecordToMp = new JCheckBox("Record to MP3");
-            chckbxRecordToMp.setEnabled(false);
             GridBagConstraints gbc_chckbxRecordToMp = new GridBagConstraints();
             gbc_chckbxRecordToMp.anchor = GridBagConstraints.WEST;
             gbc_chckbxRecordToMp.gridx = 0;
             gbc_chckbxRecordToMp.gridy = 0;
+            chckbxRecordToMp.addActionListener(e -> audioRecorder.setProcessMP3(chckbxRecordToMp.isSelected()));
+
+            if (!audioRecorder.getFfmpeg().isAvailable()) {
+                chckbxRecordToMp.setEnabled(false);
+                JLabel lblThisRequiredFfmpeg = new JLabel("This requires ffmpeg");
+                lblThisRequiredFfmpeg.setEnabled(false);
+                GridBagConstraints gbc_lblThisRequiredFfmpeg = new GridBagConstraints();
+                gbc_lblThisRequiredFfmpeg.anchor = GridBagConstraints.WEST;
+                gbc_lblThisRequiredFfmpeg.gridx = 0;
+                gbc_lblThisRequiredFfmpeg.gridy = 1;
+                panel.add(lblThisRequiredFfmpeg, gbc_lblThisRequiredFfmpeg);
+
+                JLinkLabel ffmpegLabel = new JLinkLabel("Configure", e -> {
+                    new ApplicationSettingsDialog(this, appSettings).setVisible(true);
+                });
+                GridBagConstraints gbc_linkLabel = new GridBagConstraints();
+                gbc_linkLabel.anchor = GridBagConstraints.NORTHWEST;
+                gbc_linkLabel.insets = new Insets(0, 0, 16, 0);
+                gbc_linkLabel.gridx = 0;
+                gbc_linkLabel.gridy = 2;
+                panel.add(ffmpegLabel, gbc_linkLabel);
+            } else {
+                gbc_chckbxRecordToMp.insets = new Insets(0, 0, 16, 0);
+            }
             panel.add(chckbxRecordToMp, gbc_chckbxRecordToMp);
-
-            JLabel lblThisRequiredFfmpeg = new JLabel("This requires ffmpeg");
-            lblThisRequiredFfmpeg.setEnabled(false);
-            GridBagConstraints gbc_lblThisRequiredFfmpeg = new GridBagConstraints();
-            gbc_lblThisRequiredFfmpeg.anchor = GridBagConstraints.WEST;
-            gbc_lblThisRequiredFfmpeg.gridx = 0;
-            gbc_lblThisRequiredFfmpeg.gridy = 1;
-            panel.add(lblThisRequiredFfmpeg, gbc_lblThisRequiredFfmpeg);
-
-            JLinkLabel ffmpegLabel = new JLinkLabel("Configure", e -> {
-                new ApplicationSettingsDialog(this, appSettings).setVisible(true);
-            });
-            GridBagConstraints gbc_linkLabel = new GridBagConstraints();
-            gbc_linkLabel.anchor = GridBagConstraints.NORTHWEST;
-            gbc_linkLabel.insets = new Insets(0, 0, 16, 0);
-            gbc_linkLabel.gridx = 0;
-            gbc_linkLabel.gridy = 2;
-            panel.add(ffmpegLabel, gbc_linkLabel);
 
             JLabel lblTargetDirectory = new JLabel("Target directory");
             GridBagConstraints gbc_lblTargetDirectory = new GridBagConstraints();
