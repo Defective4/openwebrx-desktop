@@ -67,7 +67,7 @@ public class ApplicationWindow extends JFrame {
             JMenu mnApplication = new JMenu("Application");
             menuBar.add(mnApplication);
 
-            JMenuItem mntmQuit = new JMenuItem("Quit");
+            JMenuItem mntmQuit = new JMenuItem("Quit", ICO_SIGN_OUT);
             mntmQuit.addActionListener(e -> dispose());
             mntmQuit.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_Q, InputEvent.CTRL_DOWN_MASK));
             mnApplication.add(mntmQuit);
@@ -75,7 +75,7 @@ public class ApplicationWindow extends JFrame {
             JMenu mnEdit = new JMenu("Edit");
             menuBar.add(mnEdit);
 
-            JMenuItem mntmAddReceiver = new JMenuItem("Add receiver...");
+            JMenuItem mntmAddReceiver = new JMenuItem("Add receiver...", ICO_PLUS);
             mntmAddReceiver.addActionListener(e -> {
                 String url = JOptionPane.showInputDialog(this, "Enter the receiver's url:", "Adding a new receiver",
                         JOptionPane.INFORMATION_MESSAGE);
@@ -98,7 +98,7 @@ public class ApplicationWindow extends JFrame {
 
             mnEdit.add(new JSeparator());
 
-            JMenuItem mntmDefaultReceiverSettings = new JMenuItem("Default receiver settings...");
+            JMenuItem mntmDefaultReceiverSettings = new JMenuItem("Default receiver settings...", ICO_SETTINGS);
             mntmDefaultReceiverSettings.addActionListener(e -> {
                 if (SettingsDialog.show(this, userStorage.getDefaultSettings(), userStorage.getApplicationSettings())) {
                     JOptionPane.showMessageDialog(this,
@@ -108,7 +108,7 @@ public class ApplicationWindow extends JFrame {
                 }
             });
 
-            JMenuItem mntmApplicationSettings = new JMenuItem("Application settings");
+            JMenuItem mntmApplicationSettings = new JMenuItem("Application settings", ICO_COG);
             mntmApplicationSettings.addActionListener(
                     e -> new ApplicationSettingsDialog(this, userStorage.getApplicationSettings()).setVisible(true));
             mntmApplicationSettings.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_O, InputEvent.CTRL_DOWN_MASK));
@@ -120,7 +120,7 @@ public class ApplicationWindow extends JFrame {
             JSeparator separator = new JSeparator();
             mnEdit.add(separator);
 
-            JMenuItem mntmRefreshAll = new JMenuItem("Refresh all");
+            JMenuItem mntmRefreshAll = new JMenuItem("Refresh all", ICO_SYNC);
             mntmRefreshAll.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_R, InputEvent.CTRL_DOWN_MASK));
             mntmRefreshAll.addActionListener(e -> refreshPersonalReceivers());
             mnEdit.add(mntmRefreshAll);
@@ -371,8 +371,8 @@ public class ApplicationWindow extends JFrame {
             FontAwesome.setFontAwesomeFont(more);
             more.addActionListener(e -> {
                 JPopupMenu menu = new JPopupMenu();
-                JMenuItem editRx = new JMenuItem("Edit receiver settings...");
-                JMenuItem deleteRx = new JMenuItem("Remove");
+                JMenuItem editRx = new JMenuItem("Edit receiver settings...", ICO_EDIT);
+                JMenuItem deleteRx = new JMenuItem("Remove", ICO_DELETE);
 
                 deleteRx.addActionListener(e2 -> removeEntry(rxcpt));
                 editRx.addActionListener(e2 -> SettingsDialog.show(this, rxcpt.getEntry().getSettings(),

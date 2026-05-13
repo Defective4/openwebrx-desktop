@@ -1,5 +1,7 @@
 package io.github.defective4.sdr.owrxdesktop.ui;
 
+import static io.github.defective4.sdr.owrxdesktop.ui.text.FontAwesome.*;
+
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
@@ -119,7 +121,7 @@ public class ReceiverWindow extends JFrame {
 
     private float minFFT, maxFFT;
 
-    private final JMenuItem mntmBookmarks = new JMenuItem("Bookmarks");
+    private final JMenuItem mntmBookmarks = new JMenuItem("Bookmarks", ICO_BOOKMARK);
     private int offset;
     private final JComboBox<ReceiverProfile> profileBox = new JComboBox<>();
     private boolean profileDebounce;
@@ -236,7 +238,7 @@ public class ReceiverWindow extends JFrame {
 
         {
             JPanel rxCtlPanel = new JPanel();
-            controlTabs.addTab("RX", null, rxCtlPanel, null);
+            controlTabs.addTab("RX", ICO_BROADCAST, rxCtlPanel, null);
             GridBagLayout gbl_rxCtlPanel = new GridBagLayout();
             gbl_rxCtlPanel.columnWidths = new int[] { 225, 0 };
             gbl_rxCtlPanel.rowHeights = new int[] { 0, 0, 0, 0, 0, 0, 0 };
@@ -519,7 +521,7 @@ public class ReceiverWindow extends JFrame {
 
         {
             JPanel fftCtlPanel = new JPanel();
-            controlTabs.addTab("FFT", null, fftCtlPanel, null);
+            controlTabs.addTab("FFT", ICO_CHART, fftCtlPanel, null);
             GridBagLayout gbl_fftCtlPanel = new GridBagLayout();
             gbl_fftCtlPanel.columnWidths = new int[] { 230, 0 };
             gbl_fftCtlPanel.rowHeights = new int[] { 0, 0, 0, 0 };
@@ -750,7 +752,7 @@ public class ReceiverWindow extends JFrame {
         {
 
             JPanel audioCtlPanel = new JPanel();
-            controlTabs.addTab("Audio", null, audioCtlPanel, null);
+            controlTabs.addTab("Audio", ICO_AUDIO, audioCtlPanel, null);
             GridBagLayout gbl_audioCtlPanel = new GridBagLayout();
             gbl_audioCtlPanel.columnWidths = new int[] { 0, 0 };
             gbl_audioCtlPanel.rowHeights = new int[] { 0, 0, 0 };
@@ -816,8 +818,7 @@ public class ReceiverWindow extends JFrame {
                 boolean available = audioRecorder.getFfmpeg().isAvailable();
                 audioRecorder.setProcessMP3(chckbxRecordToMp.isSelected() && available);
                 chckbxRecordToMp.setEnabled(available);
-                if(!available)
-                    chckbxRecordToMp.setSelected(false);
+                if (!available) chckbxRecordToMp.setSelected(false);
             });
 
             if (!audioRecorder.getFfmpeg().isAvailable()) {
@@ -940,7 +941,7 @@ public class ReceiverWindow extends JFrame {
                 JMenu mnFile = new JMenu("File");
                 menuBar.add(mnFile);
 
-                JMenuItem mntmQuit = new JMenuItem("Quit");
+                JMenuItem mntmQuit = new JMenuItem("Quit", ICO_SIGN_OUT);
                 mntmQuit.addActionListener(e -> exit());
                 mntmQuit.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_Q, InputEvent.CTRL_DOWN_MASK));
                 mnFile.add(mntmQuit);
@@ -950,7 +951,7 @@ public class ReceiverWindow extends JFrame {
                 JMenu mnWindow = new JMenu("Window");
                 menuBar.add(mnWindow);
 
-                JMenuItem mntmSettings = new JMenuItem("Settings...");
+                JMenuItem mntmSettings = new JMenuItem("Settings...", ICO_SETTINGS);
                 mntmSettings.addActionListener(e -> showSettings());
                 mntmSettings.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_O, InputEvent.CTRL_DOWN_MASK));
                 mnWindow.add(mntmSettings);
