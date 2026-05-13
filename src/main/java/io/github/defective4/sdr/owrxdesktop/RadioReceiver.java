@@ -287,6 +287,7 @@ public class RadioReceiver {
             public void highQualityAudioReceived(byte[] data) {
                 try {
                     rxWindow.getAudioRecorder().writeData(data, true);
+                    rxWindow.setLastHighSample(true);
                     audioSinkManager.writeHighSamples(data);
                 } catch (LineUnavailableException | IOException e) {
                     e.printStackTrace();
@@ -297,6 +298,7 @@ public class RadioReceiver {
             public void lowQualityAudioReceived(byte[] data) {
                 try {
                     rxWindow.getAudioRecorder().writeData(data, false);
+                    rxWindow.setLastHighSample(false);
                     audioSinkManager.writeLowSamples(data);
                 } catch (LineUnavailableException | IOException e) {
                     e.printStackTrace();

@@ -40,14 +40,4 @@ public class FFMpeg {
             return false;
         }
     }
-
-    public static void main(String[] args) {
-        try {
-            FFMpeg ffmpeg = new FFMpeg("/bin/ffmpeg");
-            ffmpeg.convertToMP3(new File("/home/defective/Recording 2026-05-13-17-37-15.wav"),
-                    new File("/tmp/test.mp3"));
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
 }

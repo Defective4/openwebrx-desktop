@@ -29,6 +29,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import javax.swing.AbstractButton;
 import javax.swing.BoxLayout;
 import javax.swing.ButtonGroup;
+import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
@@ -60,6 +61,7 @@ import io.github.defective4.sdr.owrxclient.model.ReceiverProfile;
 import io.github.defective4.sdr.owrxclient.model.WaterfallLevels;
 import io.github.defective4.sdr.owrxdesktop.application.ApplicationSettings;
 import io.github.defective4.sdr.owrxdesktop.audio.AudioRecorder;
+import io.github.defective4.sdr.owrxdesktop.audio.RecorderQuality;
 import io.github.defective4.sdr.owrxdesktop.bandplan.Bandplan;
 import io.github.defective4.sdr.owrxdesktop.cache.ReceiverCache;
 import io.github.defective4.sdr.owrxdesktop.ui.BookmarksDialog.MergedLabel;
@@ -77,12 +79,9 @@ import io.github.defective4.sdr.owrxdesktop.ui.settings.ReceiverUserSettings;
 
 public class ReceiverWindow extends JFrame {
     private final JComboBox<ReceiverMode> analogBox = new JComboBox<>();
-
     private final ApplicationSettings appSettings;
     private final AudioRecorder audioRecorder = new AudioRecorder();
-
     private final Bandplan bandplan;
-
     private int bandwidth;
 
     private final ReceiverCache cache;
@@ -90,6 +89,7 @@ public class ReceiverWindow extends JFrame {
     private int centerFrequency;
 
     private final JProgressBar clientsBar = new JProgressBar();
+
     private final JProgressBar cpuBar = new JProgressBar();
 
     private float cpuUsage = Integer.MIN_VALUE;
@@ -97,30 +97,33 @@ public class ReceiverWindow extends JFrame {
     private final JComboBox<ReceiverMode> digitalBox = new JComboBox<>();
 
     private boolean exiting;
-
     private final float fftMax = -20;
 
     private final float fftMin = -88;
+
     private final FFTPanel fftPanel;
 
     private final DateFormat fmt = new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss");
 
     private final JSpinner freqSpinner = new JFrequencySpinner();
+
     private final JRadioButton ftlAuto = new JRadioButton("Auto");
     private final JRadioButton ftlServer = new JRadioButton("Server");
 
     private long lastFFTDraw;
 
+    private boolean lastHighSample = false;
     private final List<UserInteractionListener> listeners = new CopyOnWriteArrayList<>();
     private int maxFPS = -1;
+
     private float minFFT, maxFFT;
+
     private final JMenuItem mntmBookmarks = new JMenuItem("Bookmarks");
-
     private int offset;
-
     private final JComboBox<ReceiverProfile> profileBox = new JComboBox<>();
-
     private boolean profileDebounce;
+
+    private final JComboBox<RecorderQuality> qualityBox = new JComboBox<>();
 
     private final JButton resetScope = new JButton("Reset");
 
@@ -129,12 +132,14 @@ public class ReceiverWindow extends JFrame {
     private int scopeUpper;
 
     private WaterfallLevels serverLevels = new WaterfallLevels(-88, -20);
+
     private final JProgressBar signalBar = new JProgressBar();
 
     private int temperatureC = Integer.MIN_VALUE;
-
     private final JFrequencySpinner tuningStepSpinner = new JFrequencySpinner();
+
     private final ReceiverUserSettings userSettings;
+
     private final WaterfallPanel waterfallPanel;
 
     public ReceiverWindow(ReceiverUserSettings settings, ReceiverCache cache, ApplicationSettings appSettings) {
@@ -794,13 +799,14 @@ public class ReceiverWindow extends JFrame {
             audioCtlPanel.add(panel, gbc_panel);
             GridBagLayout gbl_panel = new GridBagLayout();
             gbl_panel.columnWidths = new int[] { 0, 0, 0 };
-            gbl_panel.rowHeights = new int[] { 0, 0, 0, 0, 0, 0, 0 };
+            gbl_panel.rowHeights = new int[] { 0, 0, 0, 0, 0, 0, 0, 0, 0 };
             gbl_panel.columnWeights = new double[] { 1.0, 0.0, Double.MIN_VALUE };
-            gbl_panel.rowWeights = new double[] { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE };
+            gbl_panel.rowWeights = new double[] { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE };
             panel.setLayout(gbl_panel);
 
             JCheckBox chckbxRecordToMp = new JCheckBox("Save to MP3");
             GridBagConstraints gbc_chckbxRecordToMp = new GridBagConstraints();
+            gbc_chckbxRecordToMp.insets = new Insets(0, 0, 5, 5);
             gbc_chckbxRecordToMp.anchor = GridBagConstraints.WEST;
             gbc_chckbxRecordToMp.gridx = 0;
             gbc_chckbxRecordToMp.gridy = 0;
@@ -833,7 +839,7 @@ public class ReceiverWindow extends JFrame {
             JLabel lblTargetDirectory = new JLabel("Target directory");
             GridBagConstraints gbc_lblTargetDirectory = new GridBagConstraints();
             gbc_lblTargetDirectory.anchor = GridBagConstraints.WEST;
-            gbc_lblTargetDirectory.insets = new Insets(0, 0, 5, 5);
+            gbc_lblTargetDirectory.insets = new Insets(0, 5, 5, 0);
             gbc_lblTargetDirectory.gridx = 0;
             gbc_lblTargetDirectory.gridy = 3;
             panel.add(lblTargetDirectory, gbc_lblTargetDirectory);
@@ -865,12 +871,28 @@ public class ReceiverWindow extends JFrame {
                 }
             });
 
+            JLabel lblQuality = new JLabel("Recorder quality");
+            GridBagConstraints gbc_lblQuality = new GridBagConstraints();
+            gbc_lblQuality.anchor = GridBagConstraints.WEST;
+            gbc_lblQuality.insets = new Insets(16, 5, 5, 0);
+            gbc_lblQuality.gridx = 0;
+            gbc_lblQuality.gridy = 5;
+            panel.add(lblQuality, gbc_lblQuality);
+
+            qualityBox.setModel(new DefaultComboBoxModel<>(RecorderQuality.values()));
+            GridBagConstraints gbc_comboBox = new GridBagConstraints();
+            gbc_comboBox.insets = new Insets(0, 0, 5, 5);
+            gbc_comboBox.fill = GridBagConstraints.HORIZONTAL;
+            gbc_comboBox.gridx = 0;
+            gbc_comboBox.gridy = 6;
+            panel.add(qualityBox, gbc_comboBox);
+
             JButton btnRecord = new JButton("Record");
             GridBagConstraints gbc_btnRecord = new GridBagConstraints();
             gbc_btnRecord.anchor = GridBagConstraints.WEST;
             gbc_btnRecord.insets = new Insets(0, 0, 0, 5);
             gbc_btnRecord.gridx = 0;
-            gbc_btnRecord.gridy = 5;
+            gbc_btnRecord.gridy = 7;
             panel.add(btnRecord, gbc_btnRecord);
 
             btnRecord.addActionListener(e -> {
@@ -883,10 +905,13 @@ public class ReceiverWindow extends JFrame {
                     if (enabled) {
                         audioRecorder.stop();
                     } else {
-                        audioRecorder.start(target, true);
+                        RecorderQuality quality = (RecorderQuality) qualityBox.getSelectedItem();
+                        audioRecorder.start(target,
+                                quality == RecorderQuality.AUTO ? lastHighSample : quality.isHigh());
                     }
                     btnRecord.setText(!enabled ? "Stop recording" : "Record");
-                    btnChoose.setEnabled(!enabled);
+                    btnChoose.setEnabled(enabled);
+                    qualityBox.setEnabled(enabled);
                 } catch (Exception e2) {
                     e2.printStackTrace();
                     JOptionPane.showMessageDialog(this, "Failed to start audio recorder", "Recording failed",
@@ -1041,6 +1066,10 @@ public class ReceiverWindow extends JFrame {
         return serverLevels;
     }
 
+    public boolean isLastHighSample() {
+        return lastHighSample;
+    }
+
     public boolean removeListener(UserInteractionListener listener) {
         return listeners.remove(listener);
     }
@@ -1089,6 +1118,10 @@ public class ReceiverWindow extends JFrame {
 
     public void setLabels(Collection<FFTLabel> labels) {
         fftPanel.setLabels(labels);
+    }
+
+    public void setLastHighSample(boolean lastHighSample) {
+        this.lastHighSample = lastHighSample;
     }
 
     public void setMaxClients(int maxClients) {
