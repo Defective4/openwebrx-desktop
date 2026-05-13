@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.swing.BoxLayout;
 import javax.swing.DefaultListModel;
@@ -45,6 +46,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
 import io.github.defective4.sdr.owrxdesktop.application.ApplicationSettings;
+import io.github.defective4.sdr.owrxdesktop.bandplan.Bandplan;
 import io.github.defective4.sdr.owrxdesktop.bandplan.SerializedBandplan;
 import io.github.defective4.sdr.owrxdesktop.bandplan.reader.BandplanReader;
 import io.github.defective4.sdr.owrxdesktop.bandplan.reader.BandplanReaderFactory;
@@ -207,6 +209,19 @@ public class ApplicationSettingsDialog extends JDialog {
                                     "This is not a valid OpenWebRX bandplan file", OWRXBandplanReader.FACTORY, UTF_8);
                         });
 
+                        JMenuItem blank = new JMenuItem("Blank band plan");
+
+                        blank.addActionListener(e2 -> {
+                            List<SerializedBandplan> bps = new ArrayList<>(settings.getLoadedBandplans());
+                            bps.add(new Bandplan(Set.of(), Map.of("default", Color.red), "[Custom] New band plan")
+                                    .serialize());
+                            settings.setLoadedBandplans(bps);
+                            bandsModel.removeAllElements();
+                            settings.getLoadedBandplans().forEach(i -> bandsModel.addElement(i));
+                        });
+
+                        menu.add(blank);
+                        menu.add(new JSeparator());
                         menu.add(gqrx);
                         menu.add(sdrpp);
                         menu.add(sdrsharp);
