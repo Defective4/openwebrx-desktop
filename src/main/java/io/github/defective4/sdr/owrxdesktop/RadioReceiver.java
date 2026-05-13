@@ -63,7 +63,7 @@ public class RadioReceiver {
         this.settings = settings;
         audioSinkManager = new AudioSinkManager();
         this.uri = uri;
-        rxWindow = new ReceiverWindow(settings, cache);
+        rxWindow = new ReceiverWindow(settings, cache, app.getUserStorage().getApplicationSettings());
         rxWindow.addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosed(WindowEvent e) {
@@ -215,7 +215,7 @@ public class RadioReceiver {
             @Override
             public void bandsUpdated(Band[] bands) {
                 Bandplan bandplan = rxWindow.getBandplan();
-                if (bandplan.isServerSide()) {
+                if (settings.isUseServerBandplan()) {
                     bandplan.setBands(Arrays.stream(bands).map(band -> {
                         Color color = bandplan.getDefaultTagColor();
                         if (band.tags() != null && band.tags().length > 0) for (String tag : band.tags()) {

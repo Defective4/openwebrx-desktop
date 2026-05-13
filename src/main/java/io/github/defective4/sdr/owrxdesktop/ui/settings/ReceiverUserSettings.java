@@ -24,10 +24,7 @@ import io.github.defective4.sdr.owrxdesktop.ui.settings.waterfall.BuiltinWaterfa
 import io.github.defective4.sdr.owrxdesktop.ui.settings.waterfall.WaterfallThemeMode;
 
 public class ReceiverUserSettings {
-
-    private static final int BANDPLAN_SERVER = -1;
-
-    private static final Bandplan SERVER_BANDPLAN = new Bandplan();
+    public static final Bandplan SERVER_BANDPLAN = new Bandplan();
 
     private static final Map<String, Color[]> THEME_INDEX = new HashMap<>();
 
@@ -47,14 +44,14 @@ public class ReceiverUserSettings {
         }
     }
 
+    private SerializedBandplan customBandplan;
+
     private boolean dynamicColorMixing = true;
-
     private boolean enableFreeTuning;
-    private List<SerializedBandplan> importedBandplans = List.of();
-    private String magicKey;
 
-    private int selectedBandplan = BANDPLAN_SERVER;
+    private String magicKey;
     private BuiltinWaterfallTheme selectedBuiltinWaterfallTheme = BuiltinWaterfallTheme.TURBO;
+    private boolean useServerBandplan = true;
     private List<String> waterfallCustomTheme = List.of("#000000", "#ffffff");
     private WaterfallThemeMode waterfallThemeMode = WaterfallThemeMode.SERVER;
 
@@ -74,22 +71,15 @@ public class ReceiverUserSettings {
     }
 
     public Bandplan getBandplan() {
-        if (selectedBandplan <= BANDPLAN_SERVER || importedBandplans.isEmpty()) {
-            return SERVER_BANDPLAN;
-        }
-        return importedBandplans.get(Math.min(importedBandplans.size() - 1, selectedBandplan)).deserialize();
+        return customBandplan == null || isUseServerBandplan() ? SERVER_BANDPLAN : customBandplan.deserialize();
     }
 
-    public List<SerializedBandplan> getImportedBandplans() {
-        return importedBandplans;
+    public Optional<SerializedBandplan> getCustomBandplan() {
+        return Optional.ofNullable(customBandplan);
     }
 
     public String getMagicKey() {
         return magicKey == null ? "" : magicKey;
-    }
-
-    public int getSelectedBandplan() {
-        return selectedBandplan;
     }
 
     public BuiltinWaterfallTheme getSelectedBuiltinWaterfallTheme() {
@@ -112,6 +102,14 @@ public class ReceiverUserSettings {
         return enableFreeTuning;
     }
 
+    public boolean isUseServerBandplan() {
+        return useServerBandplan;
+    }
+
+    public void setCustomBandplan(SerializedBandplan customBandplan) {
+        this.customBandplan = customBandplan;
+    }
+
     public void setDynamicColorMixing(boolean dynamicColorMixing) {
         this.dynamicColorMixing = dynamicColorMixing;
     }
@@ -120,20 +118,16 @@ public class ReceiverUserSettings {
         this.enableFreeTuning = enableFreeTuning;
     }
 
-    public void setImportedBandplans(List<SerializedBandplan> importedBandplans) {
-        this.importedBandplans = importedBandplans;
-    }
-
     public void setMagicKey(String magicKey) {
         this.magicKey = magicKey;
     }
 
-    public void setSelectedBandplan(int selectedBandplan) {
-        this.selectedBandplan = selectedBandplan;
-    }
-
     public void setSelectedBuiltinWaterfallTheme(BuiltinWaterfallTheme selectedBuiltinWaterfallTheme) {
         this.selectedBuiltinWaterfallTheme = Objects.requireNonNull(selectedBuiltinWaterfallTheme);
+    }
+
+    public void setUseServerBandplan(boolean useServerBandplan) {
+        this.useServerBandplan = useServerBandplan;
     }
 
     public void setWaterfallCustomTheme(List<String> waterfallCustomTheme) {

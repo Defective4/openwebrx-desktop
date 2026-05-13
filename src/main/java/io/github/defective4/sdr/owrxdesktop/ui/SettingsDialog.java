@@ -10,13 +10,7 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.Window;
 import java.awt.event.ActionListener;
-import java.io.File;
-import java.io.FileReader;
-import java.nio.file.Files;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import javax.swing.BoxLayout;
 import javax.swing.ButtonGroup;
@@ -24,13 +18,10 @@ import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JDialog;
-import javax.swing.JFileChooser;
 import javax.swing.JLabel;
-import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPasswordField;
-import javax.swing.JPopupMenu;
 import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
@@ -38,41 +29,36 @@ import javax.swing.JTabbedPane;
 import javax.swing.JTextArea;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
-import javax.swing.filechooser.FileNameExtensionFilter;
 
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
-
-import io.github.defective4.sdr.owrxdesktop.bandplan.BandplanListRenderer;
+import io.github.defective4.sdr.owrxdesktop.application.ApplicationSettings;
 import io.github.defective4.sdr.owrxdesktop.bandplan.SerializedBandplan;
-import io.github.defective4.sdr.owrxdesktop.bandplan.reader.BandplanReader;
-import io.github.defective4.sdr.owrxdesktop.bandplan.reader.BandplanReaderFactory;
-import io.github.defective4.sdr.owrxdesktop.bandplan.reader.GQRXBandplanReader;
-import io.github.defective4.sdr.owrxdesktop.bandplan.reader.SDRPPBandplanReader;
-import io.github.defective4.sdr.owrxdesktop.bandplan.reader.SDRSharpBandplanReader;
+import io.github.defective4.sdr.owrxdesktop.bandplan.render.BandplanListRenderer;
 import io.github.defective4.sdr.owrxdesktop.ui.settings.ReceiverUserSettings;
 import io.github.defective4.sdr.owrxdesktop.ui.settings.waterfall.BuiltinWaterfallTheme;
 import io.github.defective4.sdr.owrxdesktop.ui.settings.waterfall.WaterfallThemeMode;
 
 public class SettingsDialog extends JDialog {
 
+    private final ApplicationSettings appSettings;
     private final JComboBox<SerializedBandplan> bandplanBox = new JComboBox<>();
-    private JButton bandplanImport = new JButton("Import");
     private final JCheckBox dynamicColorMixingCheck = new JCheckBox("Dynamic color mixing");
     private final JCheckBox freeTuningCheck = new JCheckBox("Enable free tuning");
     private final JPasswordField magicKeyField = new JPasswordField();
     private final JRadioButton rdbtnBuiltin = new JRadioButton("Built-in: ");
     private final JRadioButton rdbtnCustom = new JRadioButton("Custom (One hex color per line, each starting with #):");
-    private final JRadioButton rdbtnCustomBandplanButton = new JRadioButton("Use a custom bandplan");
 
+    private final JRadioButton rdbtnCustomBandplanButton = new JRadioButton("Use a custom bandplan");
     private final JRadioButton rdbtnServerBandplanButton = new JRadioButton("Use server bandplan");
     private final JRadioButton rdbtnServerprovidedConfiguration = new JRadioButton("Server-provided configuration");
     private boolean saved;
+    private final ReceiverUserSettings settings;
     private final JTextArea themeArea = new JTextArea();
     private final JComboBox<BuiltinWaterfallTheme> themesBox = new JComboBox<>();
 
-    private SettingsDialog(Window parent, ReceiverUserSettings settings) {
+    private SettingsDialog(Window parent, ReceiverUserSettings settings, ApplicationSettings appSettings) {
         super(parent);
+        this.settings = settings;
+        this.appSettings = appSettings;
         setTitle("Receiver settings");
         setModal(true);
         setSize(450, 500);
@@ -244,11 +230,10 @@ public class SettingsDialog extends JDialog {
                             ButtonGroup bandplanGroup = new ButtonGroup();
                             ActionListener bandplanBtnListener = e -> {
                                 boolean enable = rdbtnCustomBandplanButton.isSelected();
-                                bandplanImport.setEnabled(enable);
                                 bandplanBox.setEnabled(enable);
                             };
                             {
-                                rdbtnServerBandplanButton.setSelected(settings.getBandplan().isServerSide());
+                                rdbtnServerBandplanButton.setSelected(settings.isUseServerBandplan());
                                 GridBagConstraints gbc_rdbtnNewRadioButton = new GridBagConstraints();
                                 gbc_rdbtnNewRadioButton.insets = new Insets(0, 0, 5, 0);
                                 gbc_rdbtnNewRadioButton.anchor = GridBagConstraints.NORTHWEST;
@@ -269,7 +254,7 @@ public class SettingsDialog extends JDialog {
                                 panel.add(lblNewLabel, gbc_lblNewLabel);
                             }
                             {
-                                rdbtnCustomBandplanButton.setSelected(!settings.getBandplan().isServerSide());
+                                rdbtnCustomBandplanButton.setSelected(!settings.isUseServerBandplan());
                                 GridBagConstraints gbc_rdbtnNewRadioButton_1 = new GridBagConstraints();
                                 gbc_rdbtnNewRadioButton_1.insets = new Insets(0, 0, 5, 0);
                                 gbc_rdbtnNewRadioButton_1.anchor = GridBagConstraints.WEST;
@@ -278,16 +263,6 @@ public class SettingsDialog extends JDialog {
                                 panel.add(rdbtnCustomBandplanButton, gbc_rdbtnNewRadioButton_1);
                                 bandplanGroup.add(rdbtnCustomBandplanButton);
                                 rdbtnCustomBandplanButton.addActionListener(bandplanBtnListener);
-                            }
-                            {
-                                JLabel lblGqrxBandplansAre = new JLabel("GQRX, SDR++, and SDR# bandplans are supported");
-                                lblGqrxBandplansAre.setEnabled(false);
-                                GridBagConstraints gbc_lblGqrxBandplansAre = new GridBagConstraints();
-                                gbc_lblGqrxBandplansAre.anchor = GridBagConstraints.NORTHWEST;
-                                gbc_lblGqrxBandplansAre.insets = new Insets(0, 0, 5, 0);
-                                gbc_lblGqrxBandplansAre.gridx = 0;
-                                gbc_lblGqrxBandplansAre.gridy = 3;
-                                panel.add(lblGqrxBandplansAre, gbc_lblGqrxBandplansAre);
                             }
                             {
                                 JPanel panel_1 = new JPanel();
@@ -299,49 +274,13 @@ public class SettingsDialog extends JDialog {
                                 panel.add(panel_1, gbc_panel_1);
                                 {
                                     bandplanBox.setRenderer(new BandplanListRenderer());
-                                    if (settings.getImportedBandplans().isEmpty())
+                                    if (appSettings.getLoadedBandplans().isEmpty())
                                         bandplanBox.addItem(null);
                                     else {
-                                        settings.getImportedBandplans().forEach(i -> bandplanBox.addItem(i));
-                                        bandplanBox.setSelectedIndex(Math.max(0, Math
-                                                .min(bandplanBox.getItemCount() - 1, settings.getSelectedBandplan())));
+                                        appSettings.getLoadedBandplans().forEach(i -> bandplanBox.addItem(i));
+                                        settings.getCustomBandplan().ifPresent(bp -> bandplanBox.setSelectedItem(bp));
                                     }
                                     panel_1.add(bandplanBox);
-                                }
-                                {
-                                    bandplanImport = new JButton("Import");
-                                    bandplanImport.addActionListener(e -> {
-                                        JPopupMenu menu = new JPopupMenu();
-                                        JMenuItem gqrx = new JMenuItem("GQRX CSV file");
-
-                                        gqrx.addActionListener(e2 -> {
-                                            showBandplanChooser(settings, "GQRX CSV Files", "csv",
-                                                    "This is not a valid GQRX bandplan file",
-                                                    GQRXBandplanReader.FACTORY);
-                                        });
-
-                                        JMenuItem sdrpp = new JMenuItem("SDR++ JSON file");
-
-                                        sdrpp.addActionListener(e2 -> {
-                                            showBandplanChooser(settings, "SDR++ JSON Files", "json",
-                                                    "This is not a valid SDR++ bandplan file",
-                                                    SDRPPBandplanReader.FACTORY);
-                                        });
-
-                                        JMenuItem sdrsharp = new JMenuItem("SDR# XML file");
-
-                                        sdrsharp.addActionListener(e2 -> {
-                                            showBandplanChooser(settings, "SDR# XML Files", "xml",
-                                                    "This is not a valid SDR# bandplan file",
-                                                    SDRSharpBandplanReader.FACTORY);
-                                        });
-
-                                        menu.add(gqrx);
-                                        menu.add(sdrpp);
-                                        menu.add(sdrsharp);
-                                        menu.show(bandplanImport, 0, bandplanImport.getHeight());
-                                    });
-                                    panel_1.add(bandplanImport);
                                 }
                             }
                             bandplanBtnListener.actionPerformed(null);
@@ -424,9 +363,11 @@ public class SettingsDialog extends JDialog {
                     settings.setEnableFreeTuning(freeTuningCheck.isSelected());
                     settings.setDynamicColorMixing(dynamicColorMixingCheck.isSelected());
 
-                    settings.setSelectedBandplan(
-                            rdbtnServerBandplanButton.isSelected() || settings.getImportedBandplans().isEmpty() ? -1
-                                    : bandplanBox.getSelectedIndex());
+                    settings.setCustomBandplan(
+                            bandplanBox.getSelectedItem() != null ? (SerializedBandplan) bandplanBox.getSelectedItem()
+                                    : null);
+                    settings.setUseServerBandplan(
+                            bandplanBox.getSelectedItem() == null || rdbtnServerBandplanButton.isSelected());
                     saved = true;
                     dispose();
                 });
@@ -438,68 +379,6 @@ public class SettingsDialog extends JDialog {
                 cancelButton.setActionCommand("Cancel");
                 cancelButton.addActionListener(e -> dispose());
                 buttonPane.add(cancelButton);
-            }
-        }
-    }
-
-    private void showBandplanChooser(ReceiverUserSettings settings, String extensionName, String extension,
-            String genericErrorMessage, BandplanReaderFactory<?> factory) {
-        JFileChooser chooser = new JFileChooser();
-        chooser.setDialogTitle("Load band plan");
-        chooser.setAcceptAllFileFilterUsed(true);
-        chooser.setFileFilter(new FileNameExtensionFilter(extensionName, extension));
-
-        if (chooser.showDialog(this, "Load") == JFileChooser.APPROVE_OPTION) {
-            File selected = chooser.getSelectedFile();
-            try (BandplanReader reader = factory.create(new FileReader(selected))) {
-                if (reader instanceof SDRPPBandplanReader sdrpp) {
-                    while (true) {
-                        if (JOptionPane.showOptionDialog(this,
-                                "Do you want to load a custom color map for this SDR++ band plan?\n"
-                                        + "If your band plan does not come with one and you don't know what this means, press \"No\"",
-                                "Custom color map", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, null,
-                                0) == JOptionPane.YES_OPTION) {
-                            JFileChooser mapChooser = new JFileChooser();
-                            mapChooser.setDialogTitle("Loading SDR++ color map");
-                            if (mapChooser.showDialog(this, "Load") == JFileChooser.APPROVE_OPTION) {
-                                try {
-                                    File selectedMap = mapChooser.getSelectedFile();
-                                    String fs = Files.readString(selectedMap.toPath()).trim();
-                                    if (fs.endsWith(",")) fs = fs.substring(0, fs.length() - 1);
-                                    String json = String.format("{ %s }", fs);
-                                    JsonObject obj = JsonParser.parseString(json).getAsJsonObject();
-                                    Map<String, Color> colors = new HashMap<>();
-                                    obj.asMap().forEach((key, val) -> {
-                                        try {
-                                            String v = val.getAsString();
-                                            if (v.length() == 9 && v.startsWith("#"))
-                                                v = v.substring(0, v.length() - 2);
-                                            colors.put(key, Color.decode(v));
-                                        } catch (Exception e) {
-                                            e.printStackTrace();
-                                        }
-                                    });
-                                    sdrpp.setColors(colors);
-                                    break;
-                                } catch (Exception e) {
-                                    e.printStackTrace();
-                                    JOptionPane.showMessageDialog(this, "Failed to load SDR++ color map", "Error",
-                                            JOptionPane.ERROR_MESSAGE);
-                                }
-                            }
-                        } else
-                            break;
-                    }
-                }
-                List<SerializedBandplan> bps = new ArrayList<>(settings.getImportedBandplans());
-                bps.add(reader.readBandplan(selected.getName()).serialize());
-                settings.setImportedBandplans(bps);
-                bandplanBox.removeAllItems();
-                settings.getImportedBandplans().forEach(i -> bandplanBox.addItem(i));
-                bandplanBox.setSelectedIndex(bandplanBox.getItemCount() - 1);
-            } catch (Exception e1) {
-                e1.printStackTrace();
-                JOptionPane.showMessageDialog(this, genericErrorMessage, "Error", JOptionPane.ERROR_MESSAGE);
             }
         }
     }
@@ -519,8 +398,8 @@ public class SettingsDialog extends JDialog {
         return true;
     }
 
-    public static boolean show(Window parent, ReceiverUserSettings initialSettings) {
-        SettingsDialog dialog = new SettingsDialog(parent, initialSettings);
+    public static boolean show(Window parent, ReceiverUserSettings initialSettings, ApplicationSettings appSettings) {
+        SettingsDialog dialog = new SettingsDialog(parent, initialSettings, appSettings);
         dialog.setVisible(true);
         return dialog.saved;
     }

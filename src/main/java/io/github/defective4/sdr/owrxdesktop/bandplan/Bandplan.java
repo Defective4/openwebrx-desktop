@@ -19,7 +19,6 @@ public class Bandplan {
     private final Set<Band> bands = new HashSet<>();
     private final Map<String, Color> colorTags;
     private final Color defaultTagColor;
-    private final boolean isServerSide;
     private final String name;
 
     public Bandplan() {
@@ -30,14 +29,12 @@ public class Bandplan {
         }
         colorTags = Collections.unmodifiableMap(tagged);
         defaultTagColor = colorTags.get("public");
-        isServerSide = true;
         name = null;
     }
 
     public Bandplan(Collection<Band> bands, Map<String, Color> colors, String name) {
         colorTags = Map.copyOf(colors);
         defaultTagColor = colors.values().iterator().next();
-        isServerSide = false;
         this.name = name;
         setBands(bands.stream().collect(Collectors.toUnmodifiableSet()));
     }
@@ -57,10 +54,6 @@ public class Bandplan {
 
     public Color getDefaultTagColor() {
         return defaultTagColor;
-    }
-
-    public boolean isServerSide() {
-        return isServerSide;
     }
 
     public SerializedBandplan serialize() {

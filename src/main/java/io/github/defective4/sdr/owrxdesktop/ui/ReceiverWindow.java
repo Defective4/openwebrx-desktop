@@ -51,6 +51,7 @@ import io.github.defective4.sdr.owrxclient.model.Bandpass;
 import io.github.defective4.sdr.owrxclient.model.ReceiverMode;
 import io.github.defective4.sdr.owrxclient.model.ReceiverProfile;
 import io.github.defective4.sdr.owrxclient.model.WaterfallLevels;
+import io.github.defective4.sdr.owrxdesktop.application.ApplicationSettings;
 import io.github.defective4.sdr.owrxdesktop.bandplan.Bandplan;
 import io.github.defective4.sdr.owrxdesktop.cache.ReceiverCache;
 import io.github.defective4.sdr.owrxdesktop.ui.BookmarksDialog.MergedLabel;
@@ -68,13 +69,15 @@ import io.github.defective4.sdr.owrxdesktop.ui.settings.ReceiverUserSettings;
 public class ReceiverWindow extends JFrame {
 
     private final JComboBox<ReceiverMode> analogBox = new JComboBox<>();
+    private final ApplicationSettings appSettings;
+
     private final Bandplan bandplan;
 
     private int bandwidth;
 
     private final ReceiverCache cache;
-
     private int centerFrequency;
+
     private final JProgressBar clientsBar = new JProgressBar();
 
     private final JProgressBar cpuBar = new JProgressBar();
@@ -84,21 +87,21 @@ public class ReceiverWindow extends JFrame {
     private final JComboBox<ReceiverMode> digitalBox = new JComboBox<>();
 
     private boolean exiting;
-
     private final float fftMax = -20;
+
     private final float fftMin = -88;
 
     private final FFTPanel fftPanel;
-
     private final JSpinner freqSpinner = new JFrequencySpinner();
     private final JRadioButton ftlAuto = new JRadioButton("Auto");
+
     private final JRadioButton ftlServer = new JRadioButton("Server");
 
     private long lastFFTDraw;
-
     private final List<UserInteractionListener> listeners = new CopyOnWriteArrayList<>();
     private int maxFPS = -1;
     private float minFFT, maxFFT;
+
     private final JMenuItem mntmBookmarks = new JMenuItem("Bookmarks");
 
     private int offset;
@@ -112,17 +115,17 @@ public class ReceiverWindow extends JFrame {
     private int scopeLower;
 
     private int scopeUpper;
-
     private WaterfallLevels serverLevels = new WaterfallLevels(-88, -20);
+
     private final JProgressBar signalBar = new JProgressBar();
 
     private int temperatureC = Integer.MIN_VALUE;
-
     private final JFrequencySpinner tuningStepSpinner = new JFrequencySpinner();
     private final ReceiverUserSettings userSettings;
     private final WaterfallPanel waterfallPanel;
 
-    public ReceiverWindow(ReceiverUserSettings settings, ReceiverCache cache) {
+    public ReceiverWindow(ReceiverUserSettings settings, ReceiverCache cache, ApplicationSettings appSettings) {
+        this.appSettings = appSettings;
         bandplan = settings.getBandplan();
         userSettings = settings;
         resetAutoFFT();
@@ -1034,7 +1037,7 @@ public class ReceiverWindow extends JFrame {
     }
 
     public void showSettings() {
-        SettingsDialog.show(this, userSettings);
+        SettingsDialog.show(this, userSettings, appSettings);
         listeners.forEach(ls -> ls.settingsChanged());
     }
 

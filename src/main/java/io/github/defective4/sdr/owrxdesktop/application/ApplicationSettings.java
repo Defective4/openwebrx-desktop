@@ -1,13 +1,20 @@
 package io.github.defective4.sdr.owrxdesktop.application;
 
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
+
 import io.github.defective4.sdr.owrxclient.model.ReceiverGPS;
+import io.github.defective4.sdr.owrxdesktop.bandplan.SerializedBandplan;
 
 public class ApplicationSettings {
     private boolean autoDownloadPublicReceivers = true;
     private boolean autoRefreshPrivateReceivers = false;
     private double latitude = 0;
 
+    private List<SerializedBandplan> loadedBandplans = List.of();
     private double longitude = 0;
+
     private int maxNetworkWorkers = 3;
 
     public ReceiverGPS getGPS() {
@@ -16,6 +23,10 @@ public class ApplicationSettings {
 
     public double getLatitude() {
         return latitude;
+    }
+
+    public List<SerializedBandplan> getLoadedBandplans() {
+        return Collections.unmodifiableList(loadedBandplans);
     }
 
     public double getLongitude() {
@@ -44,6 +55,10 @@ public class ApplicationSettings {
 
     public void setLatitude(double latitude) {
         this.latitude = latitude;
+    }
+
+    public void setLoadedBandplans(List<SerializedBandplan> loadedBandplans) {
+        this.loadedBandplans = Objects.requireNonNull(loadedBandplans);
     }
 
     public void setLongitude(double longitude) {

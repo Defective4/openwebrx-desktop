@@ -1,6 +1,7 @@
 package io.github.defective4.sdr.owrxdesktop.ui;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.FlowLayout;
 import java.awt.Frame;
@@ -8,25 +9,52 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.GridLayout;
 import java.awt.Insets;
+import java.io.File;
+import java.io.FileReader;
+import java.nio.file.Files;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import javax.swing.BoxLayout;
+import javax.swing.DefaultListModel;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JDialog;
+import javax.swing.JFileChooser;
 import javax.swing.JLabel;
+import javax.swing.JList;
+import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
+import javax.swing.JScrollPane;
 import javax.swing.JSpinner;
 import javax.swing.JTabbedPane;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
+import javax.swing.filechooser.FileNameExtensionFilter;
+
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 
 import io.github.defective4.sdr.owrxdesktop.application.ApplicationSettings;
+import io.github.defective4.sdr.owrxdesktop.bandplan.SerializedBandplan;
+import io.github.defective4.sdr.owrxdesktop.bandplan.reader.BandplanReader;
+import io.github.defective4.sdr.owrxdesktop.bandplan.reader.BandplanReaderFactory;
+import io.github.defective4.sdr.owrxdesktop.bandplan.reader.GQRXBandplanReader;
+import io.github.defective4.sdr.owrxdesktop.bandplan.reader.SDRPPBandplanReader;
+import io.github.defective4.sdr.owrxdesktop.bandplan.reader.SDRSharpBandplanReader;
+import io.github.defective4.sdr.owrxdesktop.bandplan.render.BandplanListRenderer;
 
 public class ApplicationSettingsDialog extends JDialog {
 
     private final JCheckBox autoDownloadCheck = new JCheckBox("Auto-download public receiver listings");
     private final JCheckBox autoRefreshCheck = new JCheckBox("Auto-refresh receivers on startup");
+    private final JList<SerializedBandplan> bandsList = new JList<>();
+    private final DefaultListModel<SerializedBandplan> bandsModel = new DefaultListModel<>();
     private final JSpinner latSpinner = new JSpinner();
     private final JSpinner lonSpinner = new JSpinner();
     private final JSpinner networkWorkers = new JSpinner();
@@ -91,6 +119,82 @@ public class ApplicationSettingsDialog extends JDialog {
                     gbc_chckbxAuto.gridy = 2;
                     autoDownloadCheck.setSelected(settings.isAutoDownloadPublicReceivers());
                     panel.add(autoDownloadCheck, gbc_chckbxAuto);
+                }
+            }
+            {
+                JPanel panel = new JPanel();
+                panel.setBorder(new EmptyBorder(16, 8, 16, 8));
+                tabbedPane.addTab("Bandplan", null, panel, null);
+                GridBagLayout gbl_panel = new GridBagLayout();
+                gbl_panel.columnWidths = new int[] { 0, 0, 0 };
+                gbl_panel.rowHeights = new int[] { 0, 0 };
+                gbl_panel.columnWeights = new double[] { 1.0, 0.0, Double.MIN_VALUE };
+                gbl_panel.rowWeights = new double[] { 1.0, Double.MIN_VALUE };
+                panel.setLayout(gbl_panel);
+                bandsList.setCellRenderer(new BandplanListRenderer());
+                bandsList.setModel(bandsModel);
+                {
+                    JScrollPane scrollPane = new JScrollPane();
+                    GridBagConstraints gbc_scrollPane = new GridBagConstraints();
+                    gbc_scrollPane.insets = new Insets(0, 0, 0, 5);
+                    gbc_scrollPane.fill = GridBagConstraints.BOTH;
+                    gbc_scrollPane.gridx = 0;
+                    gbc_scrollPane.gridy = 0;
+                    panel.add(scrollPane, gbc_scrollPane);
+                    {
+                        scrollPane.setViewportView(bandsList);
+                    }
+                }
+                {
+                    JPanel panel_1 = new JPanel();
+                    GridBagConstraints gbc_panel_1 = new GridBagConstraints();
+                    gbc_panel_1.anchor = GridBagConstraints.WEST;
+                    gbc_panel_1.fill = GridBagConstraints.VERTICAL;
+                    gbc_panel_1.gridx = 1;
+                    gbc_panel_1.gridy = 0;
+                    panel.add(panel_1, gbc_panel_1);
+                    panel_1.setLayout(new BoxLayout(panel_1, BoxLayout.Y_AXIS));
+                    JButton importButton = new JButton("+");
+                    panel_1.add(importButton);
+                    panel_1.add(new JLabel(" "));
+                    JButton delButton = new JButton("-");
+                    delButton.setEnabled(false);
+                    panel_1.add(delButton);
+
+                    if (settings.getLoadedBandplans().isEmpty())
+                        bandsModel.addElement(null);
+                    else {
+                        settings.getLoadedBandplans().forEach(i -> bandsModel.addElement(i));
+                    }
+
+                    importButton.addActionListener(e -> {
+                        JPopupMenu menu = new JPopupMenu();
+                        JMenuItem gqrx = new JMenuItem("GQRX CSV file");
+
+                        gqrx.addActionListener(e2 -> {
+                            showBandplanChooser(settings, "GQRX CSV Files", "csv",
+                                    "This is not a valid GQRX bandplan file", GQRXBandplanReader.FACTORY);
+                        });
+
+                        JMenuItem sdrpp = new JMenuItem("SDR++ JSON file");
+
+                        sdrpp.addActionListener(e2 -> {
+                            showBandplanChooser(settings, "SDR++ JSON Files", "json",
+                                    "This is not a valid SDR++ bandplan file", SDRPPBandplanReader.FACTORY);
+                        });
+
+                        JMenuItem sdrsharp = new JMenuItem("SDR# XML file");
+
+                        sdrsharp.addActionListener(e2 -> {
+                            showBandplanChooser(settings, "SDR# XML Files", "xml",
+                                    "This is not a valid SDR# bandplan file", SDRSharpBandplanReader.FACTORY);
+                        });
+
+                        menu.add(gqrx);
+                        menu.add(sdrpp);
+                        menu.add(sdrsharp);
+                        menu.show(importButton, 0, importButton.getHeight());
+                    });
                 }
             }
             {
@@ -160,6 +264,67 @@ public class ApplicationSettingsDialog extends JDialog {
         }
         pack();
         setLocationRelativeTo(parent);
+    }
+
+    private void showBandplanChooser(ApplicationSettings settings, String extensionName, String extension,
+            String genericErrorMessage, BandplanReaderFactory<?> factory) {
+        JFileChooser chooser = new JFileChooser();
+        chooser.setDialogTitle("Load band plan");
+        chooser.setAcceptAllFileFilterUsed(true);
+        chooser.setFileFilter(new FileNameExtensionFilter(extensionName, extension));
+
+        if (chooser.showDialog(this, "Load") == JFileChooser.APPROVE_OPTION) {
+            File selected = chooser.getSelectedFile();
+            try (BandplanReader reader = factory.create(new FileReader(selected))) {
+                if (reader instanceof SDRPPBandplanReader sdrpp) {
+                    while (true) {
+                        if (JOptionPane.showOptionDialog(this,
+                                "Do you want to load a custom color map for this SDR++ band plan?\n"
+                                        + "If your band plan does not come with one and you don't know what this means, press \"No\"",
+                                "Custom color map", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, null,
+                                0) == JOptionPane.YES_OPTION) {
+                            JFileChooser mapChooser = new JFileChooser();
+                            mapChooser.setDialogTitle("Loading SDR++ color map");
+                            if (mapChooser.showDialog(this, "Load") == JFileChooser.APPROVE_OPTION) {
+                                try {
+                                    File selectedMap = mapChooser.getSelectedFile();
+                                    String fs = Files.readString(selectedMap.toPath()).trim();
+                                    if (fs.endsWith(",")) fs = fs.substring(0, fs.length() - 1);
+                                    String json = String.format("{ %s }", fs);
+                                    JsonObject obj = JsonParser.parseString(json).getAsJsonObject();
+                                    Map<String, Color> colors = new HashMap<>();
+                                    obj.asMap().forEach((key, val) -> {
+                                        try {
+                                            String v = val.getAsString();
+                                            if (v.length() == 9 && v.startsWith("#"))
+                                                v = v.substring(0, v.length() - 2);
+                                            colors.put(key, Color.decode(v));
+                                        } catch (Exception e) {
+                                            e.printStackTrace();
+                                        }
+                                    });
+                                    sdrpp.setColors(colors);
+                                    break;
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                    JOptionPane.showMessageDialog(this, "Failed to load SDR++ color map", "Error",
+                                            JOptionPane.ERROR_MESSAGE);
+                                }
+                            }
+                        } else
+                            break;
+                    }
+                }
+                List<SerializedBandplan> bps = new ArrayList<>(settings.getLoadedBandplans());
+                bps.add(reader.readBandplan(selected.getName()).serialize());
+                settings.setLoadedBandplans(bps);
+                bandsModel.removeAllElements();
+                settings.getLoadedBandplans().forEach(i -> bandsModel.addElement(i));
+            } catch (Exception e1) {
+                e1.printStackTrace();
+                JOptionPane.showMessageDialog(this, genericErrorMessage, "Error", JOptionPane.ERROR_MESSAGE);
+            }
+        }
     }
 
 }

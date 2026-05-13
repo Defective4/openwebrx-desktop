@@ -97,7 +97,7 @@ public class ApplicationWindow extends JFrame {
 
             JMenuItem mntmDefaultReceiverSettings = new JMenuItem("Default receiver settings...");
             mntmDefaultReceiverSettings.addActionListener(e -> {
-                if (SettingsDialog.show(this, userStorage.getDefaultSettings())) {
+                if (SettingsDialog.show(this, userStorage.getDefaultSettings(), userStorage.getApplicationSettings())) {
                     JOptionPane.showMessageDialog(this,
                             "These settings will only apply to new receivers.\n"
                                     + "For existing receivers, you need to adjust the settings per receiver.",
@@ -243,15 +243,16 @@ public class ApplicationWindow extends JFrame {
                 String phrase = searchField.getText();
                 int limit = (int) limitSpinner.getValue();
 
-                List<PublicReceiverEntry> receivers = scraper.searchReceivers(phrase, limit, (SearchSort) sortBox.getSelectedItem(),
-                        (SearchSortOrder) sortOrderBox.getSelectedItem());
+                List<PublicReceiverEntry> receivers = scraper.searchReceivers(phrase, limit,
+                        (SearchSort) sortBox.getSelectedItem(), (SearchSortOrder) sortOrderBox.getSelectedItem());
                 publicContainer.removeAll();
                 receivers.forEach(receiver -> {
                     try {
                         ReceiverEntry entry = new ReceiverEntry(receiver.url(),
                                 userStorage.getDefaultSettings().clone());
                         entry.setReceiverData(new StatusResponse(
-                                new StatusResponse.Receiver(receiver.label(), null, receiver.location(), null), receiver.version()));
+                                new StatusResponse.Receiver(receiver.label(), null, receiver.location(), null),
+                                receiver.version()));
                         publicContainer.addEntry(entry, cpt -> {
                             JButton connectButton = new JButton("Connect");
                             connectButton.addActionListener(e2 -> {
@@ -370,7 +371,7 @@ public class ApplicationWindow extends JFrame {
                 JMenuItem deleteRx = new JMenuItem("Remove");
 
                 deleteRx.addActionListener(e2 -> removeEntry(rxcpt));
-                editRx.addActionListener(e2 -> SettingsDialog.show(this, rxcpt.getEntry().getSettings()));
+                editRx.addActionListener(e2 -> SettingsDialog.show(this, rxcpt.getEntry().getSettings(), userStorage.getApplicationSettings()));
 
                 menu.add(editRx);
                 menu.add(deleteRx);

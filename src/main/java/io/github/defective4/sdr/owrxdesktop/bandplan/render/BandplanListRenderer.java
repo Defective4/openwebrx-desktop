@@ -1,10 +1,12 @@
-package io.github.defective4.sdr.owrxdesktop.bandplan;
+package io.github.defective4.sdr.owrxdesktop.bandplan.render;
 
 import java.awt.Component;
 
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.JLabel;
 import javax.swing.JList;
+
+import io.github.defective4.sdr.owrxdesktop.bandplan.SerializedBandplan;
 
 public class BandplanListRenderer extends DefaultListCellRenderer {
 
