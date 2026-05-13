@@ -7,6 +7,7 @@ import java.net.URI;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.sound.sampled.LineUnavailableException;
@@ -53,6 +54,8 @@ public class RadioReceiver {
     private String modulation, profileId;
 
     private final ReceiverWindow rxWindow;
+    private final Bandplan serverBandplan = new Bandplan();
+
     private final ReceiverUserSettings settings;
 
     private final URI uri;
@@ -146,6 +149,12 @@ public class RadioReceiver {
                 };
                 rxWindow.setWaterfallTheme(theme);
                 rxWindow.setColorMixing(settings.isDynamicColorMixing());
+                if (settings.isUseServerBandplan() || settings.getCustomBandplan().isEmpty()) {
+                    rxWindow.getBandplan().setBands(serverBandplan == null ? Set.of() : serverBandplan.getBands());
+                } else {
+                    rxWindow.getBandplan().setBands(settings.getCustomBandplan().get().deserialize().getBands());
+                }
+                rxWindow.updateBandplan();
             }
 
             @Override
@@ -215,20 +224,22 @@ public class RadioReceiver {
             @Override
             public void bandsUpdated(Band[] bands) {
                 Bandplan bandplan = rxWindow.getBandplan();
-                if (settings.isUseServerBandplan()) {
-                    bandplan.setBands(Arrays.stream(bands).map(band -> {
-                        Color color = bandplan.getDefaultTagColor();
-                        if (band.tags() != null && band.tags().length > 0) for (String tag : band.tags()) {
-                            Optional<Color> tagColor = bandplan.getColorForTag(tag);
-                            if (tagColor.isPresent()) {
-                                color = tagColor.get();
-                                break;
-                            }
+                Set<io.github.defective4.sdr.owrxdesktop.bandplan.Band> vBands = Arrays.stream(bands).map(band -> {
+                    Color color = bandplan.getDefaultTagColor();
+                    if (band.tags() != null && band.tags().length > 0) for (String tag : band.tags()) {
+                        Optional<Color> tagColor = bandplan.getColorForTag(tag);
+                        if (tagColor.isPresent()) {
+                            color = tagColor.get();
+                            break;
                         }
-                        return new io.github.defective4.sdr.owrxdesktop.bandplan.Band(band.lowerFrequency(),
-                                band.higherFrequency(), color, band.name());
-                    }).collect(Collectors.toSet()));
+                    }
+                    return new io.github.defective4.sdr.owrxdesktop.bandplan.Band(band.lowerFrequency(),
+                            band.higherFrequency(), color, band.name());
+                }).collect(Collectors.toSet());
+                if (settings.isUseServerBandplan()) {
+                    bandplan.setBands(vBands);
                 }
+                serverBandplan.setBands(vBands);
                 rxWindow.updateBandplan();
             }
 
