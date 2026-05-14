@@ -3,7 +3,6 @@ package io.github.defective4.sdr.owrxdesktop.application.integration.receiverboo
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.PrintWriter;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
@@ -62,8 +61,7 @@ public class ReceiverbookScraper implements ReceiverScraper {
     @Override
     public void scrapeReceivers() throws IOException {
         receivers.clear();
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(RXBOOK_URL.openStream()));
-                PrintWriter pw = new PrintWriter("/tmp/test.json")) {
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(RXBOOK_URL.openStream()))) {
             while (true) {
                 String line = reader.readLine();
                 if (line == null) break;
