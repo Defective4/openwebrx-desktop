@@ -303,10 +303,12 @@ public class ApplicationSettingsDialog extends JDialog {
                                 "Do you want us to try to guess your location automatically?\n"
                                         + "If you choose yes, your IP address will be sent to %s.\n"
                                                 .formatted(LocationServices.SERVICE_URL.getHost())
-                                        + "The address will not be logged or stored in any way, and the result may not be accurate (although probably good enough for server listings)",
+                                        + "The address will not be logged or stored in any way.\n" + "\n"
+                                        + "Also, keep in mind that the result may not be accurate\n"
+                                        + "(although probably good enough for server listings)",
                                 "Question", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, null,
                                 null) == JOptionPane.YES_OPTION) {
-                            ProgressDialog.show(this, "Guessing your location...", t -> {
+                            ProgressDialog.show(this, "Guessing your location, this may take a while...", t -> {
                                 try {
                                     Location location = LocationServices.locate();
                                     return Optional.of(location);

@@ -35,6 +35,7 @@ import javax.swing.KeyStroke;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.border.EmptyBorder;
 
+import io.github.defective4.sdr.owrxclient.model.ReceiverGPS;
 import io.github.defective4.sdr.owrxdesktop.RadioReceiver;
 import io.github.defective4.sdr.owrxdesktop.application.ReceiverEntry;
 import io.github.defective4.sdr.owrxdesktop.application.StatusResponse;
@@ -233,6 +234,22 @@ public class ApplicationWindow extends JFrame {
         scrollPane.setViewportView(publicContainer);
 
         btnSearch.addActionListener(e -> {
+            if (sortBox.getSelectedItem() == SearchSort.DISTANCE) {
+                ReceiverGPS gps = userStorage.getApplicationSettings().getGPS();
+                if (gps.lat() == 0 && gps.lon() == 0) {
+                    if (JOptionPane.showOptionDialog(this,
+                            "We can't sort search results by distance,\n"
+                                    + "because you haven't set your location in the application settings",
+                            "Error", JOptionPane.OK_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE, null,
+                            new String[] { "Take me there", "Cancel" }, null) == 0) {
+                        ApplicationSettingsDialog dialog = new ApplicationSettingsDialog(this,
+                                userStorage.getApplicationSettings());
+                        dialog.setSelectedIndex(2);
+                        dialog.setVisible(true);
+                    }
+                    return;
+                }
+            }
             ProgressDialog.show(this, "Downloading receivers...", (dialog) -> {
                 try {
                     if (!scraper.hasScraped()) scraper.scrapeReceivers();
