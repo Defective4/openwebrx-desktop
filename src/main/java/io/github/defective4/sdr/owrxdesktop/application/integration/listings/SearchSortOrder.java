@@ -1,4 +1,4 @@
-package io.github.defective4.sdr.owrxdesktop.application.integration;
+package io.github.defective4.sdr.owrxdesktop.application.integration.listings;
 
 public enum SearchSortOrder {
     ASC("Ascending"), DESC("Descending");

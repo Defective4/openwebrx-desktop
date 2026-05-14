@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import javax.swing.BoxLayout;
@@ -50,6 +51,8 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
 import io.github.defective4.sdr.owrxdesktop.application.ApplicationSettings;
+import io.github.defective4.sdr.owrxdesktop.application.integration.location.Location;
+import io.github.defective4.sdr.owrxdesktop.application.integration.location.LocationServices;
 import io.github.defective4.sdr.owrxdesktop.audio.FFMpeg;
 import io.github.defective4.sdr.owrxdesktop.bandplan.Bandplan;
 import io.github.defective4.sdr.owrxdesktop.bandplan.SerializedBandplan;
@@ -278,9 +281,12 @@ public class ApplicationSettingsDialog extends JDialog {
                     JPanel panel_2 = new JPanel();
                     panel_2.setAlignmentX(Component.LEFT_ALIGNMENT);
                     panel_1.add(panel_2);
-                    panel_2.setLayout(new GridLayout(2, 2, 0, 0));
+                    panel_2.setLayout(new GridLayout(2, 2, 16, 0));
                     panel_2.add(new JLabel("Latitude"));
                     panel_2.add(new JLabel("Longitude"));
+
+                    JLabel label = new JLabel(" ");
+                    panel_2.add(label);
                     latSpinner.setModel(new SpinnerNumberModel(0.0, -90.0, 90.0, 1.0));
                     panel_2.add(latSpinner);
                     lonSpinner.setModel(new SpinnerNumberModel(0.0, -180.0, 180.0, 1.0));
@@ -290,6 +296,35 @@ public class ApplicationSettingsDialog extends JDialog {
 
                     latSpinner.setValue(settings.getLatitude());
                     lonSpinner.setValue(settings.getLongitude());
+
+                    JButton btnLocate = new JButton("Locate", FontAwesome.ICO_LOCATION);
+                    btnLocate.addActionListener(e -> {
+                        if (JOptionPane.showOptionDialog(this,
+                                "Do you want us to try to guess your location automatically?\n"
+                                        + "If you choose yes, your IP address will be sent to %s.\n"
+                                                .formatted(LocationServices.SERVICE_URL.getHost())
+                                        + "The address will not be logged or stored in any way, and the result may not be accurate (although probably good enough for server listings)",
+                                "Question", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, null,
+                                null) == JOptionPane.YES_OPTION) {
+                            ProgressDialog.show(this, "Guessing your location...", t -> {
+                                try {
+                                    Location location = LocationServices.locate();
+                                    return Optional.of(location);
+                                } catch (Exception e2) {
+                                    e2.printStackTrace();
+                                    return Optional.ofNullable((Location) null);
+                                }
+                            }, t -> {
+                                t.ifPresentOrElse(location -> {
+                                    latSpinner.setValue(location.lat());
+                                    lonSpinner.setValue(location.lon());
+                                }, () -> JOptionPane.showMessageDialog(this,
+                                        "Couldn't guess your location, please try again later", "Error",
+                                        JOptionPane.ERROR_MESSAGE));
+                            });
+                        }
+                    });
+                    panel_2.add(btnLocate);
                 }
             }
         }

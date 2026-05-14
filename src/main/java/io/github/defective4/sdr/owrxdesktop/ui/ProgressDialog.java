@@ -35,7 +35,7 @@ public class ProgressDialog extends JDialog {
         gbl_panel.rowWeights = new double[] { 0.0, 0.0, Double.MIN_VALUE };
         panel.setLayout(gbl_panel);
 
-        JLabel lblProgress = new JLabel("Progress...");
+        JLabel lblProgress = new JLabel(text);
         GridBagConstraints gbc_lblProgress = new GridBagConstraints();
         gbc_lblProgress.insets = new Insets(0, 0, 5, 0);
         gbc_lblProgress.gridx = 0;

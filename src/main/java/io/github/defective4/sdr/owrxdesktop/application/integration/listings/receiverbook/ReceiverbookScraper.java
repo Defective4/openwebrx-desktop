@@ -1,4 +1,4 @@
-package io.github.defective4.sdr.owrxdesktop.application.integration.receiverbook;
+package io.github.defective4.sdr.owrxdesktop.application.integration.listings.receiverbook;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -18,11 +18,11 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonParser;
 
 import io.github.defective4.sdr.owrxclient.model.ReceiverGPS;
-import io.github.defective4.sdr.owrxdesktop.application.integration.PublicReceiver;
-import io.github.defective4.sdr.owrxdesktop.application.integration.PublicReceiverEntry;
-import io.github.defective4.sdr.owrxdesktop.application.integration.ReceiverScraper;
-import io.github.defective4.sdr.owrxdesktop.application.integration.SearchSort;
-import io.github.defective4.sdr.owrxdesktop.application.integration.SearchSortOrder;
+import io.github.defective4.sdr.owrxdesktop.application.integration.listings.PublicReceiver;
+import io.github.defective4.sdr.owrxdesktop.application.integration.listings.PublicReceiverEntry;
+import io.github.defective4.sdr.owrxdesktop.application.integration.listings.ReceiverScraper;
+import io.github.defective4.sdr.owrxdesktop.application.integration.listings.SearchSort;
+import io.github.defective4.sdr.owrxdesktop.application.integration.listings.SearchSortOrder;
 import io.github.defective4.sdr.owrxdesktop.ui.ApplicationWindow;
 
 public class ReceiverbookScraper implements ReceiverScraper {

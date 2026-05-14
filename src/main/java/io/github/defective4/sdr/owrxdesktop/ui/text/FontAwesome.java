@@ -24,8 +24,9 @@ public class FontAwesome {
     public static final String FA_DELETE = "\uf2ed";
     public static final String FA_EDIT = "\uf304";
     public static final String FA_GLOBE = "\uf0ac";
+    public static final String FA_LOCATION = "\uf3c5";
     public static final String FA_MINUS = "\uf068";
-    public static final String FA_NETWORK = "\uf6ff";
+    public static final String FA_NETWORK = "\uf1eb";
     public static final String FA_PALETTE = "\uf53f";
     public static final String FA_PLUS = "\uf067";
     public static final Font FA_REGULAR;
@@ -38,7 +39,7 @@ public class FontAwesome {
     public static final String FA_USER = "\uf007";
     public static final Icon ICO_NETWORK, ICO_TAGS, ICO_TASKS, ICO_AUDIO, ICO_BROADCAST, ICO_CHART, ICO_AREA_CHART,
             ICO_PALETTE, ICO_SIGN_IN, ICO_SYNC, ICO_PLUS, ICO_USER, ICO_GLOBE, ICO_SIGN_OUT, ICO_SETTINGS, ICO_EDIT,
-            ICO_DELETE, ICO_COG, ICO_BOOKMARK;
+            ICO_DELETE, ICO_COG, ICO_BOOKMARK, ICO_LOCATION;
 
     static {
         try (InputStream in = FontAwesome.class.getResourceAsStream("/font/fa-regular.otf")) {
@@ -65,6 +66,7 @@ public class FontAwesome {
         ICO_DELETE = createFAImage(FA_DELETE);
         ICO_COG = createFAImage(FA_COG);
         ICO_BOOKMARK = createFAImage(FA_BOOKMARK);
+        ICO_LOCATION = createFAImage(FA_LOCATION);
     }
 
     private FontAwesome() {}
