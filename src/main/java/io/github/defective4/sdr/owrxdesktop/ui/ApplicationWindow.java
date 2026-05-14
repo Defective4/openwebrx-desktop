@@ -59,6 +59,7 @@ public class ApplicationWindow extends JFrame {
         updateExecutor = Executors.newFixedThreadPool(userStorage.getApplicationSettings().getMaxNetworkWorkers());
         setBounds(100, 100, 768, 512);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setTitle("OpenWebRX Desktop");
 
         {
             JMenuBar menuBar = new JMenuBar();
