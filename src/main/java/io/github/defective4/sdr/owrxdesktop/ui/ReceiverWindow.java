@@ -53,6 +53,7 @@ import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextField;
 import javax.swing.KeyStroke;
+import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
@@ -75,10 +76,12 @@ import io.github.defective4.sdr.owrxdesktop.ui.component.JFrequencySpinner;
 import io.github.defective4.sdr.owrxdesktop.ui.component.JLinkLabel;
 import io.github.defective4.sdr.owrxdesktop.ui.component.TuneablePanel;
 import io.github.defective4.sdr.owrxdesktop.ui.component.WaterfallPanel;
+import io.github.defective4.sdr.owrxdesktop.ui.component.demodulation.RDSPanel;
 import io.github.defective4.sdr.owrxdesktop.ui.event.TuningAdapter;
 import io.github.defective4.sdr.owrxdesktop.ui.event.UserInteractionListener;
 import io.github.defective4.sdr.owrxdesktop.ui.rendering.ReceiverModeRenderer;
 import io.github.defective4.sdr.owrxdesktop.ui.settings.ReceiverUserSettings;
+import io.github.defective4.sdr.owrxdesktop.ui.text.FontAwesome;
 
 public class ReceiverWindow extends JFrame {
     private final JComboBox<ReceiverMode> analogBox = new JComboBox<>();
@@ -128,6 +131,8 @@ public class ReceiverWindow extends JFrame {
 
     private final JComboBox<RecorderQuality> qualityBox = new JComboBox<>();
 
+    private final RDSPanel rdsPanel = new RDSPanel();
+
     private final JButton resetScope = new JButton("Reset");
 
     private int scopeLower;
@@ -137,12 +142,15 @@ public class ReceiverWindow extends JFrame {
     private WaterfallLevels serverLevels = new WaterfallLevels(-88, -20);
 
     private final JProgressBar signalBar = new JProgressBar();
-
     private int temperatureC = Integer.MIN_VALUE;
+
+    private JTextField textField;
+
+    private JTextField textField_1;
+    private JTextField textField_2;
+    private JTextField textField_3;
     private final JFrequencySpinner tuningStepSpinner = new JFrequencySpinner();
-
     private final ReceiverUserSettings userSettings;
-
     private final WaterfallPanel waterfallPanel;
 
     public ReceiverWindow(ReceiverUserSettings settings, ReceiverCache cache, ApplicationSettings appSettings) {
@@ -177,6 +185,7 @@ public class ReceiverWindow extends JFrame {
         controlPanel.setLayout(new BoxLayout(controlPanel, BoxLayout.X_AXIS));
 
         JTabbedPane controlTabs = new JTabbedPane(JTabbedPane.TOP);
+        controlTabs.setTabLayoutPolicy(JTabbedPane.SCROLL_TAB_LAYOUT);
         controlPanel.add(controlTabs);
 
         ReceiverModeRenderer renderer = new ReceiverModeRenderer();
@@ -235,6 +244,30 @@ public class ReceiverWindow extends JFrame {
                 }
             });
         }
+
+        JPanel demodPanel = new JPanel();
+        demodPanel.setBorder(new EmptyBorder(16, 8, 16, 8));
+        controlTabs.addTab("Demodulation", FontAwesome.ICO_CPU, demodPanel, null);
+        GridBagLayout gbl_demodPanel = new GridBagLayout();
+        gbl_demodPanel.columnWidths = new int[] { 0, 0 };
+        gbl_demodPanel.rowHeights = new int[] { 0, 0, 0 };
+        gbl_demodPanel.columnWeights = new double[] { 1.0, Double.MIN_VALUE };
+        gbl_demodPanel.rowWeights = new double[] { 0.0, 0.0, Double.MIN_VALUE };
+        demodPanel.setLayout(gbl_demodPanel);
+
+        JButton btnAddDemodulator = new JButton("Add demodulator", FontAwesome.ICO_PLUS);
+        GridBagConstraints gbc_btnAddDemodulator = new GridBagConstraints();
+        gbc_btnAddDemodulator.insets = new Insets(0, 0, 5, 0);
+        gbc_btnAddDemodulator.fill = GridBagConstraints.HORIZONTAL;
+        gbc_btnAddDemodulator.gridx = 0;
+        gbc_btnAddDemodulator.gridy = 0;
+        demodPanel.add(btnAddDemodulator, gbc_btnAddDemodulator);
+
+        GridBagConstraints gbc_panel_1 = new GridBagConstraints();
+        gbc_panel_1.fill = GridBagConstraints.BOTH;
+        gbc_panel_1.gridx = 0;
+        gbc_panel_1.gridy = 1;
+        demodPanel.add(rdsPanel, gbc_panel_1);
 
         {
             JPanel rxCtlPanel = new JPanel();
@@ -1071,6 +1104,10 @@ public class ReceiverWindow extends JFrame {
             }
         }
         return Optional.empty();
+    }
+
+    public RDSPanel getRdsPanel() {
+        return rdsPanel;
     }
 
     public Optional<ReceiverMode> getSecondaryMode() {

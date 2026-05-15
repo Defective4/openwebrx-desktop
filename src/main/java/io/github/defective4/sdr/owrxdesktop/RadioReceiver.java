@@ -26,6 +26,7 @@ import io.github.defective4.sdr.owrxclient.model.ReceiverDetails;
 import io.github.defective4.sdr.owrxclient.model.ReceiverMode;
 import io.github.defective4.sdr.owrxclient.model.ReceiverProfile;
 import io.github.defective4.sdr.owrxclient.model.ServerConfig;
+import io.github.defective4.sdr.owrxclient.model.metadata.RDSMetadata;
 import io.github.defective4.sdr.owrxdesktop.audio.AudioSinkManager;
 import io.github.defective4.sdr.owrxdesktop.bandplan.Bandplan;
 import io.github.defective4.sdr.owrxdesktop.cache.ReceiverCache;
@@ -309,6 +310,11 @@ public class RadioReceiver {
             @Override
             public void numberOfClientsUpdated(int clients) {
                 rxWindow.setClients(clients);
+            }
+
+            @Override
+            public void rdsReceived(RDSMetadata rds) {
+                rxWindow.getRdsPanel().setData(rds);
             }
 
             @Override
