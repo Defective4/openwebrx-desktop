@@ -255,14 +255,15 @@ public class ReceiverWindow extends JFrame {
 
         JButton btnAddDemodulator = new JButton("Add demodulator", FontAwesome.ICO_PLUS);
         GridBagConstraints gbc_btnAddDemodulator = new GridBagConstraints();
+        gbc_btnAddDemodulator.anchor = GridBagConstraints.WEST;
         gbc_btnAddDemodulator.insets = new Insets(0, 0, 5, 0);
-        gbc_btnAddDemodulator.fill = GridBagConstraints.HORIZONTAL;
         gbc_btnAddDemodulator.gridx = 0;
         gbc_btnAddDemodulator.gridy = 0;
         demodPanel.add(btnAddDemodulator, gbc_btnAddDemodulator);
 
         {
             JPanel rxCtlPanel = new JPanel();
+            rxCtlPanel.setBorder(new EmptyBorder(0, 0, 0, 16));
             controlTabs.addTab("RX", ICO_BROADCAST, rxCtlPanel, null);
             GridBagLayout gbl_rxCtlPanel = new GridBagLayout();
             gbl_rxCtlPanel.columnWidths = new int[] { 225, 0 };
@@ -546,11 +547,12 @@ public class ReceiverWindow extends JFrame {
 
         {
             JPanel fftCtlPanel = new JPanel();
+            fftCtlPanel.setBorder(new EmptyBorder(0, 0, 0, 16));
             controlTabs.addTab("FFT", ICO_CHART, fftCtlPanel, null);
             GridBagLayout gbl_fftCtlPanel = new GridBagLayout();
             gbl_fftCtlPanel.columnWidths = new int[] { 230, 0 };
             gbl_fftCtlPanel.rowHeights = new int[] { 0, 0, 0, 0 };
-            gbl_fftCtlPanel.columnWeights = new double[] { 0.0, Double.MIN_VALUE };
+            gbl_fftCtlPanel.columnWeights = new double[] { 1.0, Double.MIN_VALUE };
             gbl_fftCtlPanel.rowWeights = new double[] { 0.0, 0.0, 0.0, Double.MIN_VALUE };
             fftCtlPanel.setLayout(gbl_fftCtlPanel);
 
@@ -777,6 +779,7 @@ public class ReceiverWindow extends JFrame {
         {
 
             JPanel audioCtlPanel = new JPanel();
+            audioCtlPanel.setBorder(new EmptyBorder(0, 0, 0, 16));
             controlTabs.addTab("Audio", ICO_AUDIO, audioCtlPanel, null);
             GridBagLayout gbl_audioCtlPanel = new GridBagLayout();
             gbl_audioCtlPanel.columnWidths = new int[] { 0, 0 };
