@@ -261,13 +261,6 @@ public class ReceiverWindow extends JFrame {
         gbc_btnAddDemodulator.gridy = 0;
         demodPanel.add(btnAddDemodulator, gbc_btnAddDemodulator);
 
-        GridBagConstraints gbc_panel_1 = new GridBagConstraints();
-        gbc_panel_1.fill = GridBagConstraints.BOTH;
-        gbc_panel_1.gridx = 0;
-        gbc_panel_1.gridy = 1;
-
-        demodPanel.add(ftPanel, gbc_panel_1);
-
         {
             JPanel rxCtlPanel = new JPanel();
             controlTabs.addTab("RX", ICO_BROADCAST, rxCtlPanel, null);

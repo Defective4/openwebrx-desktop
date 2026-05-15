@@ -416,6 +416,7 @@ public class RadioReceiver {
                 rxWindow.getFftPanel().resetMaxFFT();
                 rxWindow.resetAutoFFT();
                 if (config.maxClients() != null) rxWindow.setMaxClients(config.maxClients());
+                client.startDSP();
             }
 
             @Override
