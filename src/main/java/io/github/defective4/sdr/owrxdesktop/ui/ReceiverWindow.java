@@ -76,6 +76,7 @@ import io.github.defective4.sdr.owrxdesktop.ui.component.JFrequencySpinner;
 import io.github.defective4.sdr.owrxdesktop.ui.component.JLinkLabel;
 import io.github.defective4.sdr.owrxdesktop.ui.component.TuneablePanel;
 import io.github.defective4.sdr.owrxdesktop.ui.component.WaterfallPanel;
+import io.github.defective4.sdr.owrxdesktop.ui.component.demodulation.FTPanel;
 import io.github.defective4.sdr.owrxdesktop.ui.component.demodulation.RDSPanel;
 import io.github.defective4.sdr.owrxdesktop.ui.event.TuningAdapter;
 import io.github.defective4.sdr.owrxdesktop.ui.event.UserInteractionListener;
@@ -108,13 +109,14 @@ public class ReceiverWindow extends JFrame {
     private final float fftMin = -88;
 
     private final FFTPanel fftPanel;
-
     private final DateFormat fmt = new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss");
 
     private final JSpinner freqSpinner = new JFrequencySpinner();
 
     private final JRadioButton ftlAuto = new JRadioButton("Auto");
+
     private final JRadioButton ftlServer = new JRadioButton("Server");
+    private final FTPanel ftPanel = new FTPanel();
 
     private long lastFFTDraw;
 
@@ -142,13 +144,9 @@ public class ReceiverWindow extends JFrame {
     private WaterfallLevels serverLevels = new WaterfallLevels(-88, -20);
 
     private final JProgressBar signalBar = new JProgressBar();
+
     private int temperatureC = Integer.MIN_VALUE;
 
-    private JTextField textField;
-
-    private JTextField textField_1;
-    private JTextField textField_2;
-    private JTextField textField_3;
     private final JFrequencySpinner tuningStepSpinner = new JFrequencySpinner();
     private final ReceiverUserSettings userSettings;
     private final WaterfallPanel waterfallPanel;
@@ -250,7 +248,7 @@ public class ReceiverWindow extends JFrame {
         controlTabs.addTab("Demodulation", FontAwesome.ICO_CPU, demodPanel, null);
         GridBagLayout gbl_demodPanel = new GridBagLayout();
         gbl_demodPanel.columnWidths = new int[] { 0, 0 };
-        gbl_demodPanel.rowHeights = new int[] { 0, 0, 0 };
+        gbl_demodPanel.rowHeights = new int[] { 0, 300, 0 };
         gbl_demodPanel.columnWeights = new double[] { 1.0, Double.MIN_VALUE };
         gbl_demodPanel.rowWeights = new double[] { 0.0, 0.0, Double.MIN_VALUE };
         demodPanel.setLayout(gbl_demodPanel);
@@ -267,7 +265,8 @@ public class ReceiverWindow extends JFrame {
         gbc_panel_1.fill = GridBagConstraints.BOTH;
         gbc_panel_1.gridx = 0;
         gbc_panel_1.gridy = 1;
-        demodPanel.add(rdsPanel, gbc_panel_1);
+
+        demodPanel.add(ftPanel, gbc_panel_1);
 
         {
             JPanel rxCtlPanel = new JPanel();
@@ -1081,6 +1080,10 @@ public class ReceiverWindow extends JFrame {
 
     public FFTPanel getFftPanel() {
         return fftPanel;
+    }
+
+    public FTPanel getFtPanel() {
+        return ftPanel;
     }
 
     public List<UserInteractionListener> getListeners() {
