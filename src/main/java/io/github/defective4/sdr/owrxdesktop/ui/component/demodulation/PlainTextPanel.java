@@ -31,6 +31,7 @@ public class PlainTextPanel extends JPanel {
         add(scrollPane, gbc_scrollPane);
 
         textArea = new JTextArea();
+        textArea.setRows(8);
         textArea.setEditable(false);
         scrollPane.setViewportView(textArea);
 

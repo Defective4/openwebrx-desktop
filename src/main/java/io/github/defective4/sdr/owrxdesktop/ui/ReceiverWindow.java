@@ -44,8 +44,10 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
 import javax.swing.JProgressBar;
 import javax.swing.JRadioButton;
+import javax.swing.JScrollPane;
 import javax.swing.JSlider;
 import javax.swing.JSpinner;
 import javax.swing.JSpinner.NumberEditor;
@@ -154,6 +156,7 @@ public class ReceiverWindow extends JFrame {
 
     private final ReceiverUserSettings userSettings;
     private final WaterfallPanel waterfallPanel;
+
     public ReceiverWindow(ReceiverUserSettings settings, ReceiverCache cache, ApplicationSettings appSettings) {
         this.appSettings = appSettings;
         audioRecorder = new AudioRecorder(appSettings.getFfmpegPath());
@@ -251,18 +254,67 @@ public class ReceiverWindow extends JFrame {
         controlTabs.addTab("Demodulation", FontAwesome.ICO_CPU, demodPanel, null);
         GridBagLayout gbl_demodPanel = new GridBagLayout();
         gbl_demodPanel.columnWidths = new int[] { 0, 0 };
-        gbl_demodPanel.rowHeights = new int[] { 0, 300, 0 };
+        gbl_demodPanel.rowHeights = new int[] { 0, 16, 0 };
         gbl_demodPanel.columnWeights = new double[] { 1.0, Double.MIN_VALUE };
-        gbl_demodPanel.rowWeights = new double[] { 0.0, 0.0, Double.MIN_VALUE };
+        gbl_demodPanel.rowWeights = new double[] { 0.0, 1.0, Double.MIN_VALUE };
         demodPanel.setLayout(gbl_demodPanel);
 
         JButton btnAddDemodulator = new JButton("Add demodulator", FontAwesome.ICO_PLUS);
         GridBagConstraints gbc_btnAddDemodulator = new GridBagConstraints();
-        gbc_btnAddDemodulator.anchor = GridBagConstraints.WEST;
         gbc_btnAddDemodulator.insets = new Insets(0, 0, 5, 0);
+        gbc_btnAddDemodulator.anchor = GridBagConstraints.NORTHWEST;
         gbc_btnAddDemodulator.gridx = 0;
         gbc_btnAddDemodulator.gridy = 0;
         demodPanel.add(btnAddDemodulator, gbc_btnAddDemodulator);
+
+        JScrollPane scrollPane = new JScrollPane();
+        GridBagConstraints gbc_scrollPane = new GridBagConstraints();
+        gbc_scrollPane.fill = GridBagConstraints.BOTH;
+        gbc_scrollPane.gridx = 0;
+        gbc_scrollPane.gridy = 1;
+        demodPanel.add(scrollPane, gbc_scrollPane);
+
+        JPanel demodsContainer = new JPanel();
+        scrollPane.setViewportView(demodsContainer);
+        GridBagLayout gbl_demodsContainer = new GridBagLayout();
+        gbl_demodsContainer.columnWidths = new int[] { 0, 0 };
+        gbl_demodsContainer.rowHeights = new int[] { 0, 0, 0, 0 };
+        gbl_demodsContainer.columnWeights = new double[] { 1.0, Double.MIN_VALUE };
+        gbl_demodsContainer.rowWeights = new double[] { 0.0, 0.0, 0.0, Double.MIN_VALUE };
+        demodsContainer.setLayout(gbl_demodsContainer);
+
+        btnAddDemodulator.addActionListener(e -> {
+            JPopupMenu menu = new JPopupMenu();
+
+            JMenuItem rds = new JMenuItem("RDS (WFM)");
+            JMenuItem ft = new JMenuItem("FT (FT8, FT4)");
+            JMenuItem plainText = new JMenuItem("Plain Text (RTTY, CW)");
+
+            menu.add(rds);
+            menu.add(ft);
+            menu.add(plainText);
+
+            ActionListener ls = e2 -> {
+                GridBagConstraints constr = new GridBagConstraints();
+                constr.fill = GridBagConstraints.HORIZONTAL;
+                constr.gridx = 0;
+                constr.gridy = demodsContainer.getComponentCount();
+                if (e2.getSource() == rds) {
+                    demodsContainer.add(rdsPanel, constr);
+                } else if (e2.getSource() == ft) {
+                    demodsContainer.add(ftPanel, constr);
+                    ftPanel.setMaximumSize(ftPanel.getSize());
+                } else if (e2.getSource() == plainText) {
+                    demodsContainer.add(plainTextPanel, constr);
+                }
+            };
+
+            rds.addActionListener(ls);
+            ft.addActionListener(ls);
+            plainText.addActionListener(ls);
+
+            menu.show(btnAddDemodulator, 0, btnAddDemodulator.getHeight());
+        });
 
         {
             JPanel rxCtlPanel = new JPanel();

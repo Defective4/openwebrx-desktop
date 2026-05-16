@@ -50,13 +50,18 @@ public class FTPanel extends JPanel {
         TableColumnModel columnModel = table.getTableHeader().getColumnModel();
         for (int i = 0; i < columnModel.getColumnCount(); i++) columnModel.getColumn(i).setPreferredWidth(0);
         panel_2.add(table, BorderLayout.CENTER);
+        for (int x = 0; x < 10; x++) {
+            model.addRow(new String[0]);
+        }
     }
 
     public void insertMessage(FTMessage msg, int centerFreq) {
         try {
-            model.addRow(new String[] { msg.getMode(), FORMAT.format(new Date(msg.getTimestamp())),
-                    FORMATTER.valueToString(msg.getFrequency() - centerFreq), msg.getMessage(),
-                    Double.toString(msg.getDb()) });
+            if (model.getValueAt(model.getRowCount() - 1, 0) == null) model.removeRow(model.getRowCount() - 1);
+            model.insertRow(0,
+                    new String[] { msg.getMode(), FORMAT.format(new Date(msg.getTimestamp())),
+                            FORMATTER.valueToString(msg.getFrequency() - centerFreq), msg.getMessage(),
+                            Double.toString(msg.getDb()) });
         } catch (ParseException e) {
             e.printStackTrace();
         }
