@@ -1287,6 +1287,7 @@ public class ReceiverWindow extends JFrame {
     public void showSettings() {
         SettingsDialog.show(this, userSettings, appSettings);
         listeners.forEach(ls -> ls.settingsChanged());
+        resetTitle();
     }
 
     public void tune(int offset) {

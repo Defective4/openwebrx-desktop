@@ -45,6 +45,7 @@ public class SettingsDialog extends JDialog {
 
     private final ApplicationSettings appSettings;
     private final JComboBox<SerializedBandplan> bandplanBox = new JComboBox<>();
+    private final JCheckBox chckbxRDSTitle = new JCheckBox("Set window title to RDS data");
     private final JCheckBox dynamicColorMixingCheck = new JCheckBox("Dynamic color mixing");
     private final JCheckBox freeTuningCheck = new JCheckBox("Enable free tuning");
     private final JPasswordField magicKeyField = new JPasswordField();
@@ -357,6 +358,25 @@ public class SettingsDialog extends JDialog {
                                 panel.add(separator_1, gbc_separator_1);
                             }
                         }
+                        {
+                            JPanel panel = new JPanel();
+                            tabbedPane.addTab("Integrations", FontAwesome.ICO_LINK, panel, null);
+                            panel.setLayout(new BorderLayout(0, 0));
+                            {
+                                JTabbedPane tabbedPane_1 = new JTabbedPane(JTabbedPane.TOP);
+                                panel.add(tabbedPane_1, BorderLayout.CENTER);
+                                {
+                                    JPanel panel_1 = new JPanel();
+                                    panel_1.setBorder(new EmptyBorder(16, 8, 8, 8));
+                                    tabbedPane_1.addTab("RDS", FontAwesome.ICO_CPU, panel_1, null);
+                                    panel_1.setLayout(new BoxLayout(panel_1, BoxLayout.Y_AXIS));
+                                    {
+                                        panel_1.add(chckbxRDSTitle);
+                                        chckbxRDSTitle.setSelected(settings.isDecorateWindowRDS());
+                                    }
+                                }
+                            }
+                        }
                         rdbtnServerprovidedConfiguration.addActionListener(ls);
 
                         (switch (settings.getWaterfallThemeMode()) {
@@ -390,6 +410,7 @@ public class SettingsDialog extends JDialog {
                     settings.setMagicKey(new String(magicKeyField.getPassword()));
                     settings.setEnableFreeTuning(freeTuningCheck.isSelected());
                     settings.setDynamicColorMixing(dynamicColorMixingCheck.isSelected());
+                    settings.setDecorateWindowRDS(chckbxRDSTitle.isSelected());
 
                     settings.setCustomBandplan(
                             bandplanBox.getSelectedItem() != null ? (SerializedBandplan) bandplanBox.getSelectedItem()
