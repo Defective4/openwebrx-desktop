@@ -9,7 +9,6 @@ import java.util.Date;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
-import javax.swing.border.TitledBorder;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumnModel;
 
@@ -30,7 +29,6 @@ public class FTPanel extends JPanel {
     };
 
     public FTPanel() {
-        setBorder(new TitledBorder(null, "FT", TitledBorder.LEADING, TitledBorder.TOP, null, null));
         setLayout(new BorderLayout(0, 0));
 
         JScrollPane scrollPane = new JScrollPane();
@@ -50,14 +48,10 @@ public class FTPanel extends JPanel {
         TableColumnModel columnModel = table.getTableHeader().getColumnModel();
         for (int i = 0; i < columnModel.getColumnCount(); i++) columnModel.getColumn(i).setPreferredWidth(0);
         panel_2.add(table, BorderLayout.CENTER);
-        for (int x = 0; x < 10; x++) {
-            model.addRow(new String[0]);
-        }
     }
 
     public void insertMessage(FTMessage msg, int centerFreq) {
         try {
-            if (model.getValueAt(model.getRowCount() - 1, 0) == null) model.removeRow(model.getRowCount() - 1);
             model.insertRow(0,
                     new String[] { msg.getMode(), FORMAT.format(new Date(msg.getTimestamp())),
                             FORMATTER.valueToString(msg.getFrequency() - centerFreq), msg.getMessage(),

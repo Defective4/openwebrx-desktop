@@ -2,6 +2,7 @@ package io.github.defective4.sdr.owrxdesktop.ui;
 
 import static io.github.defective4.sdr.owrxdesktop.ui.text.FontAwesome.*;
 
+import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
@@ -44,10 +45,8 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.JPopupMenu;
 import javax.swing.JProgressBar;
 import javax.swing.JRadioButton;
-import javax.swing.JScrollPane;
 import javax.swing.JSlider;
 import javax.swing.JSpinner;
 import javax.swing.JSpinner.NumberEditor;
@@ -927,75 +926,39 @@ public class ReceiverWindow extends JFrame {
             panel.add(btnRecord, gbc_btnRecord);
 
             JPanel demodPanel = new JPanel();
-            demodPanel.setBorder(new EmptyBorder(16, 8, 16, 8));
             controlTabs.addTab("Demodulation", FontAwesome.ICO_CPU, demodPanel, null);
-            GridBagLayout gbl_demodPanel = new GridBagLayout();
-            gbl_demodPanel.columnWidths = new int[] { 0, 0 };
-            gbl_demodPanel.rowHeights = new int[] { 0, 16, 0 };
-            gbl_demodPanel.columnWeights = new double[] { 1.0, Double.MIN_VALUE };
-            gbl_demodPanel.rowWeights = new double[] { 0.0, 1.0, Double.MIN_VALUE };
-            demodPanel.setLayout(gbl_demodPanel);
+            demodPanel.setLayout(new BorderLayout(0, 0));
 
-            JButton btnAddDemodulator = new JButton("Add demodulator", FontAwesome.ICO_PLUS);
-            GridBagConstraints gbc_btnAddDemodulator = new GridBagConstraints();
-            gbc_btnAddDemodulator.insets = new Insets(0, 0, 5, 0);
-            gbc_btnAddDemodulator.anchor = GridBagConstraints.NORTHWEST;
-            gbc_btnAddDemodulator.gridx = 0;
-            gbc_btnAddDemodulator.gridy = 0;
-            demodPanel.add(btnAddDemodulator, gbc_btnAddDemodulator);
+            JTabbedPane tabbedPane = new JTabbedPane(JTabbedPane.TOP);
+            demodPanel.add(tabbedPane, BorderLayout.CENTER);
 
-            JScrollPane scrollPane = new JScrollPane();
-            GridBagConstraints gbc_scrollPane = new GridBagConstraints();
-            gbc_scrollPane.fill = GridBagConstraints.BOTH;
-            gbc_scrollPane.gridx = 0;
-            gbc_scrollPane.gridy = 1;
-            demodPanel.add(scrollPane, gbc_scrollPane);
+            JPanel panel_1 = new JPanel();
+            tabbedPane.addTab("RDS", null, panel_1, null);
+            GridBagLayout gbl_panel_1 = new GridBagLayout();
+            gbl_panel_1.columnWidths = new int[]{0, 0};
+            gbl_panel_1.rowHeights = new int[]{0, 0};
+            gbl_panel_1.columnWeights = new double[]{1.0, Double.MIN_VALUE};
+            gbl_panel_1.rowWeights = new double[]{0.0, Double.MIN_VALUE};
+            panel_1.setLayout(gbl_panel_1);
 
-            JPanel demodsContainer = new JPanel();
-            scrollPane.setViewportView(demodsContainer);
-            GridBagLayout gbl_demodsContainer = new GridBagLayout();
-            gbl_demodsContainer.columnWidths = new int[] { 0, 0 };
-            gbl_demodsContainer.rowHeights = new int[] { 0, 0, 0, 0 };
-            gbl_demodsContainer.columnWeights = new double[] { 1.0, Double.MIN_VALUE };
-            gbl_demodsContainer.rowWeights = new double[] { 0.0, 0.0, 0.0, Double.MIN_VALUE };
-            demodsContainer.setLayout(gbl_demodsContainer);
+            GridBagConstraints gbc_panel_2 = new GridBagConstraints();
+            gbc_panel_2.fill = GridBagConstraints.BOTH;
+            gbc_panel_2.gridx = 0;
+            gbc_panel_2.gridy = 0;
+            rdsPanel.setBorder(new EmptyBorder(8, 8, 16, 8));
+            panel_1.add(rdsPanel, gbc_panel_2);
 
-            btnAddDemodulator.addActionListener(e -> {
-                JPopupMenu menu = new JPopupMenu();
+            JPanel panel_2 = new JPanel();
+            panel_2.setLayout(new BorderLayout(0, 0));
+            ftPanel.setBorder(new EmptyBorder(0, 0, 0, 16));
+            panel_2.add(ftPanel);
+            tabbedPane.addTab("FT", null, panel_2, null);
 
-                JMenuItem rds = new JMenuItem("RDS (WFM)");
-                JMenuItem ft = new JMenuItem("FT (FT8, FT4)");
-                JMenuItem plainText = new JMenuItem("Plain Text (RTTY, CW)");
-
-                rds.setEnabled(!demodsContainer.isAncestorOf(rdsPanel));
-                ft.setEnabled(!demodsContainer.isAncestorOf(ftPanel));
-                plainText.setEnabled(!demodsContainer.isAncestorOf(plainTextPanel));
-
-                menu.add(rds);
-                menu.add(ft);
-                menu.add(plainText);
-
-                ActionListener ls = e2 -> {
-                    GridBagConstraints constr = new GridBagConstraints();
-                    constr.fill = GridBagConstraints.HORIZONTAL;
-                    constr.gridx = 0;
-                    constr.gridy = demodsContainer.getComponentCount();
-                    if (e2.getSource() == rds) {
-                        demodsContainer.add(rdsPanel, constr);
-                    } else if (e2.getSource() == ft) {
-                        demodsContainer.add(ftPanel, constr);
-                        ftPanel.setMaximumSize(ftPanel.getSize());
-                    } else if (e2.getSource() == plainText) {
-                        demodsContainer.add(plainTextPanel, constr);
-                    }
-                };
-
-                rds.addActionListener(ls);
-                ft.addActionListener(ls);
-                plainText.addActionListener(ls);
-
-                menu.show(btnAddDemodulator, 0, btnAddDemodulator.getHeight());
-            });
+            JPanel panel_3 = new JPanel();
+            panel_3.setLayout(new BorderLayout(0, 0));
+            plainTextPanel.setBorder(new EmptyBorder(8, 8, 16, 8));
+            panel_3.add(plainTextPanel);
+            tabbedPane.addTab("Plain text", null, panel_3, null);
 
             btnRecord.addActionListener(e -> {
                 try {

@@ -8,13 +8,11 @@ import javax.swing.JButton;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
-import javax.swing.border.TitledBorder;
 
 public class PlainTextPanel extends JPanel {
     private final JTextArea textArea;
 
     public PlainTextPanel() {
-        setBorder(new TitledBorder(null, "Plain text", TitledBorder.LEADING, TitledBorder.TOP, null, null));
         GridBagLayout gbl_panel_1 = new GridBagLayout();
         gbl_panel_1.columnWidths = new int[] { 0, 0 };
         gbl_panel_1.rowHeights = new int[] { 0, 0, 0 };

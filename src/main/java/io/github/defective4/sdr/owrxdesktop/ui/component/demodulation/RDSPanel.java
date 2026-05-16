@@ -7,7 +7,6 @@ import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
-import javax.swing.border.TitledBorder;
 
 import io.github.defective4.sdr.owrxclient.model.metadata.RDSMetadata;
 
@@ -31,7 +30,6 @@ public class RDSPanel extends JPanel {
         taCheck.addActionListener(ls);
         tpCheck.addActionListener(ls);
 
-        setBorder(new TitledBorder(null, "RDS", TitledBorder.LEADING, TitledBorder.TOP, null, null));
         setLayout(new GridLayout(0, 2, 0, 0));
         JLabel lblStation = new JLabel("Station");
         add(lblStation);
