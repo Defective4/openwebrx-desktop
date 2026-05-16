@@ -950,7 +950,7 @@ public class ReceiverWindow extends JFrame {
 
             JPanel panel_2 = new JPanel();
             panel_2.setLayout(new BorderLayout(0, 0));
-            ftPanel.setBorder(new EmptyBorder(0, 0, 0, 16));
+            ftPanel.setBorder(new EmptyBorder(8, 8, 8, 8));
             panel_2.add(ftPanel);
             tabbedPane.addTab("FT", null, panel_2, null);
 

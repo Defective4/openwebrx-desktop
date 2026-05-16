@@ -1,8 +1,9 @@
 package io.github.defective4.sdr.owrxdesktop.ui.component.demodulation;
 
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Insets;
+import java.awt.BorderLayout;
+import java.awt.FlowLayout;
+import java.awt.Toolkit;
+import java.awt.datatransfer.StringSelection;
 
 import javax.swing.JButton;
 import javax.swing.JPanel;
@@ -13,33 +14,31 @@ public class PlainTextPanel extends JPanel {
     private final JTextArea textArea;
 
     public PlainTextPanel() {
-        GridBagLayout gbl_panel_1 = new GridBagLayout();
-        gbl_panel_1.columnWidths = new int[] { 0, 0 };
-        gbl_panel_1.rowHeights = new int[] { 0, 0, 0 };
-        gbl_panel_1.columnWeights = new double[] { 1.0, Double.MIN_VALUE };
-        gbl_panel_1.rowWeights = new double[] { 1.0, 0.0, Double.MIN_VALUE };
-        setLayout(gbl_panel_1);
+        setLayout(new BorderLayout(0, 0));
 
         JScrollPane scrollPane = new JScrollPane();
-        GridBagConstraints gbc_scrollPane = new GridBagConstraints();
-        gbc_scrollPane.insets = new Insets(0, 0, 5, 0);
-        gbc_scrollPane.fill = GridBagConstraints.BOTH;
-        gbc_scrollPane.gridx = 0;
-        gbc_scrollPane.gridy = 0;
-        add(scrollPane, gbc_scrollPane);
+        add(scrollPane);
 
         textArea = new JTextArea();
         textArea.setRows(8);
         textArea.setEditable(false);
         scrollPane.setViewportView(textArea);
 
+        JPanel panel = new JPanel();
+        add(panel, BorderLayout.SOUTH);
+        FlowLayout flowLayout = (FlowLayout) panel.getLayout();
+        flowLayout.setAlignment(FlowLayout.LEFT);
+
         JButton btnClear = new JButton("Clear");
-        btnClear.addActionListener(e -> { textArea.setText(""); });
-        GridBagConstraints gbc_btnClear = new GridBagConstraints();
-        gbc_btnClear.anchor = GridBagConstraints.WEST;
-        gbc_btnClear.gridx = 0;
-        gbc_btnClear.gridy = 1;
-        add(btnClear, gbc_btnClear);
+        panel.add(btnClear);
+
+        JButton btnCopyToClipboard = new JButton("Copy to clipboard");
+        btnCopyToClipboard.addActionListener(e -> {
+            StringSelection sel = new StringSelection(textArea.getText());
+            Toolkit.getDefaultToolkit().getSystemClipboard().setContents(sel, sel);
+        });
+        panel.add(btnCopyToClipboard);
+        btnClear.addActionListener(e -> textArea.setText(""));
     }
 
     public void appendText(String str) {
