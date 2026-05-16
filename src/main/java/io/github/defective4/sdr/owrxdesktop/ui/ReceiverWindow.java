@@ -290,6 +290,10 @@ public class ReceiverWindow extends JFrame {
             JMenuItem ft = new JMenuItem("FT (FT8, FT4)");
             JMenuItem plainText = new JMenuItem("Plain Text (RTTY, CW)");
 
+            rds.setEnabled(!demodsContainer.isAncestorOf(rdsPanel));
+            ft.setEnabled(!demodsContainer.isAncestorOf(ftPanel));
+            plainText.setEnabled(!demodsContainer.isAncestorOf(plainTextPanel));
+
             menu.add(rds);
             menu.add(ft);
             menu.add(plainText);
