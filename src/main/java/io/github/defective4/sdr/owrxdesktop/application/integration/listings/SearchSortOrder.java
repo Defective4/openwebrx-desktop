@@ -14,5 +14,4 @@ public enum SearchSortOrder {
         return name;
     }
 
-
 }

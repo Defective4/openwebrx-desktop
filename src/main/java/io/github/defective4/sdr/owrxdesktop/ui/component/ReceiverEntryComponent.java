@@ -22,7 +22,8 @@ public class ReceiverEntryComponent extends JPanel {
     private final JLabel receiverName = new JLabel("");
     private final JLabel receiverSoftware = new JLabel("");
 
-    public ReceiverEntryComponent(ReceiverEntry entry, BufferedImage placeholder, Function<ReceiverEntryComponent, Collection<JButton>> buttonFunction) {
+    public ReceiverEntryComponent(ReceiverEntry entry, BufferedImage placeholder,
+            Function<ReceiverEntryComponent, Collection<JButton>> buttonFunction) {
         this.entry = entry;
         this.placeholder = placeholder;
         setBorder(new EmptyBorder(5, 5, 5, 5));
