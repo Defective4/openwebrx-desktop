@@ -77,6 +77,7 @@ import io.github.defective4.sdr.owrxdesktop.ui.component.JLinkLabel;
 import io.github.defective4.sdr.owrxdesktop.ui.component.TuneablePanel;
 import io.github.defective4.sdr.owrxdesktop.ui.component.WaterfallPanel;
 import io.github.defective4.sdr.owrxdesktop.ui.component.demodulation.FTPanel;
+import io.github.defective4.sdr.owrxdesktop.ui.component.demodulation.PlainTextPanel;
 import io.github.defective4.sdr.owrxdesktop.ui.component.demodulation.RDSPanel;
 import io.github.defective4.sdr.owrxdesktop.ui.event.TuningAdapter;
 import io.github.defective4.sdr.owrxdesktop.ui.event.UserInteractionListener;
@@ -104,33 +105,35 @@ public class ReceiverWindow extends JFrame {
     private final JComboBox<ReceiverMode> digitalBox = new JComboBox<>();
 
     private boolean exiting;
+
     private final float fftMax = -20;
 
     private final float fftMin = -88;
-
     private final FFTPanel fftPanel;
+
     private final DateFormat fmt = new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss");
 
     private final JSpinner freqSpinner = new JFrequencySpinner();
-
     private final JRadioButton ftlAuto = new JRadioButton("Auto");
 
     private final JRadioButton ftlServer = new JRadioButton("Server");
+
     private final FTPanel ftPanel = new FTPanel();
 
     private long lastFFTDraw;
-
     private boolean lastHighSample = false;
+
     private final List<UserInteractionListener> listeners = new CopyOnWriteArrayList<>();
+
     private int maxFPS = -1;
-
     private float minFFT, maxFFT;
-
     private final JMenuItem mntmBookmarks = new JMenuItem("Bookmarks", ICO_BOOKMARK);
+
     private int offset;
+
+    private final PlainTextPanel plainTextPanel = new PlainTextPanel();
     private final JComboBox<ReceiverProfile> profileBox = new JComboBox<>();
     private boolean profileDebounce;
-
     private final JComboBox<RecorderQuality> qualityBox = new JComboBox<>();
 
     private final RDSPanel rdsPanel = new RDSPanel();
@@ -148,9 +151,9 @@ public class ReceiverWindow extends JFrame {
     private int temperatureC = Integer.MIN_VALUE;
 
     private final JFrequencySpinner tuningStepSpinner = new JFrequencySpinner();
+
     private final ReceiverUserSettings userSettings;
     private final WaterfallPanel waterfallPanel;
-
     public ReceiverWindow(ReceiverUserSettings settings, ReceiverCache cache, ApplicationSettings appSettings) {
         this.appSettings = appSettings;
         audioRecorder = new AudioRecorder(appSettings.getFfmpegPath());
@@ -1088,6 +1091,10 @@ public class ReceiverWindow extends JFrame {
 
     public TuneablePanel[] getPanels() {
         return new TuneablePanel[] { waterfallPanel, fftPanel };
+    }
+
+    public PlainTextPanel getPlainTextPanel() {
+        return plainTextPanel;
     }
 
     public ReceiverMode getPrimaryMode() {

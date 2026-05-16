@@ -28,6 +28,7 @@ import io.github.defective4.sdr.owrxclient.model.ReceiverProfile;
 import io.github.defective4.sdr.owrxclient.model.ServerConfig;
 import io.github.defective4.sdr.owrxclient.model.demod.DemodulatorResult;
 import io.github.defective4.sdr.owrxclient.model.demod.FTMessage;
+import io.github.defective4.sdr.owrxclient.model.demod.PlaintextResult;
 import io.github.defective4.sdr.owrxclient.model.metadata.RDSMetadata;
 import io.github.defective4.sdr.owrxdesktop.audio.AudioSinkManager;
 import io.github.defective4.sdr.owrxdesktop.bandplan.Bandplan;
@@ -273,6 +274,8 @@ public class RadioReceiver {
             public void demodulatorResultReceived(DemodulatorResult result) {
                 if (result instanceof FTMessage msg) {
                     rxWindow.getFtPanel().insertMessage(msg, rxWindow.getCenterFrequency());
+                } else if (result instanceof PlaintextResult ptx) {
+                    rxWindow.getPlainTextPanel().appendText(ptx.getText());
                 }
             }
 
