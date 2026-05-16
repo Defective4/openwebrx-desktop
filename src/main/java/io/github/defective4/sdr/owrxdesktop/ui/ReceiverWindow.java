@@ -121,20 +121,22 @@ public class ReceiverWindow extends JFrame {
 
     private final FTPanel ftPanel = new FTPanel();
 
+    private String initialTitle;
     private long lastFFTDraw;
+
     private boolean lastHighSample = false;
 
     private final List<UserInteractionListener> listeners = new CopyOnWriteArrayList<>();
-
     private int maxFPS = -1;
     private float minFFT, maxFFT;
+
     private final JMenuItem mntmBookmarks = new JMenuItem("Bookmarks", ICO_BOOKMARK);
 
     private int offset;
-
     private final PlainTextPanel plainTextPanel = new PlainTextPanel();
     private final JComboBox<ReceiverProfile> profileBox = new JComboBox<>();
     private boolean profileDebounce;
+
     private final JComboBox<RecorderQuality> qualityBox = new JComboBox<>();
 
     private final RDSPanel rdsPanel = new RDSPanel();
@@ -152,7 +154,6 @@ public class ReceiverWindow extends JFrame {
     private int temperatureC = Integer.MIN_VALUE;
 
     private final JFrequencySpinner tuningStepSpinner = new JFrequencySpinner();
-
     private final ReceiverUserSettings userSettings;
     private final WaterfallPanel waterfallPanel;
 
@@ -935,10 +936,10 @@ public class ReceiverWindow extends JFrame {
             JPanel panel_1 = new JPanel();
             tabbedPane.addTab("RDS", null, panel_1, null);
             GridBagLayout gbl_panel_1 = new GridBagLayout();
-            gbl_panel_1.columnWidths = new int[]{0, 0};
-            gbl_panel_1.rowHeights = new int[]{0, 0};
-            gbl_panel_1.columnWeights = new double[]{1.0, Double.MIN_VALUE};
-            gbl_panel_1.rowWeights = new double[]{0.0, Double.MIN_VALUE};
+            gbl_panel_1.columnWidths = new int[] { 0, 0 };
+            gbl_panel_1.rowHeights = new int[] { 0, 0 };
+            gbl_panel_1.columnWeights = new double[] { 1.0, Double.MIN_VALUE };
+            gbl_panel_1.rowWeights = new double[] { 0.0, Double.MIN_VALUE };
             panel_1.setLayout(gbl_panel_1);
 
             GridBagConstraints gbc_panel_2 = new GridBagConstraints();
@@ -1160,6 +1161,10 @@ public class ReceiverWindow extends JFrame {
         fftPanel.resetLabels();
     }
 
+    public void resetTitle() {
+        if (initialTitle != null) super.setTitle(initialTitle);
+    }
+
     public void setBandwidth(int bandwidth) {
         this.bandwidth = bandwidth;
         for (TuneablePanel fftPanel : getPanels()) fftPanel.setBandwidth(bandwidth);
@@ -1260,6 +1265,12 @@ public class ReceiverWindow extends JFrame {
         updateCPU();
     }
 
+    @Override
+    public void setTitle(String title) {
+        if (initialTitle == null) initialTitle = title;
+        super.setTitle(title);
+    }
+
     public void setTuningReady(boolean tuningReady) {
         for (TuneablePanel fftPanel : getPanels()) fftPanel.setTuningReady(tuningReady);
     }
@@ -1312,6 +1323,7 @@ public class ReceiverWindow extends JFrame {
 
     public void updateProfile(ReceiverProfile profile) {
         mntmBookmarks.setEnabled(true);
+        resetTitle();
         profileDebounce = true;
         profileBox.setSelectedItem(profile);
         profileDebounce = false;

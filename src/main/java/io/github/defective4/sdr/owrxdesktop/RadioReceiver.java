@@ -326,7 +326,12 @@ public class RadioReceiver {
 
             @Override
             public void rdsReceived(RDSMetadata rds) {
+                if (!rxWindow.getPrimaryMode().modulation().equalsIgnoreCase("wfm")) return;
                 rxWindow.getRdsPanel().setData(rds);
+                if (settings.isDecorateWindowRDS()) {
+                    rxWindow.setTitle(
+                            "[%s] %s".formatted(rds.getStation().orElse("").trim(), rds.getRadiotext().orElse("")));
+                }
             }
 
             @Override

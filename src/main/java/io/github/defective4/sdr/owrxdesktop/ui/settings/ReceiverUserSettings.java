@@ -46,9 +46,10 @@ public class ReceiverUserSettings {
 
     private SerializedBandplan customBandplan;
 
+    private boolean decorateWindowRDS = true;
     private boolean dynamicColorMixing = true;
-    private boolean enableFreeTuning;
 
+    private boolean enableFreeTuning;
     private String magicKey;
     private BuiltinWaterfallTheme selectedBuiltinWaterfallTheme = BuiltinWaterfallTheme.TURBO;
     private boolean useServerBandplan = true;
@@ -94,6 +95,10 @@ public class ReceiverUserSettings {
         return waterfallThemeMode;
     }
 
+    public boolean isDecorateWindowRDS() {
+        return decorateWindowRDS;
+    }
+
     public boolean isDynamicColorMixing() {
         return dynamicColorMixing;
     }
@@ -108,6 +113,10 @@ public class ReceiverUserSettings {
 
     public void setCustomBandplan(SerializedBandplan customBandplan) {
         this.customBandplan = customBandplan;
+    }
+
+    public void setDecorateWindowRDS(boolean decorateWindowRDS) {
+        this.decorateWindowRDS = decorateWindowRDS;
     }
 
     public void setDynamicColorMixing(boolean dynamicColorMixing) {
