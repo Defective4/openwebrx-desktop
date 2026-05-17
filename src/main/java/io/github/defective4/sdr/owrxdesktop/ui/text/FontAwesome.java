@@ -39,6 +39,7 @@ public class FontAwesome {
     public static final String FA_TAGS = "\uf02c";
     public static final String FA_TASKS = "\uf0ae";
     public static final String FA_USER = "\uf007";
+    public static final String FA_X = "\u0058";
     public static final Icon ICO_NETWORK, ICO_TAGS, ICO_TASKS, ICO_AUDIO, ICO_BROADCAST, ICO_CHART, ICO_AREA_CHART,
             ICO_PALETTE, ICO_SIGN_IN, ICO_SYNC, ICO_PLUS, ICO_USER, ICO_GLOBE, ICO_SIGN_OUT, ICO_SETTINGS, ICO_EDIT,
             ICO_DELETE, ICO_COG, ICO_BOOKMARK, ICO_LOCATION, ICO_CPU, ICO_LINK;

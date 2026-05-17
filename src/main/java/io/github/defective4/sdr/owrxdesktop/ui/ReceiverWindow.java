@@ -45,6 +45,7 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
 import javax.swing.JProgressBar;
 import javax.swing.JRadioButton;
 import javax.swing.JSlider;
@@ -73,6 +74,7 @@ import io.github.defective4.sdr.owrxdesktop.ui.BookmarksDialog.MergedLabel;
 import io.github.defective4.sdr.owrxdesktop.ui.component.FFTLabel;
 import io.github.defective4.sdr.owrxdesktop.ui.component.FFTPanel;
 import io.github.defective4.sdr.owrxdesktop.ui.component.FFTPanel.FFTPanelListener;
+import io.github.defective4.sdr.owrxdesktop.ui.component.JCloseableTab;
 import io.github.defective4.sdr.owrxdesktop.ui.component.JFrequencySpinner;
 import io.github.defective4.sdr.owrxdesktop.ui.component.JLinkLabel;
 import io.github.defective4.sdr.owrxdesktop.ui.component.TuneablePanel;
@@ -926,40 +928,87 @@ public class ReceiverWindow extends JFrame {
             gbc_btnRecord.gridy = 7;
             panel.add(btnRecord, gbc_btnRecord);
 
-            JPanel demodPanel = new JPanel();
-            controlTabs.addTab("Demodulation", FontAwesome.ICO_CPU, demodPanel, null);
-            demodPanel.setLayout(new BorderLayout(0, 0));
+            JPanel decodingPanel = new JPanel();
+            controlTabs.addTab("Decoders", FontAwesome.ICO_CPU, decodingPanel, null);
+            decodingPanel.setLayout(new BorderLayout(0, 0));
 
             JTabbedPane tabbedPane = new JTabbedPane(JTabbedPane.TOP);
-            demodPanel.add(tabbedPane, BorderLayout.CENTER);
+            decodingPanel.add(tabbedPane, BorderLayout.CENTER);
 
-            JPanel panel_1 = new JPanel();
-            tabbedPane.addTab("RDS", null, panel_1, null);
-            GridBagLayout gbl_panel_1 = new GridBagLayout();
-            gbl_panel_1.columnWidths = new int[] { 0, 0 };
-            gbl_panel_1.rowHeights = new int[] { 0, 0 };
-            gbl_panel_1.columnWeights = new double[] { 1.0, Double.MIN_VALUE };
-            gbl_panel_1.rowWeights = new double[] { 0.0, Double.MIN_VALUE };
-            panel_1.setLayout(gbl_panel_1);
+            JPanel panel_4 = new JPanel();
+            panel_4.setBorder(new EmptyBorder(16, 8, 8, 8));
+            tabbedPane.addTab("Add", FontAwesome.ICO_PLUS, panel_4, null);
+            GridBagLayout gbl_panel_4 = new GridBagLayout();
+            gbl_panel_4.columnWidths = new int[] { 0, 0 };
+            gbl_panel_4.rowHeights = new int[] { 0, 0 };
+            gbl_panel_4.columnWeights = new double[] { 0.0, Double.MIN_VALUE };
+            gbl_panel_4.rowWeights = new double[] { 0.0, Double.MIN_VALUE };
+            panel_4.setLayout(gbl_panel_4);
+
+            JButton btnAddDecoder = new JButton("Add decoder", FontAwesome.ICO_PLUS);
+
+            btnAddDecoder.addActionListener(e -> {
+                JPopupMenu menu = new JPopupMenu();
+
+                JMenuItem rds = new JMenuItem("RDS (WFM)");
+                JMenuItem ft = new JMenuItem("FT (FT8, FT4)");
+                JMenuItem text = new JMenuItem("Plain text (rtty, cw, etc.)");
+
+                rds.setEnabled(!tabbedPane.isAncestorOf(rdsPanel));
+                ft.setEnabled(!tabbedPane.isAncestorOf(ftPanel));
+                text.setEnabled(!tabbedPane.isAncestorOf(plainTextPanel));
+
+                rds.addActionListener(e2 -> {
+                    JPanel rdsPanel = new JPanel();
+                    rdsPanel.setLayout(new BorderLayout(0, 0));
+                    rdsPanel.setBorder(new EmptyBorder(16, 8, 0, 8));
+                    rdsPanel.add(this.rdsPanel, BorderLayout.NORTH);
+
+                    tabbedPane.insertTab("", null, rdsPanel, null, 0);
+                    tabbedPane.setTabComponentAt(0, new JCloseableTab("RDS", tabbedPane));
+                    tabbedPane.setSelectedIndex(0);
+                });
+
+                text.addActionListener(e2 -> {
+                    JPanel textPanel = new JPanel();
+                    textPanel.setLayout(new BorderLayout(0, 0));
+                    textPanel.setBorder(new EmptyBorder(16, 8, 4, 8));
+                    textPanel.add(plainTextPanel, BorderLayout.CENTER);
+
+                    tabbedPane.insertTab("", null, textPanel, null, 0);
+                    tabbedPane.setTabComponentAt(0, new JCloseableTab("Plain text", tabbedPane));
+                    tabbedPane.setSelectedIndex(0);
+                });
+
+                ft.addActionListener(e2 -> {
+                    JPanel ftPanel = new JPanel();
+                    ftPanel.setLayout(new BorderLayout(0, 0));
+                    ftPanel.setBorder(new EmptyBorder(16, 4, 4, 4));
+                    ftPanel.add(this.ftPanel, BorderLayout.CENTER);
+
+                    tabbedPane.insertTab("", null, ftPanel, null, 0);
+                    tabbedPane.setTabComponentAt(0, new JCloseableTab("FT", tabbedPane));
+                    tabbedPane.setSelectedIndex(0);
+                });
+
+                menu.add(rds);
+                menu.add(ft);
+                menu.add(text);
+
+                menu.show((Component) e.getSource(), 0, ((Component) e.getSource()).getHeight());
+            });
+            GridBagConstraints gbc_btnAddDemodulator = new GridBagConstraints();
+            gbc_btnAddDemodulator.gridx = 0;
+            gbc_btnAddDemodulator.gridy = 0;
+            panel_4.add(btnAddDecoder, gbc_btnAddDemodulator);
 
             GridBagConstraints gbc_panel_2 = new GridBagConstraints();
             gbc_panel_2.fill = GridBagConstraints.BOTH;
             gbc_panel_2.gridx = 0;
             gbc_panel_2.gridy = 0;
             rdsPanel.setBorder(new EmptyBorder(8, 8, 16, 8));
-            panel_1.add(rdsPanel, gbc_panel_2);
-
-            JPanel panel_2 = new JPanel();
-            panel_2.setLayout(new BorderLayout(0, 0));
             ftPanel.setBorder(new EmptyBorder(8, 8, 8, 8));
-            panel_2.add(ftPanel);
-            tabbedPane.addTab("FT", null, panel_2, null);
-
-            JPanel panel_3 = new JPanel();
-            panel_3.setLayout(new BorderLayout(0, 0));
             plainTextPanel.setBorder(new EmptyBorder(8, 8, 16, 8));
-            panel_3.add(plainTextPanel);
-            tabbedPane.addTab("Plain text", null, panel_3, null);
 
             btnRecord.addActionListener(e -> {
                 try {
