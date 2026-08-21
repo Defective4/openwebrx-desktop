@@ -44,6 +44,8 @@ public class ReceiverUserSettings {
         }
     }
 
+    private String chatUsername;
+
     private SerializedBandplan customBandplan;
 
     private boolean decorateWindowRDS = true;
@@ -73,6 +75,10 @@ public class ReceiverUserSettings {
 
     public Bandplan getBandplan() {
         return customBandplan == null || isUseServerBandplan() ? SERVER_BANDPLAN : customBandplan.deserialize();
+    }
+
+    public String getChatUsername() {
+        return chatUsername;
     }
 
     public Optional<SerializedBandplan> getCustomBandplan() {
@@ -109,6 +115,10 @@ public class ReceiverUserSettings {
 
     public boolean isUseServerBandplan() {
         return useServerBandplan;
+    }
+
+    public void setChatUsername(String chatUsername) {
+        this.chatUsername = chatUsername;
     }
 
     public void setCustomBandplan(SerializedBandplan customBandplan) {

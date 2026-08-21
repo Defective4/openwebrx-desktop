@@ -1047,6 +1047,16 @@ public class ReceiverWindow extends JFrame {
             JButton chatSend = new JButton("Send");
             chatInputPanel.add(chatSend);
 
+            chatSend.addActionListener(e -> {
+                String text = chatInput.getText();
+                if (!text.isBlank()) {
+                    listeners.forEach(ls -> ls.chatMessageSent(settings.getChatUsername(), text));
+                }
+                chatInput.setText("");
+            });
+
+            chatInput.addActionListener(e -> { chatSend.doClick(); });
+
             GridBagConstraints gbc_panel_2 = new GridBagConstraints();
             gbc_panel_2.fill = GridBagConstraints.BOTH;
             gbc_panel_2.gridx = 0;
@@ -1112,6 +1122,29 @@ public class ReceiverWindow extends JFrame {
                 mntmBookmarks.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_B, InputEvent.CTRL_DOWN_MASK));
                 mnWindow.add(mntmBookmarks);
             }
+
+            controlTabs.addChangeListener(new ChangeListener() {
+
+                private int lastIndex = 0;
+
+                @Override
+                public void stateChanged(ChangeEvent e) {
+                    if (controlTabs.getSelectedIndex() == CHAT_TAB_INDEX && settings.getChatUsername() == null) {
+                        controlTabs.setSelectedIndex(lastIndex);
+                        String username = JOptionPane.showInputDialog(ReceiverWindow.this, "Enter your chat username");
+                        if (username != null) {
+                            if (!username.isBlank()) {
+                                settings.setChatUsername(username);
+                                controlTabs.setSelectedIndex(CHAT_TAB_INDEX);
+                            } else {
+                                JOptionPane.showMessageDialog(ReceiverWindow.this, "Username can't be empty!", "Error",
+                                        JOptionPane.ERROR_MESSAGE);
+                            }
+                        }
+                    }
+                    lastIndex = controlTabs.getSelectedIndex();
+                }
+            });
 
             disableControls();
         }

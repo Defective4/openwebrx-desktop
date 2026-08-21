@@ -124,6 +124,11 @@ public class RadioReceiver {
             }
 
             @Override
+            public void chatMessageSent(String chatUsername, String text) {
+                client.sendChatMessage(chatUsername, text);
+            }
+
+            @Override
             public void freeTune(int freq) {
                 jumpFreq = freq;
                 freeTuned = true;

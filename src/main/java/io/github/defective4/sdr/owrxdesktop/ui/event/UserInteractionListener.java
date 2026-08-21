@@ -7,6 +7,8 @@ import io.github.defective4.sdr.owrxdesktop.ui.BookmarksDialog.MergedLabel;
 public interface UserInteractionListener {
     void bookmarkJumped(MergedLabel label);
 
+    void chatMessageSent(String chatUsername, String text);
+
     void freeTune(int freq);
 
     void modeChanged(ReceiverMode primary, ReceiverMode underlying);
