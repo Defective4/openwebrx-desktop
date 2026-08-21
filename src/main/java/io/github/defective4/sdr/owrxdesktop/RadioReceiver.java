@@ -425,6 +425,10 @@ public class RadioReceiver {
                     rxWindow.setServerLevels(config.waterfallLevels());
                 }
 
+                if (config.chatEnabled() != null) {
+                    rxWindow.setChatEnabled(config.chatEnabled());
+                }
+
                 rxWindow.setTuningReady(true);
 
                 rxWindow.getFftPanel().resetMaxFFT();

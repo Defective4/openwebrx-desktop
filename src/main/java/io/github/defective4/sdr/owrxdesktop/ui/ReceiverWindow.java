@@ -91,10 +91,12 @@ import io.github.defective4.sdr.owrxdesktop.ui.settings.ReceiverUserSettings;
 import io.github.defective4.sdr.owrxdesktop.ui.text.FontAwesome;
 
 public class ReceiverWindow extends JFrame {
+    private static final int CHAT_TAB_INDEX = 4;
     private final JComboBox<ReceiverMode> analogBox = new JComboBox<>();
     private final ApplicationSettings appSettings;
     private final AudioRecorder audioRecorder;
     private final Bandplan bandplan;
+
     private int bandwidth;
 
     private final ReceiverCache cache;
@@ -105,40 +107,42 @@ public class ReceiverWindow extends JFrame {
 
     private final JProgressBar clientsBar = new JProgressBar();
 
+    private final JTabbedPane controlTabs;
+
     private final JProgressBar cpuBar = new JProgressBar();
 
     private float cpuUsage = Integer.MIN_VALUE;
 
     private final JComboBox<ReceiverMode> digitalBox = new JComboBox<>();
-
     private boolean exiting;
 
     private final float fftMax = -20;
-    private final float fftMin = -88;
 
+    private final float fftMin = -88;
     private final FFTPanel fftPanel;
 
     private final DateFormat fmt = new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss");
+
     private final JSpinner freqSpinner = new JFrequencySpinner();
 
     private final JRadioButton ftlAuto = new JRadioButton("Auto");
-
     private final JRadioButton ftlServer = new JRadioButton("Server");
 
     private final FTPanel ftPanel = new FTPanel();
+
     private String initialTitle;
-
     private long lastFFTDraw;
-
     private boolean lastHighSample = false;
+
     private final List<UserInteractionListener> listeners = new CopyOnWriteArrayList<>();
+
     private int maxFPS = -1;
-
     private float minFFT, maxFFT;
-
     private final JMenuItem mntmBookmarks = new JMenuItem("Bookmarks", ICO_BOOKMARK);
     private int offset;
+
     private final PlainTextPanel plainTextPanel = new PlainTextPanel();
+
     private final JComboBox<ReceiverProfile> profileBox = new JComboBox<>();
 
     private boolean profileDebounce;
@@ -154,9 +158,7 @@ public class ReceiverWindow extends JFrame {
     private int scopeUpper;
 
     private WaterfallLevels serverLevels = new WaterfallLevels(-88, -20);
-
     private final JProgressBar signalBar = new JProgressBar();
-
     private int temperatureC = Integer.MIN_VALUE;
     private final JFrequencySpinner tuningStepSpinner = new JFrequencySpinner();
     private final ReceiverUserSettings userSettings;
@@ -193,7 +195,7 @@ public class ReceiverWindow extends JFrame {
         splitPane.setRightComponent(controlPanel);
         controlPanel.setLayout(new BoxLayout(controlPanel, BoxLayout.X_AXIS));
 
-        JTabbedPane controlTabs = new JTabbedPane(JTabbedPane.TOP);
+        controlTabs = new JTabbedPane(JTabbedPane.TOP);
         controlTabs.setTabLayoutPolicy(JTabbedPane.SCROLL_TAB_LAYOUT);
         controlPanel.add(controlTabs);
 
@@ -1008,6 +1010,7 @@ public class ReceiverWindow extends JFrame {
             JPanel chatPanel = new JPanel();
             chatPanel.setBorder(new EmptyBorder(10, 5, 10, 5));
             controlTabs.addTab("Chat", FontAwesome.ICO_COMMENT, chatPanel, null);
+            controlTabs.setEnabledAt(CHAT_TAB_INDEX, false);
             GridBagLayout gbl_chatPanel = new GridBagLayout();
             gbl_chatPanel.columnWidths = new int[] { 0, 0 };
             gbl_chatPanel.rowHeights = new int[] { 0, 0, 0 };
@@ -1269,6 +1272,10 @@ public class ReceiverWindow extends JFrame {
         this.centerFrequency = centerFrequency;
         for (TuneablePanel fftPanel : getPanels()) fftPanel.setCenterFrequency(centerFrequency);
         updateFreqSpinnerValue(0);
+    }
+
+    public void setChatEnabled(boolean enabled) {
+        controlTabs.setEnabledAt(CHAT_TAB_INDEX, enabled);
     }
 
     public void setClients(int clients) {
