@@ -14,7 +14,7 @@ public class UserStorage {
 
     public UserStorage() {
         try {
-            userEntries.add(new ReceiverEntry("https://radio.raspberry.local", defaultSettings.clone()));
+            userEntries.add(new ReceiverEntry("http://172.18.0.2:8073/", defaultSettings.clone()));
         } catch (MalformedURLException e) {
             e.printStackTrace();
         }

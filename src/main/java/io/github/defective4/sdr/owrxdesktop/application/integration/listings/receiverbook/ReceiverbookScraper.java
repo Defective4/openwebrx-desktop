@@ -26,12 +26,18 @@ import io.github.defective4.sdr.owrxdesktop.application.integration.listings.Sea
 import io.github.defective4.sdr.owrxdesktop.ui.ApplicationWindow;
 
 public class ReceiverbookScraper implements ReceiverScraper {
+    private static final String RXBOOK_URL_ENV = "RECEIVERBOOK_URL";
     private static final double EARTH_RADIUS = 6371;
     private static final Pattern JSON_PATTERN = Pattern.compile("^\\s*var\\s+receivers\\s+=\\s+(\\[.*\\]);\\s*$");
     private static final URL RXBOOK_URL;
     static {
         try {
-            RXBOOK_URL = URI.create("http://proxy.raspberry.local/map").toURL();
+            String url;
+            url = "https://www.receiverbook.de";
+            if (System.getenv(RXBOOK_URL_ENV) != null) url = System.getenv(RXBOOK_URL_ENV);
+            if (!url.endsWith("/")) url += "/";
+            url += "map";
+            RXBOOK_URL = URI.create(url).toURL();
         } catch (MalformedURLException e) {
             throw new IllegalStateException(e);
         }
