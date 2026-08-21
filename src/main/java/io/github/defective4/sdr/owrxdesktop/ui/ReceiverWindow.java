@@ -48,11 +48,13 @@ import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JProgressBar;
 import javax.swing.JRadioButton;
+import javax.swing.JScrollPane;
 import javax.swing.JSlider;
 import javax.swing.JSpinner;
 import javax.swing.JSpinner.NumberEditor;
 import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
+import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.KeyStroke;
 import javax.swing.border.EmptyBorder;
@@ -99,6 +101,8 @@ public class ReceiverWindow extends JFrame {
 
     private int centerFrequency;
 
+    private final JTextArea chatArea;
+
     private final JProgressBar clientsBar = new JProgressBar();
 
     private final JProgressBar cpuBar = new JProgressBar();
@@ -110,33 +114,33 @@ public class ReceiverWindow extends JFrame {
     private boolean exiting;
 
     private final float fftMax = -20;
-
     private final float fftMin = -88;
+
     private final FFTPanel fftPanel;
 
     private final DateFormat fmt = new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss");
-
     private final JSpinner freqSpinner = new JFrequencySpinner();
+
     private final JRadioButton ftlAuto = new JRadioButton("Auto");
 
     private final JRadioButton ftlServer = new JRadioButton("Server");
 
     private final FTPanel ftPanel = new FTPanel();
-
     private String initialTitle;
+
     private long lastFFTDraw;
 
     private boolean lastHighSample = false;
-
     private final List<UserInteractionListener> listeners = new CopyOnWriteArrayList<>();
     private int maxFPS = -1;
+
     private float minFFT, maxFFT;
 
     private final JMenuItem mntmBookmarks = new JMenuItem("Bookmarks", ICO_BOOKMARK);
-
     private int offset;
     private final PlainTextPanel plainTextPanel = new PlainTextPanel();
     private final JComboBox<ReceiverProfile> profileBox = new JComboBox<>();
+
     private boolean profileDebounce;
 
     private final JComboBox<RecorderQuality> qualityBox = new JComboBox<>();
@@ -154,7 +158,6 @@ public class ReceiverWindow extends JFrame {
     private final JProgressBar signalBar = new JProgressBar();
 
     private int temperatureC = Integer.MIN_VALUE;
-
     private final JFrequencySpinner tuningStepSpinner = new JFrequencySpinner();
     private final ReceiverUserSettings userSettings;
     private final WaterfallPanel waterfallPanel;
@@ -1002,6 +1005,45 @@ public class ReceiverWindow extends JFrame {
             gbc_btnAddDemodulator.gridy = 0;
             panel_4.add(btnAddDecoder, gbc_btnAddDemodulator);
 
+            JPanel chatPanel = new JPanel();
+            chatPanel.setBorder(new EmptyBorder(10, 5, 10, 5));
+            controlTabs.addTab("Chat", FontAwesome.ICO_COMMENT, chatPanel, null);
+            GridBagLayout gbl_chatPanel = new GridBagLayout();
+            gbl_chatPanel.columnWidths = new int[] { 0, 0 };
+            gbl_chatPanel.rowHeights = new int[] { 0, 0, 0 };
+            gbl_chatPanel.columnWeights = new double[] { 1.0, Double.MIN_VALUE };
+            gbl_chatPanel.rowWeights = new double[] { 1.0, 0.0, Double.MIN_VALUE };
+            chatPanel.setLayout(gbl_chatPanel);
+
+            JScrollPane scrollPane = new JScrollPane();
+            GridBagConstraints gbc_scrollPane = new GridBagConstraints();
+            gbc_scrollPane.insets = new Insets(0, 0, 5, 0);
+            gbc_scrollPane.fill = GridBagConstraints.BOTH;
+            gbc_scrollPane.gridx = 0;
+            gbc_scrollPane.gridy = 0;
+            chatPanel.add(scrollPane, gbc_scrollPane);
+
+            chatArea = new JTextArea();
+            chatArea.setEditable(false);
+            scrollPane.setViewportView(chatArea);
+
+            JPanel chatInputPanel = new JPanel();
+            GridBagConstraints gbc_chatInputPanel = new GridBagConstraints();
+            gbc_chatInputPanel.fill = GridBagConstraints.BOTH;
+            gbc_chatInputPanel.gridx = 0;
+            gbc_chatInputPanel.gridy = 1;
+            chatPanel.add(chatInputPanel, gbc_chatInputPanel);
+            chatInputPanel.setLayout(new BoxLayout(chatInputPanel, BoxLayout.X_AXIS));
+
+            JTextField chatInput = new JTextField();
+            chatInputPanel.add(chatInput);
+            chatInput.setColumns(10);
+
+            chatInputPanel.add(new JLabel(" "));
+
+            JButton chatSend = new JButton("Send");
+            chatInputPanel.add(chatSend);
+
             GridBagConstraints gbc_panel_2 = new GridBagConstraints();
             gbc_panel_2.fill = GridBagConstraints.BOTH;
             gbc_panel_2.gridx = 0;
@@ -1195,6 +1237,10 @@ public class ReceiverWindow extends JFrame {
 
     public boolean isLastHighSample() {
         return lastHighSample;
+    }
+
+    public void pushChatMessage(String username, String message) {
+        chatArea.setText(chatArea.getText() + "%s> %s\n".formatted(username, message));
     }
 
     public boolean removeListener(UserInteractionListener listener) {

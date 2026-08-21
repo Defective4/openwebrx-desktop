@@ -25,6 +25,7 @@ import io.github.defective4.sdr.owrxclient.model.DialFrequency;
 import io.github.defective4.sdr.owrxclient.model.ReceiverDetails;
 import io.github.defective4.sdr.owrxclient.model.ReceiverMode;
 import io.github.defective4.sdr.owrxclient.model.ReceiverProfile;
+import io.github.defective4.sdr.owrxclient.model.ServerChatMessage;
 import io.github.defective4.sdr.owrxclient.model.ServerConfig;
 import io.github.defective4.sdr.owrxclient.model.demod.DemodulatorResult;
 import io.github.defective4.sdr.owrxclient.model.demod.FTMessage;
@@ -263,6 +264,11 @@ public class RadioReceiver {
                         .toList();
                 rxWindow.setLabels(labels);
                 if (!freeTuned) cache.setLabels(profileId, labels);
+            }
+
+            @Override
+            public void chatMessageReceived(ServerChatMessage message) {
+                rxWindow.pushChatMessage(message.getUsername(), message.getMessage());
             }
 
             @Override
