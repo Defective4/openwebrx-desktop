@@ -45,7 +45,7 @@ public class SettingsDialog extends JDialog {
 
     private final ApplicationSettings appSettings;
     private final JComboBox<SerializedBandplan> bandplanBox = new JComboBox<>();
-    private final JCheckBox chckbxRDSTitle = new JCheckBox("Set window title to RDS data");
+    private final JCheckBox chckbxMetaTitle = new JCheckBox("Set window title to received metadata");
     private final JCheckBox dynamicColorMixingCheck = new JCheckBox("Dynamic color mixing");
     private final JCheckBox freeTuningCheck = new JCheckBox("Enable free tuning");
     private final JPasswordField magicKeyField = new JPasswordField();
@@ -368,11 +368,11 @@ public class SettingsDialog extends JDialog {
                                 {
                                     JPanel panel_1 = new JPanel();
                                     panel_1.setBorder(new EmptyBorder(16, 8, 8, 8));
-                                    tabbedPane_1.addTab("RDS", FontAwesome.ICO_CPU, panel_1, null);
+                                    tabbedPane_1.addTab("Metadata", FontAwesome.ICO_CPU, panel_1, null);
                                     panel_1.setLayout(new BoxLayout(panel_1, BoxLayout.Y_AXIS));
                                     {
-                                        panel_1.add(chckbxRDSTitle);
-                                        chckbxRDSTitle.setSelected(settings.isDecorateWindowRDS());
+                                        panel_1.add(chckbxMetaTitle);
+                                        chckbxMetaTitle.setSelected(settings.isDecorateWindowMetadata());
                                     }
                                 }
                             }
@@ -410,7 +410,7 @@ public class SettingsDialog extends JDialog {
                     settings.setMagicKey(new String(magicKeyField.getPassword()));
                     settings.setEnableFreeTuning(freeTuningCheck.isSelected());
                     settings.setDynamicColorMixing(dynamicColorMixingCheck.isSelected());
-                    settings.setDecorateWindowRDS(chckbxRDSTitle.isSelected());
+                    settings.setDecorateWindowRDS(chckbxMetaTitle.isSelected());
 
                     settings.setCustomBandplan(
                             bandplanBox.getSelectedItem() != null ? (SerializedBandplan) bandplanBox.getSelectedItem()
