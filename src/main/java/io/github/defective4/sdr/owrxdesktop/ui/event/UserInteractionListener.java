@@ -9,6 +9,8 @@ public interface UserInteractionListener {
 
     void chatMessageSent(String chatUsername, String text);
 
+    void dabServiceChanged(int service);
+
     void freeTune(int freq);
 
     void modeChanged(ReceiverMode primary, ReceiverMode underlying);

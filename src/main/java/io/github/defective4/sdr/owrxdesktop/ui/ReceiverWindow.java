@@ -114,7 +114,7 @@ public class ReceiverWindow extends JFrame {
 
     private float cpuUsage = Integer.MIN_VALUE;
 
-    private final DABPanel dabPanel = new DABPanel();
+    private final DABPanel dabPanel;
     private final JComboBox<ReceiverMode> digitalBox = new JComboBox<>();
 
     private boolean exiting;
@@ -202,6 +202,7 @@ public class ReceiverWindow extends JFrame {
         controlPanel.add(controlTabs);
 
         ReceiverModeRenderer renderer = new ReceiverModeRenderer();
+        dabPanel = new DABPanel(svc -> listeners.forEach(ls -> ls.dabServiceChanged(svc)));
 
         {
             JSplitPane fftPane = new JSplitPane();

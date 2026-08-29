@@ -9,6 +9,8 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.function.Consumer;
 
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.JButton;
@@ -33,11 +35,9 @@ public class DABPanel extends JPanel {
     private final JLabel lblClock;
 
     private final JLabel lblProgramme;
-    private JSeparator separator;
-    private JSeparator separator_1;
     private final JComboBox<Map.Entry<String, String>> serviceBox;
 
-    public DABPanel() {
+    public DABPanel(Consumer<Integer> serviceConsumer) {
         GridBagLayout gridBagLayout = new GridBagLayout();
         gridBagLayout.columnWidths = new int[] { 0, 0, 0 };
         gridBagLayout.rowHeights = new int[] { 0, 0, 0, 0, 0, 0, 0 };
@@ -63,7 +63,7 @@ public class DABPanel extends JPanel {
         add(ensLabel, gbc_textField);
         ensLabel.setColumns(10);
 
-        separator = new JSeparator();
+        JSeparator separator = new JSeparator();
         GridBagConstraints gbc_separator = new GridBagConstraints();
         gbc_separator.insets = new Insets(0, 0, 5, 0);
         gbc_separator.gridx = 1;
@@ -104,7 +104,12 @@ public class DABPanel extends JPanel {
         gbc_btnSelect.gridy = 3;
         add(btnSelect, gbc_btnSelect);
 
-        separator_1 = new JSeparator();
+        btnSelect.addActionListener(e -> {
+            Map.Entry<String, String> entry = (Entry<String, String>) serviceBox.getSelectedItem();
+            if (entry != null) serviceConsumer.accept(Integer.parseInt(entry.getKey()));
+        });
+
+        JSeparator separator_1 = new JSeparator();
         GridBagConstraints gbc_separator_1 = new GridBagConstraints();
         gbc_separator_1.insets = new Insets(0, 0, 5, 0);
         gbc_separator_1.gridx = 1;

@@ -32,6 +32,7 @@ import io.github.defective4.sdr.owrxclient.model.demod.FTMessage;
 import io.github.defective4.sdr.owrxclient.model.demod.PlaintextResult;
 import io.github.defective4.sdr.owrxclient.model.metadata.DABMetadata;
 import io.github.defective4.sdr.owrxclient.model.metadata.RDSMetadata;
+import io.github.defective4.sdr.owrxclient.model.param.DSPParams;
 import io.github.defective4.sdr.owrxdesktop.audio.AudioSinkManager;
 import io.github.defective4.sdr.owrxdesktop.bandplan.Bandplan;
 import io.github.defective4.sdr.owrxdesktop.cache.ReceiverCache;
@@ -127,6 +128,11 @@ public class RadioReceiver {
             @Override
             public void chatMessageSent(String chatUsername, String text) {
                 client.sendChatMessage(chatUsername, text);
+            }
+
+            @Override
+            public void dabServiceChanged(int service) {
+                client.setDSP(new DSPParams(null, null, null, null, null, service, null, null));
             }
 
             @Override
