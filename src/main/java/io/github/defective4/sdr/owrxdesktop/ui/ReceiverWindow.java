@@ -81,6 +81,7 @@ import io.github.defective4.sdr.owrxdesktop.ui.component.JFrequencySpinner;
 import io.github.defective4.sdr.owrxdesktop.ui.component.JLinkLabel;
 import io.github.defective4.sdr.owrxdesktop.ui.component.TuneablePanel;
 import io.github.defective4.sdr.owrxdesktop.ui.component.WaterfallPanel;
+import io.github.defective4.sdr.owrxdesktop.ui.component.demodulation.DABPanel;
 import io.github.defective4.sdr.owrxdesktop.ui.component.demodulation.FTPanel;
 import io.github.defective4.sdr.owrxdesktop.ui.component.demodulation.PlainTextPanel;
 import io.github.defective4.sdr.owrxdesktop.ui.component.demodulation.RDSPanel;
@@ -113,21 +114,22 @@ public class ReceiverWindow extends JFrame {
 
     private float cpuUsage = Integer.MIN_VALUE;
 
+    private final DABPanel dabPanel = new DABPanel();
     private final JComboBox<ReceiverMode> digitalBox = new JComboBox<>();
+
     private boolean exiting;
 
     private final float fftMax = -20;
-
     private final float fftMin = -88;
+
     private final FFTPanel fftPanel;
 
     private final DateFormat fmt = new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss");
 
     private final JSpinner freqSpinner = new JFrequencySpinner();
-
     private final JRadioButton ftlAuto = new JRadioButton("Auto");
-    private final JRadioButton ftlServer = new JRadioButton("Server");
 
+    private final JRadioButton ftlServer = new JRadioButton("Server");
     private final FTPanel ftPanel = new FTPanel();
 
     private String initialTitle;
@@ -958,6 +960,7 @@ public class ReceiverWindow extends JFrame {
                 JMenuItem rds = new JMenuItem("RDS (WFM)");
                 JMenuItem ft = new JMenuItem("FT (FT8, FT4)");
                 JMenuItem text = new JMenuItem("Plain text (rtty, cw, etc.)");
+                JMenuItem dab = new JMenuItem("DAB(+)");
 
                 rds.setEnabled(!tabbedPane.isAncestorOf(rdsPanel));
                 ft.setEnabled(!tabbedPane.isAncestorOf(ftPanel));
@@ -996,9 +999,21 @@ public class ReceiverWindow extends JFrame {
                     tabbedPane.setSelectedIndex(0);
                 });
 
+                dab.addActionListener(e2 -> {
+                    JPanel dabPanel = new JPanel();
+                    dabPanel.setLayout(new BorderLayout(0, 0));
+                    dabPanel.setBorder(new EmptyBorder(16, 4, 4, 4));
+                    dabPanel.add(this.dabPanel, BorderLayout.CENTER);
+
+                    tabbedPane.insertTab("", null, dabPanel, null, 0);
+                    tabbedPane.setTabComponentAt(0, new JCloseableTab("DAB(+)", tabbedPane));
+                    tabbedPane.setSelectedIndex(0);
+                });
+
                 menu.add(rds);
                 menu.add(ft);
                 menu.add(text);
+                menu.add(dab);
 
                 menu.show((Component) e.getSource(), 0, ((Component) e.getSource()).getHeight());
             });
@@ -1213,6 +1228,10 @@ public class ReceiverWindow extends JFrame {
 
     public int getCenterFrequency() {
         return centerFrequency;
+    }
+
+    public DABPanel getDabPanel() {
+        return dabPanel;
     }
 
     public List<ReceiverMode> getDigitalModes() {

@@ -26,10 +26,10 @@ import io.github.defective4.sdr.owrxdesktop.application.integration.listings.Sea
 import io.github.defective4.sdr.owrxdesktop.ui.ApplicationWindow;
 
 public class ReceiverbookScraper implements ReceiverScraper {
-    private static final String RXBOOK_URL_ENV = "RECEIVERBOOK_URL";
     private static final double EARTH_RADIUS = 6371;
     private static final Pattern JSON_PATTERN = Pattern.compile("^\\s*var\\s+receivers\\s+=\\s+(\\[.*\\]);\\s*$");
     private static final URL RXBOOK_URL;
+    private static final String RXBOOK_URL_ENV = "RECEIVERBOOK_URL";
     static {
         try {
             String url;

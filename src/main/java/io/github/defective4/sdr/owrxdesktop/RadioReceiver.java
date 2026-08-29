@@ -30,6 +30,7 @@ import io.github.defective4.sdr.owrxclient.model.ServerConfig;
 import io.github.defective4.sdr.owrxclient.model.demod.DemodulatorResult;
 import io.github.defective4.sdr.owrxclient.model.demod.FTMessage;
 import io.github.defective4.sdr.owrxclient.model.demod.PlaintextResult;
+import io.github.defective4.sdr.owrxclient.model.metadata.DABMetadata;
 import io.github.defective4.sdr.owrxclient.model.metadata.RDSMetadata;
 import io.github.defective4.sdr.owrxdesktop.audio.AudioSinkManager;
 import io.github.defective4.sdr.owrxdesktop.bandplan.Bandplan;
@@ -279,6 +280,11 @@ public class RadioReceiver {
             @Override
             public void cpuUsageUpdated(float cpuUsage) {
                 rxWindow.setCPUUsage(cpuUsage);
+            }
+
+            @Override
+            public void dabMetadataReceived(DABMetadata metadata) {
+                rxWindow.getDabPanel().setData(metadata);
             }
 
             @Override
