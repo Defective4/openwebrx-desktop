@@ -317,6 +317,9 @@ public class RadioReceiver {
             @Override
             public void drmMetadataReceived(DRMMetadata metadata) {
                 rxWindow.getDrmPanel().update(metadata);
+                if (settings.isDecorateWindowMetadata()) metadata.getServiceList().ifPresent(svcs -> {
+                    if (svcs.length > 0) rxWindow.setTitle(svcs[0].label());
+                });
             }
 
             @Override
