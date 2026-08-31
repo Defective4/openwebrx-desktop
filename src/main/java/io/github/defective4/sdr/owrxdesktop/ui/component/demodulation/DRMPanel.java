@@ -8,6 +8,7 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
 import javax.swing.JTable;
 import javax.swing.border.EmptyBorder;
@@ -16,24 +17,13 @@ import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
 
 import io.github.defective4.sdr.owrxclient.model.metadata.DRMMetadata;
+import io.github.defective4.sdr.owrxclient.model.metadata.DRMMetadata.DRMService;
 import io.github.defective4.sdr.owrxdesktop.ui.component.JLED;
 
 public class DRMPanel extends JPanel {
     private static final String[] INTERLEAVE = new String[] { "Short", "Long" };
     private static final String[] QAM = new String[] { "4-QAM", "16-QAM", "64-QAM" };
-    private JLED jldAudio;
-    private JLED jldData;
-    private JLED jldFac;
-    private JLED jldFrame;
-    private JLED jldGuide;
-    private JLED jldIo;
-    private JLED jldJournaline;
-    private JLED jldMsc;
-    private JLED jldSdc;
-    private JLED jldSlideshow;
-    private JLED jldTime;
-
-    private final DefaultTableModel model = new DefaultTableModel(
+    private final DefaultTableModel dataModel = new DefaultTableModel(
             new Object[][] { { "IF Level", null, "SNR", null }, { "Mode", null, "Bandwidth", null },
                     { "SDC", null, "MSC", null }, { "Interleave", null, "Protection", null }, },
             new String[] { "", "", "", "" }) {
@@ -42,18 +32,34 @@ public class DRMPanel extends JPanel {
         public boolean isCellEditable(int row, int column) {
             return false;
         }
-
     };
+    private final JLED jldAudio;
+    private final JLED jldData;
+    private final JLED jldFac;
+    private final JLED jldFrame;
+    private final JLED jldGuide;
+    private final JLED jldIo;
+    private final JLED jldJournaline;
+    private final JLED jldMsc;
+    private final JLED jldSdc;
+    private final JLED jldSlideshow;
+    private final JLED jldTime;
 
-    private JTable table;
+    private final DefaultTableModel servicesModel = new DefaultTableModel(new Object[][] {},
+            new String[] { "ID", "Service", "Language", "Bitrate" }) {
+        @Override
+        public boolean isCellEditable(int row, int column) {
+            return false;
+        }
+    };
 
     public DRMPanel() {
         setBorder(new EmptyBorder(8, 16, 8, 16));
         GridBagLayout gridBagLayout = new GridBagLayout();
         gridBagLayout.columnWidths = new int[] { 0, 0 };
-        gridBagLayout.rowHeights = new int[] { 0, 0, 0, 0, 0, 0 };
+        gridBagLayout.rowHeights = new int[] { 0, 0, 0, 0, 0, 0, 0 };
         gridBagLayout.columnWeights = new double[] { 1.0, Double.MIN_VALUE };
-        gridBagLayout.rowWeights = new double[] { 0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE };
+        gridBagLayout.rowWeights = new double[] { 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, Double.MIN_VALUE };
         setLayout(gridBagLayout);
 
         JPanel panel = new JPanel();
@@ -99,30 +105,29 @@ public class DRMPanel extends JPanel {
         gbc_separator.gridy = 1;
         add(separator, gbc_separator);
 
-        table = new JTable();
-        JTableHeader header = table.getTableHeader();
+        JTable dataTable = new JTable();
+        JTableHeader header = dataTable.getTableHeader();
         header.setResizingAllowed(false);
         header.setReorderingAllowed(false);
-        table.setDefaultRenderer(Object.class, new DefaultTableCellRenderer() {
+        dataTable.setDefaultRenderer(Object.class, new DefaultTableCellRenderer() {
             @Override
             public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected,
                     boolean hasFocus, int row, int column) {
                 Component label = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
                 if (column % 2 == 0) {
                     label.setFont(label.getFont().deriveFont(Font.BOLD));
-
                 }
                 return label;
             }
         });
 
-        table.setModel(model);
+        dataTable.setModel(dataModel);
         GridBagConstraints gbc_table = new GridBagConstraints();
         gbc_table.insets = new Insets(0, 0, 5, 0);
         gbc_table.fill = GridBagConstraints.BOTH;
         gbc_table.gridx = 0;
         gbc_table.gridy = 2;
-        add(table, gbc_table);
+        add(dataTable, gbc_table);
 
         JSeparator separator_1 = new JSeparator();
         GridBagConstraints gbc_separator_1 = new GridBagConstraints();
@@ -137,6 +142,7 @@ public class DRMPanel extends JPanel {
         flowLayout_1.setHgap(10);
         flowLayout_1.setAlignment(FlowLayout.LEFT);
         GridBagConstraints gbc_panel_1 = new GridBagConstraints();
+        gbc_panel_1.insets = new Insets(0, 0, 5, 0);
         gbc_panel_1.fill = GridBagConstraints.BOTH;
         gbc_panel_1.gridx = 0;
         gbc_panel_1.gridy = 4;
@@ -161,6 +167,19 @@ public class DRMPanel extends JPanel {
         jldSlideshow = new JLED((String) null);
         jldSlideshow.setText("Slideshow");
         panel_1.add(jldSlideshow);
+
+        JScrollPane scrollPane = new JScrollPane();
+        GridBagConstraints gbc_scrollPane = new GridBagConstraints();
+        gbc_scrollPane.fill = GridBagConstraints.BOTH;
+        gbc_scrollPane.gridx = 0;
+        gbc_scrollPane.gridy = 5;
+        add(scrollPane, gbc_scrollPane);
+
+        JTable servicesTable = new JTable();
+        header = servicesTable.getTableHeader();
+        header.setReorderingAllowed(false);
+        servicesTable.setModel(servicesModel);
+        scrollPane.setViewportView(servicesTable);
     }
 
     public void update(DRMMetadata data) {
@@ -185,8 +204,8 @@ public class DRMPanel extends JPanel {
         });
 
         data.getSignal().ifPresent(levels -> {
-            model.setValueAt("%s dB".formatted(levels.ifDb()), 0, 1);
-            model.setValueAt("%s dB".formatted(levels.snr()), 0, 3);
+            dataModel.setValueAt("%s dB".formatted(levels.ifDb()), 0, 1);
+            dataModel.setValueAt("%s dB".formatted(levels.snr()), 0, 3);
         });
 
         data.getCoding().ifPresent(coding -> {
@@ -201,15 +220,31 @@ public class DRMPanel extends JPanel {
                 val = "B";
             else
                 val = "";
-            model.setValueAt(val, 3, 3);
-            model.setValueAt(QAM[coding.sdc()], 2, 1);
-            model.setValueAt(QAM[coding.msc()], 2, 3);
+            dataModel.setValueAt(val, 3, 3);
+            dataModel.setValueAt(QAM[coding.sdc()], 2, 1);
+            dataModel.setValueAt(QAM[coding.msc()], 2, 3);
         });
 
         data.getMode().ifPresent(mode -> {
-            model.setValueAt("%s KHz".formatted(mode.bandwidthKhz()), 1, 3);
-            model.setValueAt(INTERLEAVE[mode.interleaver()], 3, 1);
-            model.setValueAt((char) ('A' + mode.robustness()), 1, 1);
+            dataModel.setValueAt("%s KHz".formatted(mode.bandwidthKhz()), 1, 3);
+            dataModel.setValueAt(INTERLEAVE[mode.interleaver()], 3, 1);
+            dataModel.setValueAt((char) ('A' + mode.robustness()), 1, 1);
+        });
+
+        data.getServiceList().ifPresent(services -> {
+            int rows = servicesModel.getRowCount();
+            for (int i = 0; i < rows; i++) servicesModel.removeRow(0);
+
+            for (DRMService service : services) {
+                String id;
+                try {
+                    id = "0x" + Integer.toHexString(Integer.parseInt(service.id()));
+                } catch (NumberFormatException e) {
+                    id = service.id();
+                }
+                servicesModel.addRow(new String[] { id, service.label(), service.language().name(),
+                        Float.toString(service.bitrate()) });
+            }
         });
     }
 }
