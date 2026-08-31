@@ -82,6 +82,7 @@ import io.github.defective4.sdr.owrxdesktop.ui.component.JLinkLabel;
 import io.github.defective4.sdr.owrxdesktop.ui.component.TuneablePanel;
 import io.github.defective4.sdr.owrxdesktop.ui.component.WaterfallPanel;
 import io.github.defective4.sdr.owrxdesktop.ui.component.demodulation.DABPanel;
+import io.github.defective4.sdr.owrxdesktop.ui.component.demodulation.DRMPanel;
 import io.github.defective4.sdr.owrxdesktop.ui.component.demodulation.FTPanel;
 import io.github.defective4.sdr.owrxdesktop.ui.component.demodulation.PlainTextPanel;
 import io.github.defective4.sdr.owrxdesktop.ui.component.demodulation.RDSPanel;
@@ -117,30 +118,32 @@ public class ReceiverWindow extends JFrame {
     private final DABPanel dabPanel;
     private final JComboBox<ReceiverMode> digitalBox = new JComboBox<>();
 
-    private boolean exiting;
+    private final DRMPanel drmPanel = new DRMPanel();
 
+    private boolean exiting;
     private final float fftMax = -20;
+
     private final float fftMin = -88;
 
     private final FFTPanel fftPanel;
 
     private final DateFormat fmt = new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss");
-
     private final JSpinner freqSpinner = new JFrequencySpinner();
+
     private final JRadioButton ftlAuto = new JRadioButton("Auto");
-
     private final JRadioButton ftlServer = new JRadioButton("Server");
-    private final FTPanel ftPanel = new FTPanel();
 
+    private final FTPanel ftPanel = new FTPanel();
     private String initialTitle;
     private long lastFFTDraw;
+
     private boolean lastHighSample = false;
 
     private final List<UserInteractionListener> listeners = new CopyOnWriteArrayList<>();
-
     private int maxFPS = -1;
     private float minFFT, maxFFT;
     private final JMenuItem mntmBookmarks = new JMenuItem("Bookmarks", ICO_BOOKMARK);
+
     private int offset;
 
     private final PlainTextPanel plainTextPanel = new PlainTextPanel();
@@ -150,7 +153,6 @@ public class ReceiverWindow extends JFrame {
     private boolean profileDebounce;
 
     private final JComboBox<RecorderQuality> qualityBox = new JComboBox<>();
-
     private final RDSPanel rdsPanel = new RDSPanel();
 
     private final JButton resetScope = new JButton("Reset");
@@ -962,6 +964,7 @@ public class ReceiverWindow extends JFrame {
                 JMenuItem ft = new JMenuItem("FT (FT8, FT4)");
                 JMenuItem text = new JMenuItem("Plain text (rtty, cw, etc.)");
                 JMenuItem dab = new JMenuItem("DAB(+)");
+                JMenuItem drm = new JMenuItem("DRM");
 
                 rds.setEnabled(!tabbedPane.isAncestorOf(rdsPanel));
                 ft.setEnabled(!tabbedPane.isAncestorOf(ftPanel));
@@ -1011,10 +1014,27 @@ public class ReceiverWindow extends JFrame {
                     tabbedPane.setSelectedIndex(0);
                 });
 
+                drm.addActionListener(e2 -> {
+                    JPanel drmPanel = new JPanel();
+                    drmPanel.setLayout(new BorderLayout(0, 0));
+                    drmPanel.setBorder(new EmptyBorder(16, 4, 4, 4));
+
+                    JPanel container = new JPanel();
+                    container.setLayout(new BoxLayout(container, BoxLayout.X_AXIS));
+                    container.add(this.drmPanel);
+
+                    drmPanel.add(container, BorderLayout.CENTER);
+
+                    tabbedPane.insertTab("", null, drmPanel, null, 0);
+                    tabbedPane.setTabComponentAt(0, new JCloseableTab("DRM", tabbedPane));
+                    tabbedPane.setSelectedIndex(0);
+                });
+
                 menu.add(rds);
                 menu.add(ft);
                 menu.add(text);
                 menu.add(dab);
+                menu.add(drm);
 
                 menu.show((Component) e.getSource(), 0, ((Component) e.getSource()).getHeight());
             });
@@ -1242,6 +1262,10 @@ public class ReceiverWindow extends JFrame {
             mode.add(digitalBox.getItemAt(i));
         }
         return Collections.unmodifiableList(mode);
+    }
+
+    public DRMPanel getDrmPanel() {
+        return drmPanel;
     }
 
     public FFTPanel getFftPanel() {

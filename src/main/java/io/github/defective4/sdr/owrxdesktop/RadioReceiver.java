@@ -31,6 +31,7 @@ import io.github.defective4.sdr.owrxclient.model.demod.DemodulatorResult;
 import io.github.defective4.sdr.owrxclient.model.demod.FTMessage;
 import io.github.defective4.sdr.owrxclient.model.demod.PlaintextResult;
 import io.github.defective4.sdr.owrxclient.model.metadata.DABMetadata;
+import io.github.defective4.sdr.owrxclient.model.metadata.DRMMetadata;
 import io.github.defective4.sdr.owrxclient.model.metadata.RDSMetadata;
 import io.github.defective4.sdr.owrxclient.model.param.DSPParams;
 import io.github.defective4.sdr.owrxdesktop.audio.AudioSinkManager;
@@ -311,6 +312,11 @@ public class RadioReceiver {
                         freq.mode(), Color.green, Color.decode("#009000"), Type.DIAL, freq.mode(), null)).toList();
                 rxWindow.setLabels(labels);
                 if (!freeTuned) cache.setLabels(profileId, labels);
+            }
+
+            @Override
+            public void drmMetadataReceived(DRMMetadata metadata) {
+                rxWindow.getDrmPanel().update(metadata);
             }
 
             @Override
