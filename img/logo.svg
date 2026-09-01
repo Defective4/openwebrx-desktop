@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="512"
+   height="512"
+   viewBox="0 0 512 512"
+   version="1.1"
+   id="svg1"
+   inkscape:version="1.4 (e7c3feb100, 2024-10-09)"
+   sodipodi:docname="logo.svg"
+   inkscape:export-filename="logo.png"
+   inkscape:export-xdpi="96"
+   inkscape:export-ydpi="96"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview1"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:document-units="px"
+     showguides="false"
+     inkscape:zoom="0.40332032"
+     inkscape:cx="545.47215"
+     inkscape:cy="228.10654"
+     inkscape:window-width="1920"
+     inkscape:window-height="1016"
+     inkscape:window-x="0"
+     inkscape:window-y="0"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="g4-7" />
+  <defs
+     id="defs1" />
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1">
+    <g
+       id="g5"
+       transform="matrix(2.1666498,0,0,2.1666498,-299.8387,-175.54102)">
+      <g
+         id="g4"
+         transform="translate(18,14)">
+        <g
+           id="g3">
+          <path
+             style="fill:none;stroke:#ff7f2a;stroke-width:12;stroke-linecap:round;stroke-dasharray:none"
+             d="M 239.08588,204.38741 256,186.63188 V 145.046"
+             id="path1"
+             sodipodi:nodetypes="ccc" />
+          <path
+             id="path2"
+             style="fill:none;stroke:#ff7f2a;stroke-width:11.53855136;stroke-linecap:round;stroke-dasharray:none"
+             d="m 223.65889,148.58657 c 0,-17.8615 14.47961,-32.34112 32.34111,-32.34112 17.8615,0 32.34111,14.47962 32.34111,32.34112"
+             sodipodi:nodetypes="csc" />
+          <path
+             id="path2-7"
+             style="fill:none;stroke:#ff7f2a;stroke-width:11.53855136;stroke-linecap:round;stroke-dasharray:none"
+             d="m 201.4257,148.99831 c 0,-30.14055 24.43374,-54.57431 54.5743,-54.57431 30.14056,0 54.5743,24.43376 54.5743,54.57431"
+             sodipodi:nodetypes="csc" />
+        </g>
+        <circle
+           style="fill:#00caff;fill-opacity:1;stroke:#ff7f2a;stroke-width:7.76594;stroke-linecap:round;stroke-dasharray:none"
+           id="path3"
+           cx="256"
+           cy="143.96126"
+           r="11.071649" />
+      </g>
+      <g
+         id="g4-7"
+         transform="rotate(180,247.54294,192.17433)"
+         style="stroke:#00caff;stroke-opacity:1">
+        <g
+           id="g3-9"
+           style="stroke:#00caff;stroke-opacity:1">
+          <path
+             style="fill:none;stroke:#00caff;stroke-width:12;stroke-linecap:round;stroke-dasharray:none;stroke-opacity:1"
+             d="M 239.08588,204.38741 256,186.63187 V 145.046"
+             id="path1-2"
+             sodipodi:nodetypes="ccc" />
+          <path
+             id="path2-0"
+             style="fill:none;stroke:#00caff;stroke-width:11.53855136;stroke-linecap:round;stroke-opacity:1;stroke-dasharray:none"
+             d="m 223.65889,148.58657 c 0,-17.8615 14.47961,-32.34112 32.34111,-32.34112 17.8615,0 32.34111,14.47962 32.34111,32.34112"
+             sodipodi:nodetypes="csc" />
+          <path
+             id="path2-7-2"
+             style="fill:none;stroke:#00caff;stroke-width:11.53855136;stroke-linecap:round;stroke-dasharray:none;stroke-opacity:1"
+             d="m 201.4257,148.99831 c 0,-30.14055 24.43374,-54.57431 54.5743,-54.57431 30.14056,0 54.5743,24.43376 54.5743,54.57431"
+             sodipodi:nodetypes="csc" />
+        </g>
+        <circle
+           style="fill:#ff7f2a;stroke:#00caff;stroke-width:7.74678;stroke-linecap:round;stroke-dasharray:none;stroke-opacity:1"
+           id="path3-3"
+           cx="256"
+           cy="143.96126"
+           r="11.044327" />
+      </g>
+    </g>
+  </g>
+</svg>

@@ -8,12 +8,15 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
+import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import javax.imageio.ImageIO;
 import javax.sound.sampled.LineUnavailableException;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
@@ -61,6 +64,13 @@ public class ApplicationWindow extends JFrame {
         setBounds(100, 100, 768, 512);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setTitle("OpenWebRX Desktop");
+        BufferedImage logo;
+        try (InputStream in = getClass().getResourceAsStream("/logo.png")){
+            logo = ImageIO.read(in);
+        } catch (IOException e3) {
+            throw new IllegalStateException(e3);
+        }
+        setIconImage(logo);
 
         {
             JMenuBar menuBar = new JMenuBar();
