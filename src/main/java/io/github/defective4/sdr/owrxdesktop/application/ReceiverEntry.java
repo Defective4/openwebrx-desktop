@@ -82,9 +82,7 @@ public class ReceiverEntry {
     }
 
     public void query() {
-        receiverData = null;
-        receiverImage = null;
-        querying = true;
+        setQuerying();
         try {
             StatusResponse response;
             try (Reader reader = new InputStreamReader(URI.create(rootURL + "status.json").toURL().openStream())) {

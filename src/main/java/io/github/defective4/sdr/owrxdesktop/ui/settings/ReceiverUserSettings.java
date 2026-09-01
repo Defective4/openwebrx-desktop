@@ -54,6 +54,7 @@ public class ReceiverUserSettings {
     private boolean enableFreeTuning;
     private String magicKey;
     private BuiltinWaterfallTheme selectedBuiltinWaterfallTheme = BuiltinWaterfallTheme.TURBO;
+    private boolean syncWindowIcon = true;
     private boolean useServerBandplan = true;
     private List<String> waterfallCustomTheme = List.of("#000000", "#ffffff");
     private WaterfallThemeMode waterfallThemeMode = WaterfallThemeMode.SERVER;
@@ -113,6 +114,10 @@ public class ReceiverUserSettings {
         return enableFreeTuning;
     }
 
+    public boolean isSyncWindowIcon() {
+        return syncWindowIcon;
+    }
+
     public boolean isUseServerBandplan() {
         return useServerBandplan;
     }
@@ -143,6 +148,10 @@ public class ReceiverUserSettings {
 
     public void setSelectedBuiltinWaterfallTheme(BuiltinWaterfallTheme selectedBuiltinWaterfallTheme) {
         this.selectedBuiltinWaterfallTheme = Objects.requireNonNull(selectedBuiltinWaterfallTheme);
+    }
+
+    public void setSyncWindowIcon(boolean syncWindowIcon) {
+        this.syncWindowIcon = syncWindowIcon;
     }
 
     public void setUseServerBandplan(boolean useServerBandplan) {

@@ -12,6 +12,8 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Image;
 import java.awt.Insets;
+import java.awt.MenuItem;
+import java.awt.PopupMenu;
 import java.awt.SystemTray;
 import java.awt.TrayIcon;
 import java.awt.event.ActionListener;
@@ -121,7 +123,6 @@ public class ReceiverWindow extends JFrame {
     private float cpuUsage = Integer.MIN_VALUE;
 
     private final DABPanel dabPanel;
-    private boolean deiconifying;
 
     private final JComboBox<ReceiverMode> digitalBox = new JComboBox<>();
 
@@ -187,6 +188,7 @@ public class ReceiverWindow extends JFrame {
         resetAutoFFT();
         setBounds(100, 100, 768, 600);
         setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+        setIconImage(logo);
         addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent e) {
@@ -1579,13 +1581,17 @@ public class ReceiverWindow extends JFrame {
         Dimension size = tray.getTrayIconSize();
 
         trayIcon = new TrayIcon(logo.getScaledInstance(size.width, size.height, Image.SCALE_SMOOTH));
-        trayIcon.addActionListener(e -> {
-            deiconifying = true;
-            tray.remove(trayIcon);
-            trayIcon = null;
-            setVisible(true);
-            setExtendedState(getExtendedState() & ~ICONIFIED);
+        trayIcon.addActionListener(e -> { unminimize(tray); });
+
+        PopupMenu menu = new PopupMenu();
+        menu.add(new MenuItem("Reopen")).addActionListener(e -> unminimize(tray));
+        menu.add(new MenuItem("Quit")).addActionListener(e -> {
+            unminimize(tray);
+            exiting = false;
+            exit();
         });
+
+        trayIcon.setPopupMenu(menu);
 
         try {
             tray.add(trayIcon);
@@ -1604,6 +1610,13 @@ public class ReceiverWindow extends JFrame {
         digitalBox.setEnabled(state);
         freqSpinner.setEnabled(state);
         tuningStepSpinner.setEnabled(state);
+    }
+
+    private void unminimize(SystemTray tray) {
+        tray.remove(trayIcon);
+        trayIcon = null;
+        setVisible(true);
+        setExtendedState(getExtendedState() & ~ICONIFIED);
     }
 
     private void updateCPU() {

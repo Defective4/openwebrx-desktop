@@ -46,12 +46,13 @@ public class SettingsDialog extends JDialog {
     private final ApplicationSettings appSettings;
     private final JComboBox<SerializedBandplan> bandplanBox = new JComboBox<>();
     private final JCheckBox chckbxMetaTitle = new JCheckBox("Set window title to received metadata");
+    private final JCheckBox chckbxSetWindowIcon;
     private final JCheckBox dynamicColorMixingCheck = new JCheckBox("Dynamic color mixing");
     private final JCheckBox freeTuningCheck = new JCheckBox("Enable free tuning");
     private final JPasswordField magicKeyField = new JPasswordField();
     private final JRadioButton rdbtnBuiltin = new JRadioButton("Built-in: ");
-    private final JRadioButton rdbtnCustom = new JRadioButton("Custom (One hex color per line, each starting with #):");
 
+    private final JRadioButton rdbtnCustom = new JRadioButton("Custom (One hex color per line, each starting with #):");
     private final JRadioButton rdbtnCustomBandplanButton = new JRadioButton("Use a custom bandplan");
     private final JRadioButton rdbtnServerBandplanButton = new JRadioButton("Use server bandplan");
     private final JRadioButton rdbtnServerprovidedConfiguration = new JRadioButton("Server-provided configuration");
@@ -374,6 +375,11 @@ public class SettingsDialog extends JDialog {
                                         panel_1.add(chckbxMetaTitle);
                                         chckbxMetaTitle.setSelected(settings.isDecorateWindowMetadata());
                                     }
+                                    {
+                                        chckbxSetWindowIcon = new JCheckBox("Set window icon to receiver avatar");
+                                        chckbxSetWindowIcon.setSelected(settings.isSyncWindowIcon());
+                                        panel_1.add(chckbxSetWindowIcon);
+                                    }
                                 }
                             }
                         }
@@ -411,6 +417,7 @@ public class SettingsDialog extends JDialog {
                     settings.setEnableFreeTuning(freeTuningCheck.isSelected());
                     settings.setDynamicColorMixing(dynamicColorMixingCheck.isSelected());
                     settings.setDecorateWindowRDS(chckbxMetaTitle.isSelected());
+                    settings.setSyncWindowIcon(chckbxSetWindowIcon.isSelected());
 
                     settings.setCustomBandplan(
                             bandplanBox.getSelectedItem() != null ? (SerializedBandplan) bandplanBox.getSelectedItem()

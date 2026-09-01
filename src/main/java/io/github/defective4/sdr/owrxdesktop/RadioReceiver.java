@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.awt.TrayIcon.MessageType;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.net.URI;
 import java.util.Arrays;
@@ -62,22 +63,24 @@ public class RadioReceiver {
     private int jumpFreq = -1;
 
     private String jumpMode;
-    private String modulation, profileId;
+    private final BufferedImage logo;
 
+    private String modulation, profileId;
     private final ReceiverWindow rxWindow;
+
     private final Bandplan serverBandplan = new Bandplan();
 
     private final ReceiverUserSettings settings;
-
     private final URI uri;
 
-    public RadioReceiver(URI uri, ReceiverUserSettings settings, ApplicationWindow app, ReceiverCache cache)
-            throws LineUnavailableException {
+    public RadioReceiver(URI uri, ReceiverUserSettings settings, ApplicationWindow app, ReceiverCache cache,
+            BufferedImage logo) throws LineUnavailableException {
         this.cache = cache;
         this.settings = settings;
+        this.logo = logo;
         audioSinkManager = new AudioSinkManager();
         this.uri = uri;
-        rxWindow = new ReceiverWindow(settings, cache, app.getUserStorage().getApplicationSettings(), app.getLogo());
+        rxWindow = new ReceiverWindow(settings, cache, app.getUserStorage().getApplicationSettings(), logo);
         rxWindow.addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosed(WindowEvent e) {

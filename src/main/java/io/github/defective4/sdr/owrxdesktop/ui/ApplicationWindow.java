@@ -286,12 +286,24 @@ public class ApplicationWindow extends JFrame {
                                 receiver.version()));
                         publicContainer.addEntry(entry, cpt -> {
                             JButton connectButton = new JButton("Connect", FontAwesome.ICO_SIGN_IN);
+
+                            JButton queryButton = new JButton("Query", ICO_SYNC);
+                            queryButton.addActionListener(e2 -> {
+                                ReceiverEntry rxEntry = cpt.getEntry();
+                                rxEntry.setQuerying();
+                                cpt.updateEntry();
+                                updateEntryAsync(cpt);
+                            });
                             connectButton.addActionListener(e2 -> {
                                 setVisible(false);
                                 ReceiverEntry rxEntry = cpt.getEntry();
                                 try {
+                                    if (rxEntry.getSettings().isSyncWindowIcon()) rxEntry.query();
                                     RadioReceiver rx = new RadioReceiver(rxEntry.getWebsocketURI(),
-                                            rxEntry.getSettings(), this, rxEntry.getCache());
+                                            rxEntry.getSettings(), this, rxEntry.getCache(),
+                                            rxEntry.getSettings().isSyncWindowIcon()
+                                                    ? rxEntry.getReceiverImage().orElse(logo)
+                                                    : logo);
                                     rx.setVisible(true);
                                     rx.connect();
                                 } catch (LineUnavailableException | InterruptedException e1) {
@@ -307,14 +319,6 @@ public class ApplicationWindow extends JFrame {
                                 rxEntry.setQuerying();
                                 newCpt.updateEntry();
                                 updateEntryAsync(newCpt);
-                            });
-
-                            JButton queryButton = new JButton("Query", ICO_SYNC);
-                            queryButton.addActionListener(e2 -> {
-                                ReceiverEntry rxEntry = cpt.getEntry();
-                                rxEntry.setQuerying();
-                                cpt.updateEntry();
-                                updateEntryAsync(cpt);
                             });
 
                             return List.of(connectButton, addButton, queryButton);
@@ -381,23 +385,27 @@ public class ApplicationWindow extends JFrame {
     private ReceiverEntryComponent addPersonalEntry(ReceiverEntry entry) {
         ReceiverEntryComponent cpt = rxContainer.addEntry(entry, rxcpt -> {
             JButton connect = new JButton("Connect", ICO_SIGN_IN);
-            connect.addActionListener(e -> {
-                setVisible(false);
-                ReceiverEntry rxEntry = rxcpt.getEntry();
-                try {
-                    RadioReceiver rx = new RadioReceiver(rxEntry.getWebsocketURI(), rxEntry.getSettings(), this,
-                            rxEntry.getCache());
-                    rx.setVisible(true);
-                    rx.connect();
-                } catch (LineUnavailableException | InterruptedException e1) {
-                    e1.printStackTrace();
-                }
-            });
             JButton refresh = new JButton("Refresh", ICO_SYNC);
             refresh.addActionListener(e -> {
                 rxcpt.getEntry().setQuerying();
                 rxcpt.updateEntry();
                 updateEntryAsync(rxcpt);
+            });
+            connect.addActionListener(e -> {
+                setVisible(false);
+                ReceiverEntry rxEntry = rxcpt.getEntry();
+                try {
+                    if (rxEntry.getSettings().isSyncWindowIcon()) {
+                        rxEntry.query();
+                    }
+                    RadioReceiver rx = new RadioReceiver(rxEntry.getWebsocketURI(), rxEntry.getSettings(), this,
+                            rxEntry.getCache(),
+                            rxEntry.getSettings().isSyncWindowIcon() ? rxEntry.getReceiverImage().orElse(logo) : logo);
+                    rx.setVisible(true);
+                    rx.connect();
+                } catch (LineUnavailableException | InterruptedException e1) {
+                    e1.printStackTrace();
+                }
             });
             JButton more = new JButton(FontAwesome.FA_COG);
             FontAwesome.setFontAwesomeFont(more);
