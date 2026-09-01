@@ -2,6 +2,7 @@ package io.github.defective4.sdr.owrxdesktop.ui;
 
 import static io.github.defective4.sdr.owrxdesktop.ui.text.FontAwesome.*;
 
+import java.awt.AWTException;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
@@ -9,13 +10,17 @@ import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.Image;
 import java.awt.Insets;
+import java.awt.SystemTray;
+import java.awt.TrayIcon;
 import java.awt.event.ActionListener;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.text.DateFormat;
@@ -116,32 +121,36 @@ public class ReceiverWindow extends JFrame {
     private float cpuUsage = Integer.MIN_VALUE;
 
     private final DABPanel dabPanel;
+    private boolean deiconifying;
+
     private final JComboBox<ReceiverMode> digitalBox = new JComboBox<>();
 
     private final DRMPanel drmPanel = new DRMPanel();
-
     private boolean exiting;
+
     private final float fftMax = -20;
 
     private final float fftMin = -88;
 
     private final FFTPanel fftPanel;
-
     private final DateFormat fmt = new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss");
+
     private final JSpinner freqSpinner = new JFrequencySpinner();
-
     private final JRadioButton ftlAuto = new JRadioButton("Auto");
-    private final JRadioButton ftlServer = new JRadioButton("Server");
 
+    private final JRadioButton ftlServer = new JRadioButton("Server");
     private final FTPanel ftPanel = new FTPanel();
     private String initialTitle;
+
     private long lastFFTDraw;
 
     private boolean lastHighSample = false;
-
     private final List<UserInteractionListener> listeners = new CopyOnWriteArrayList<>();
+    private final BufferedImage logo;
     private int maxFPS = -1;
+
     private float minFFT, maxFFT;
+
     private final JMenuItem mntmBookmarks = new JMenuItem("Bookmarks", ICO_BOOKMARK);
 
     private int offset;
@@ -149,27 +158,29 @@ public class ReceiverWindow extends JFrame {
     private final PlainTextPanel plainTextPanel = new PlainTextPanel();
 
     private final JComboBox<ReceiverProfile> profileBox = new JComboBox<>();
-
     private boolean profileDebounce;
 
     private final JComboBox<RecorderQuality> qualityBox = new JComboBox<>();
+
     private final RDSPanel rdsPanel = new RDSPanel();
 
     private final JButton resetScope = new JButton("Reset");
 
     private int scopeLower;
-
     private int scopeUpper;
-
     private WaterfallLevels serverLevels = new WaterfallLevels(-88, -20);
     private final JProgressBar signalBar = new JProgressBar();
     private int temperatureC = Integer.MIN_VALUE;
+    private TrayIcon trayIcon;
     private final JFrequencySpinner tuningStepSpinner = new JFrequencySpinner();
+
     private final ReceiverUserSettings userSettings;
     private final WaterfallPanel waterfallPanel;
 
-    public ReceiverWindow(ReceiverUserSettings settings, ReceiverCache cache, ApplicationSettings appSettings) {
+    public ReceiverWindow(ReceiverUserSettings settings, ReceiverCache cache, ApplicationSettings appSettings,
+            BufferedImage logo) {
         this.appSettings = appSettings;
+        this.logo = logo;
         audioRecorder = new AudioRecorder(appSettings.getFfmpegPath());
         bandplan = settings.getBandplan();
         userSettings = settings;
@@ -1315,6 +1326,10 @@ public class ReceiverWindow extends JFrame {
         return serverLevels;
     }
 
+    public Optional<TrayIcon> getTrayIcon() {
+        return Optional.ofNullable(trayIcon);
+    }
+
     public boolean isLastHighSample() {
         return lastHighSample;
     }
@@ -1530,7 +1545,8 @@ public class ReceiverWindow extends JFrame {
         if (exiting) return;
         switch (JOptionPane.showOptionDialog(this, "Are you sure you want to close the receiver?", "Exiting",
                 JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null,
-                new String[] { "Close the application", "Return to receivers list", "Cancel" }, null)) {
+                new String[] { "Close the application", "Return to receivers list", "Minimize to tray", "Cancel" },
+                null)) {
             case 0 -> {
                 exiting = true;
                 listeners.forEach(ls -> {
@@ -1546,8 +1562,40 @@ public class ReceiverWindow extends JFrame {
                 exiting = true;
                 dispose();
             }
+            case 2 -> {
+                if (SystemTray.isSupported()) {
+                    minimize();
+                } else {
+                    JOptionPane.showMessageDialog(this, "Tray is not available in this system", "Tray unavailable",
+                            JOptionPane.ERROR_MESSAGE);
+                }
+            }
             default -> {}
         }
+    }
+
+    private void minimize() {
+        SystemTray tray = SystemTray.getSystemTray();
+        Dimension size = tray.getTrayIconSize();
+
+        trayIcon = new TrayIcon(logo.getScaledInstance(size.width, size.height, Image.SCALE_SMOOTH));
+        trayIcon.addActionListener(e -> {
+            deiconifying = true;
+            tray.remove(trayIcon);
+            trayIcon = null;
+            setVisible(true);
+            setExtendedState(getExtendedState() & ~ICONIFIED);
+        });
+
+        try {
+            tray.add(trayIcon);
+        } catch (AWTException e) {
+            e.printStackTrace();
+            trayIcon = null;
+            JOptionPane.showMessageDialog(this, "Couldn't minimize to tray. Check console for details", "Error",
+                    JOptionPane.ERROR_MESSAGE);
+        }
+        setVisible(false);
     }
 
     private void setControls(boolean state) {

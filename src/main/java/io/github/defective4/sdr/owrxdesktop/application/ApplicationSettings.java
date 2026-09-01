@@ -18,6 +18,7 @@ public class ApplicationSettings {
 
     private double longitude = 0;
     private int maxNetworkWorkers = 3;
+    private boolean notifyChatMessages = true;
 
     public String getFfmpegPath() {
         return ffmpegPath;
@@ -51,6 +52,10 @@ public class ApplicationSettings {
         return autoRefreshPrivateReceivers;
     }
 
+    public boolean isNotifyChatMessages() {
+        return notifyChatMessages;
+    }
+
     public void setAutoDownloadPublicReceivers(boolean autoDownloadPublicReceivers) {
         this.autoDownloadPublicReceivers = autoDownloadPublicReceivers;
     }
@@ -77,6 +82,10 @@ public class ApplicationSettings {
 
     public void setMaxNetworkWorkers(int maxNetworkWorkers) {
         this.maxNetworkWorkers = maxNetworkWorkers;
+    }
+
+    public void setNotifyChatMessages(boolean notifyChatMessages) {
+        this.notifyChatMessages = notifyChatMessages;
     }
 
 }

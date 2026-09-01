@@ -72,6 +72,7 @@ public class ApplicationSettingsDialog extends JDialog {
     private final JCheckBox autoRefreshCheck = new JCheckBox("Auto-refresh receivers on startup");
     private final JList<SerializedBandplan> bandsList = new JList<>();
     private final DefaultListModel<SerializedBandplan> bandsModel = new DefaultListModel<>();
+    private final JCheckBox chatNotify;
     private final JTextField ffmpegPath;
     private final JSpinner latSpinner = new JSpinner();
     private final JSpinner lonSpinner = new JSpinner();
@@ -329,69 +330,81 @@ public class ApplicationSettingsDialog extends JDialog {
                     panel_2.add(btnLocate);
                 }
             }
+            {
+                JPanel panel = new JPanel();
+                tabbedPane.addTab("Audio", FontAwesome.ICO_AUDIO, panel, null);
+                GridBagLayout gbl_panel = new GridBagLayout();
+                gbl_panel.columnWidths = new int[] { 0, 0 };
+                gbl_panel.rowHeights = new int[] { 0, 0 };
+                gbl_panel.columnWeights = new double[] { 1.0, Double.MIN_VALUE };
+                gbl_panel.rowWeights = new double[] { 0.0, Double.MIN_VALUE };
+                panel.setLayout(gbl_panel);
+
+                JPanel panel_1 = new JPanel();
+                panel_1.setBorder(
+                        new TitledBorder(null, "Recording", TitledBorder.LEADING, TitledBorder.TOP, null, null));
+                GridBagConstraints gbc_panel_1 = new GridBagConstraints();
+                gbc_panel_1.fill = GridBagConstraints.BOTH;
+                gbc_panel_1.gridx = 0;
+                gbc_panel_1.gridy = 0;
+                panel.add(panel_1, gbc_panel_1);
+                panel_1.setLayout(new BoxLayout(panel_1, BoxLayout.Y_AXIS));
+
+                JLabel lblFfmpegPath = new JLabel("ffmpeg path");
+                panel_1.add(lblFfmpegPath);
+
+                JPanel panel_2 = new JPanel();
+                panel_2.setAlignmentX(Component.LEFT_ALIGNMENT);
+                panel_1.add(panel_2);
+                panel_2.setLayout(new BoxLayout(panel_2, BoxLayout.X_AXIS));
+
+                ffmpegPath = new JTextField(settings.getFfmpegPath());
+                panel_2.add(ffmpegPath);
+                ffmpegPath.setAlignmentX(Component.LEFT_ALIGNMENT);
+                ffmpegPath.setColumns(10);
+
+                panel_2.add(new JLabel(" "));
+
+                JButton btnFFmpegCheck = new JButton("Check");
+                btnFFmpegCheck.addActionListener(e -> {
+                    boolean available = new FFMpeg(ffmpegPath.getText()).isAvailable();
+                    btnFFmpegCheck.setEnabled(!available);
+                    btnFFmpegCheck.setText(available ? "OK" : "Error!");
+                });
+                ffmpegPath.getDocument().addDocumentListener(new DocumentListener() {
+                    @Override
+                    public void changedUpdate(DocumentEvent e) {
+                        update(btnFFmpegCheck);
+                    }
+
+                    @Override
+                    public void insertUpdate(DocumentEvent e) {
+                        update(btnFFmpegCheck);
+                    }
+
+                    @Override
+                    public void removeUpdate(DocumentEvent e) {
+                        update(btnFFmpegCheck);
+                    }
+
+                    private void update(JButton btnFFmpegCheck) {
+                        btnFFmpegCheck.setEnabled(true);
+                        btnFFmpegCheck.setText("Check");
+                    }
+                });
+                panel_2.add(btnFFmpegCheck);
+            }
+            {
+                JPanel panel = new JPanel();
+                panel.setBorder(new EmptyBorder(4, 4, 0, 0));
+                tabbedPane.addTab("System", FontAwesome.ICO_WINDOWS, panel, null);
+                panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+
+                chatNotify = new JCheckBox("Notify of new chat messages when in tray");
+                chatNotify.setSelected(settings.isNotifyChatMessages());
+                panel.add(chatNotify);
+            }
         }
-
-        JPanel panel = new JPanel();
-        tabbedPane.addTab("Audio", FontAwesome.ICO_AUDIO, panel, null);
-        GridBagLayout gbl_panel = new GridBagLayout();
-        gbl_panel.columnWidths = new int[] { 0, 0 };
-        gbl_panel.rowHeights = new int[] { 0, 0 };
-        gbl_panel.columnWeights = new double[] { 1.0, Double.MIN_VALUE };
-        gbl_panel.rowWeights = new double[] { 0.0, Double.MIN_VALUE };
-        panel.setLayout(gbl_panel);
-
-        JPanel panel_1 = new JPanel();
-        panel_1.setBorder(new TitledBorder(null, "Recording", TitledBorder.LEADING, TitledBorder.TOP, null, null));
-        GridBagConstraints gbc_panel_1 = new GridBagConstraints();
-        gbc_panel_1.fill = GridBagConstraints.BOTH;
-        gbc_panel_1.gridx = 0;
-        gbc_panel_1.gridy = 0;
-        panel.add(panel_1, gbc_panel_1);
-        panel_1.setLayout(new BoxLayout(panel_1, BoxLayout.Y_AXIS));
-
-        JLabel lblFfmpegPath = new JLabel("ffmpeg path");
-        panel_1.add(lblFfmpegPath);
-
-        JPanel panel_2 = new JPanel();
-        panel_2.setAlignmentX(Component.LEFT_ALIGNMENT);
-        panel_1.add(panel_2);
-        panel_2.setLayout(new BoxLayout(panel_2, BoxLayout.X_AXIS));
-
-        ffmpegPath = new JTextField(settings.getFfmpegPath());
-        panel_2.add(ffmpegPath);
-        ffmpegPath.setAlignmentX(Component.LEFT_ALIGNMENT);
-        ffmpegPath.setColumns(10);
-
-        panel_2.add(new JLabel(" "));
-
-        JButton btnFFmpegCheck = new JButton("Check");
-        btnFFmpegCheck.addActionListener(e -> {
-            boolean available = new FFMpeg(ffmpegPath.getText()).isAvailable();
-            btnFFmpegCheck.setEnabled(!available);
-            btnFFmpegCheck.setText(available ? "OK" : "Error!");
-        });
-        ffmpegPath.getDocument().addDocumentListener(new DocumentListener() {
-            @Override
-            public void changedUpdate(DocumentEvent e) {
-                update(btnFFmpegCheck);
-            }
-
-            @Override
-            public void insertUpdate(DocumentEvent e) {
-                update(btnFFmpegCheck);
-            }
-
-            @Override
-            public void removeUpdate(DocumentEvent e) {
-                update(btnFFmpegCheck);
-            }
-
-            private void update(JButton btnFFmpegCheck) {
-                btnFFmpegCheck.setEnabled(true);
-                btnFFmpegCheck.setText("Check");
-            }
-        });
-        panel_2.add(btnFFmpegCheck);
         {
             JPanel buttonPane = new JPanel();
             buttonPane.setLayout(new FlowLayout(FlowLayout.RIGHT));
@@ -409,6 +422,7 @@ public class ApplicationSettingsDialog extends JDialog {
 
                     settings.setFfmpegPath(ffmpegPath.getText());
 
+                    settings.setNotifyChatMessages(chatNotify.isSelected());
                     dispose();
                 });
                 saveButton.setActionCommand("Save");

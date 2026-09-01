@@ -1,6 +1,7 @@
 package io.github.defective4.sdr.owrxdesktop;
 
 import java.awt.Color;
+import java.awt.TrayIcon.MessageType;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.IOException;
@@ -76,7 +77,7 @@ public class RadioReceiver {
         this.settings = settings;
         audioSinkManager = new AudioSinkManager();
         this.uri = uri;
-        rxWindow = new ReceiverWindow(settings, cache, app.getUserStorage().getApplicationSettings());
+        rxWindow = new ReceiverWindow(settings, cache, app.getUserStorage().getApplicationSettings(), app.getLogo());
         rxWindow.addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosed(WindowEvent e) {
@@ -282,6 +283,10 @@ public class RadioReceiver {
             @Override
             public void chatMessageReceived(ServerChatMessage message) {
                 rxWindow.pushChatMessage(message.getUsername(), message.getMessage());
+                if (app.getUserStorage().getApplicationSettings().isNotifyChatMessages()) { // TODO setting
+                    rxWindow.getTrayIcon().ifPresent(
+                            icon -> icon.displayMessage(message.getUsername(), message.getMessage(), MessageType.INFO));
+                }
             }
 
             @Override

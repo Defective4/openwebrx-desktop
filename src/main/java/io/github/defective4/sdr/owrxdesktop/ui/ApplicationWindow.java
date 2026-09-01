@@ -53,6 +53,7 @@ import io.github.defective4.sdr.owrxdesktop.ui.component.ReceiverEntryContainer;
 import io.github.defective4.sdr.owrxdesktop.ui.text.FontAwesome;
 
 public class ApplicationWindow extends JFrame {
+    private final BufferedImage logo;
     private final ReceiverEntryContainer publicContainer = new ReceiverEntryContainer();
     private final ReceiverEntryContainer rxContainer = new ReceiverEntryContainer();
     private final ReceiverScraper scraper = new ReceiverbookScraper(this);
@@ -64,8 +65,7 @@ public class ApplicationWindow extends JFrame {
         setBounds(100, 100, 768, 512);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setTitle("OpenWebRX Desktop");
-        BufferedImage logo;
-        try (InputStream in = getClass().getResourceAsStream("/logo.png")){
+        try (InputStream in = getClass().getResourceAsStream("/logo.png")) {
             logo = ImageIO.read(in);
         } catch (IOException e3) {
             throw new IllegalStateException(e3);
@@ -339,6 +339,10 @@ public class ApplicationWindow extends JFrame {
         if (userStorage.getApplicationSettings().isAutoRefreshPrivateReceivers()) {
             refreshPersonalReceivers();
         }
+    }
+
+    public BufferedImage getLogo() {
+        return logo;
     }
 
     public UserStorage getUserStorage() {
