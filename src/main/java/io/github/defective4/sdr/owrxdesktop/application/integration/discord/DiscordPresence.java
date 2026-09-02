@@ -32,6 +32,7 @@ public class DiscordPresence {
 
     private final long timestamp = System.currentTimeMillis();
     private final ApplicationWindow window;
+
     public DiscordPresence(ApplicationWindow window) {
         this.window = window;
         CreateParams params = new CreateParams();

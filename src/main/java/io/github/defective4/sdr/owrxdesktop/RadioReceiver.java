@@ -1,6 +1,7 @@
 package io.github.defective4.sdr.owrxdesktop;
 
 import java.awt.Color;
+import java.awt.SystemTray;
 import java.awt.TrayIcon.MessageType;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
@@ -250,9 +251,16 @@ public class RadioReceiver {
         });
     }
 
-    public void connect() throws InterruptedException {
+    public void connect() {
         app.getPresence().updatePresence();
-        client.connect();
+        try {
+            client.connect();
+        } catch (Exception e) {
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(rxWindow, e.toString(), "Error", JOptionPane.ERROR_MESSAGE);
+            rxWindow.getTrayIcon().ifPresent(SystemTray.getSystemTray()::remove);
+            rxWindow.dispose();
+        }
         connected = true;
         app.getPresence().updatePresence();
     }
@@ -318,6 +326,11 @@ public class RadioReceiver {
                     rxWindow.getTrayIcon().ifPresent(
                             icon -> icon.displayMessage(message.getUsername(), message.getMessage(), MessageType.INFO));
                 }
+            }
+
+            @Override
+            public void clientErrored(Exception ex) {
+                fatalError(ex.toString(), "Client Error");
             }
 
             @Override
@@ -443,6 +456,11 @@ public class RadioReceiver {
             }
 
             @Override
+            public void sdrError(String message) {
+                fatalError(message, "SDR Error");
+            }
+
+            @Override
             public void serverConfigChanged(ServerConfig config) {
                 if (config.sampleRate() != null) {
                     rxWindow.setBandwidth(config.sampleRate());
@@ -518,6 +536,12 @@ public class RadioReceiver {
             @Override
             public void temperatureUpdated(int temperatureC) {
                 rxWindow.setTemperature(temperatureC);
+            }
+
+            private void fatalError(String message, String title) {
+                JOptionPane.showMessageDialog(rxWindow, message, title, JOptionPane.ERROR_MESSAGE);
+                rxWindow.getTrayIcon().ifPresent(SystemTray.getSystemTray()::remove);
+                rxWindow.dispose();
             }
         });
 

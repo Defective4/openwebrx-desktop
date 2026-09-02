@@ -313,7 +313,7 @@ public class ApplicationWindow extends JFrame {
                                     appState.receiver = rx;
                                     rx.setVisible(true);
                                     rx.connect();
-                                } catch (LineUnavailableException | InterruptedException e1) {
+                                } catch (LineUnavailableException e1) {
                                     e1.printStackTrace();
                                 }
                             });
@@ -427,7 +427,7 @@ public class ApplicationWindow extends JFrame {
                     appState.receiver = rx;
                     rx.setVisible(true);
                     rx.connect();
-                } catch (LineUnavailableException | InterruptedException e1) {
+                } catch (LineUnavailableException e1) {
                     e1.printStackTrace();
                 }
             });
