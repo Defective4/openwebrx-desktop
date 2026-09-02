@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -43,6 +44,8 @@ import io.github.defective4.sdr.owrxdesktop.RadioReceiver;
 import io.github.defective4.sdr.owrxdesktop.application.ReceiverEntry;
 import io.github.defective4.sdr.owrxdesktop.application.StatusResponse;
 import io.github.defective4.sdr.owrxdesktop.application.UserStorage;
+import io.github.defective4.sdr.owrxdesktop.application.integration.discord.AppState;
+import io.github.defective4.sdr.owrxdesktop.application.integration.discord.DiscordPresence;
 import io.github.defective4.sdr.owrxdesktop.application.integration.listings.PublicReceiverEntry;
 import io.github.defective4.sdr.owrxdesktop.application.integration.listings.ReceiverScraper;
 import io.github.defective4.sdr.owrxdesktop.application.integration.listings.SearchSort;
@@ -53,7 +56,9 @@ import io.github.defective4.sdr.owrxdesktop.ui.component.ReceiverEntryContainer;
 import io.github.defective4.sdr.owrxdesktop.ui.text.FontAwesome;
 
 public class ApplicationWindow extends JFrame {
+    private final AppState appState = new AppState();
     private final BufferedImage logo;
+    private final DiscordPresence presence;
     private final ReceiverEntryContainer publicContainer = new ReceiverEntryContainer();
     private final ReceiverEntryContainer rxContainer = new ReceiverEntryContainer();
     private final ReceiverScraper scraper = new ReceiverbookScraper(this);
@@ -61,6 +66,7 @@ public class ApplicationWindow extends JFrame {
     private final UserStorage userStorage = new UserStorage();
 
     public ApplicationWindow() {
+        presence = new DiscordPresence(this);
         updateExecutor = Executors.newFixedThreadPool(userStorage.getApplicationSettings().getMaxNetworkWorkers());
         setBounds(100, 100, 768, 512);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -304,6 +310,7 @@ public class ApplicationWindow extends JFrame {
                                             rxEntry.getSettings().isSyncWindowIcon()
                                                     ? rxEntry.getReceiverImage().orElse(logo)
                                                     : logo);
+                                    appState.receiver = rx;
                                     rx.setVisible(true);
                                     rx.connect();
                                 } catch (LineUnavailableException | InterruptedException e1) {
@@ -345,8 +352,24 @@ public class ApplicationWindow extends JFrame {
         }
     }
 
+    public void clearReceiver() {
+        appState.receiver = null;
+    }
+
+    public AppState getAppState() {
+        return appState;
+    }
+
     public BufferedImage getLogo() {
         return logo;
+    }
+
+    public DiscordPresence getPresence() {
+        return presence;
+    }
+
+    public Optional<RadioReceiver> getReceiver() {
+        return Optional.ofNullable(appState.receiver);
     }
 
     public UserStorage getUserStorage() {
@@ -401,6 +424,7 @@ public class ApplicationWindow extends JFrame {
                     RadioReceiver rx = new RadioReceiver(rxEntry.getWebsocketURI(), rxEntry.getSettings(), this,
                             rxEntry.getCache(),
                             rxEntry.getSettings().isSyncWindowIcon() ? rxEntry.getReceiverImage().orElse(logo) : logo);
+                    appState.receiver = rx;
                     rx.setVisible(true);
                     rx.connect();
                 } catch (LineUnavailableException | InterruptedException e1) {

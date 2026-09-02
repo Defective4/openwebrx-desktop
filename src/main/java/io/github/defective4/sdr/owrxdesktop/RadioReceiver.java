@@ -59,6 +59,9 @@ public class RadioReceiver {
 
     private final ReceiverCache cache;
     private final OpenWebRXClient client;
+    private boolean connected;
+    private ReceiverDetails details;
+
     private boolean freeTuned;
     private int jumpFreq = -1;
 
@@ -66,11 +69,12 @@ public class RadioReceiver {
     private final BufferedImage logo;
 
     private String modulation, profileId;
-    private final ReceiverWindow rxWindow;
 
+    private final ReceiverWindow rxWindow;
     private final Bandplan serverBandplan = new Bandplan();
 
     private final ReceiverUserSettings settings;
+
     private final URI uri;
 
     public RadioReceiver(URI uri, ReceiverUserSettings settings, ApplicationWindow app, ReceiverCache cache,
@@ -90,7 +94,9 @@ public class RadioReceiver {
                 } catch (IOException e1) {
                     e1.printStackTrace();
                 }
+                app.clearReceiver();
                 app.setVisible(true);
+                app.getPresence().updatePresence();
             }
         });
         client = prepareClient();
@@ -128,6 +134,7 @@ public class RadioReceiver {
                             cache.removeLabel(label.profile(), label.label());
                     }
                 });
+                app.getPresence().updatePresence();
             }
 
             @Override
@@ -138,6 +145,7 @@ public class RadioReceiver {
             @Override
             public void dabServiceChanged(int service) {
                 client.setDSP(new DSPParams(null, null, null, null, null, service, null, null));
+                app.getPresence().updatePresence();
             }
 
             @Override
@@ -145,11 +153,13 @@ public class RadioReceiver {
                 jumpFreq = freq;
                 freeTuned = true;
                 client.setCenterFrequency(freq, settings.getMagicKey());
+                app.getPresence().updatePresence();
             }
 
             @Override
             public void modeChanged(ReceiverMode primary, ReceiverMode underlying) {
                 client.setModulation(primary, underlying);
+                app.getPresence().updatePresence();
             }
 
             @Override
@@ -160,6 +170,7 @@ public class RadioReceiver {
             @Override
             public void profileChanged(ReceiverProfile profile) {
                 client.switchProfile(profile);
+                app.getPresence().updatePresence();
             }
 
             @Override
@@ -184,11 +195,13 @@ public class RadioReceiver {
                     rxWindow.getBandplan().setBands(settings.getCustomBandplan().get().deserialize().getBands());
                 }
                 rxWindow.updateBandplan();
+                app.getPresence().updatePresence();
             }
 
             @Override
             public void tuned(int offset) {
                 client.setOffsetFrequency(offset);
+                app.getPresence().updatePresence();
             }
 
             @Override
@@ -238,7 +251,22 @@ public class RadioReceiver {
     }
 
     public void connect() throws InterruptedException {
+        app.getPresence().updatePresence();
         client.connect();
+        connected = true;
+        app.getPresence().updatePresence();
+    }
+
+    public Optional<ReceiverDetails> getReceiverDetails() {
+        return Optional.ofNullable(details);
+    }
+
+    public ReceiverWindow getRxWindow() {
+        return rxWindow;
+    }
+
+    public boolean isConnected() {
+        return connected;
     }
 
     public void setVisible(boolean b) {
@@ -303,6 +331,7 @@ public class RadioReceiver {
                 if (settings.isDecorateWindowMetadata()) {
                     metadata.getEnsembleLabel().ifPresent(rxWindow::setTitle);
                 }
+                app.getPresence().updatePresence();
             }
 
             @Override
@@ -312,6 +341,7 @@ public class RadioReceiver {
                 } else if (result instanceof PlaintextResult ptx) {
                     rxWindow.getPlainTextPanel().appendText(ptx.getText());
                 }
+                app.getPresence().updatePresence();
             }
 
             @Override
@@ -320,6 +350,7 @@ public class RadioReceiver {
                         freq.mode(), Color.green, Color.decode("#009000"), Type.DIAL, freq.mode(), null)).toList();
                 rxWindow.setLabels(labels);
                 if (!freeTuned) cache.setLabels(profileId, labels);
+                app.getPresence().updatePresence();
             }
 
             @Override
@@ -375,11 +406,14 @@ public class RadioReceiver {
                     rxWindow.setTitle(
                             "[%s] %s".formatted(rds.getStation().orElse("").trim(), rds.getRadiotext().orElse("")));
                 }
+                app.getPresence().updatePresence();
             }
 
             @Override
             public void receiverDetailsReceived(ReceiverDetails details) {
+                RadioReceiver.this.details = details;
                 rxWindow.setTitle(details.receiverName());
+                app.getPresence().updatePresence();
             }
 
             @Override
@@ -393,7 +427,7 @@ public class RadioReceiver {
                     }
                     rxWindow.setStartingMode(mode);
                 });
-
+                app.getPresence().updatePresence();
             }
 
             @Override
@@ -405,6 +439,7 @@ public class RadioReceiver {
                         rxWindow.updateProfile(profile.get());
                     }
                 }
+                app.getPresence().updatePresence();
             }
 
             @Override
@@ -472,6 +507,7 @@ public class RadioReceiver {
                 rxWindow.resetAutoFFT();
                 if (config.maxClients() != null) rxWindow.setMaxClients(config.maxClients());
                 client.startDSP();
+                app.getPresence().updatePresence();
             }
 
             @Override

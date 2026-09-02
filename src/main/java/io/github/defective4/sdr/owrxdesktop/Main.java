@@ -13,6 +13,7 @@ public class Main {
 
             ApplicationWindow window = new ApplicationWindow();
             window.setVisible(true);
+            window.getPresence().updatePresence();
         } catch (Exception e) {
             e.printStackTrace();
         }

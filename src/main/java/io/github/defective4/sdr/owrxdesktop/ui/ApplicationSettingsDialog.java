@@ -77,10 +77,12 @@ public class ApplicationSettingsDialog extends JDialog {
     private final JSpinner latSpinner = new JSpinner();
     private final JSpinner lonSpinner = new JSpinner();
     private final JSpinner networkWorkers = new JSpinner();
+    private final Window parent;
     private final JTabbedPane tabbedPane = new JTabbedPane(JTabbedPane.LEFT);
 
     public ApplicationSettingsDialog(Window parent, ApplicationSettings settings) {
         super(parent);
+        this.parent = parent;
         setTitle("Application settings");
         setModal(true);
         setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
@@ -440,8 +442,26 @@ public class ApplicationSettingsDialog extends JDialog {
         setLocationRelativeTo(parent);
     }
 
+    @Override
+    public void dispose() {
+        super.dispose();
+        if (parent instanceof ApplicationWindow app) {
+            app.getAppState().changingSettings = false;
+            app.getPresence().updatePresence();
+        }
+    }
+
     public void setSelectedIndex(int index) {
         tabbedPane.setSelectedIndex(index);
+    }
+
+    @Override
+    public void setVisible(boolean b) {
+        if (parent instanceof ApplicationWindow app) {
+            app.getAppState().changingSettings = true;
+            app.getPresence().updatePresence();
+        }
+        super.setVisible(b);
     }
 
     private void showBandplanChooser(ApplicationSettings settings, String extensionName, String extension,

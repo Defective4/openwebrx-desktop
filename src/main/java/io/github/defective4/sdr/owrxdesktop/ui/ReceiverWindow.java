@@ -243,7 +243,7 @@ public class ReceiverWindow extends JFrame {
 
                 @Override
                 public void tuned(int offset) {
-                    ReceiverWindow.this.offset = offset;
+                    updateOffset(offset);
                     fftPanel.tune(offset, false, false);
                     listeners.forEach(ls -> ls.tuned(offset));
                     updateFreqSpinnerValue(offset);
@@ -260,7 +260,7 @@ public class ReceiverWindow extends JFrame {
 
                 @Override
                 public void tuned(int offset) {
-                    ReceiverWindow.this.offset = offset;
+                    updateOffset(offset);
                     waterfallPanel.tune(offset, false, false);
                     listeners.forEach(ls -> ls.tuned(offset));
                     updateFreqSpinnerValue(offset);
@@ -1293,6 +1293,10 @@ public class ReceiverWindow extends JFrame {
         return Collections.unmodifiableList(listeners);
     }
 
+    public int getOffset() {
+        return offset;
+    }
+
     public TuneablePanel[] getPanels() {
         return new TuneablePanel[] { waterfallPanel, fftPanel };
     }
@@ -1487,13 +1491,13 @@ public class ReceiverWindow extends JFrame {
     }
 
     public void tune(int offset) {
-        this.offset = offset;
+        updateOffset(offset);
         for (TuneablePanel fftPanel : getPanels()) fftPanel.tune(offset);
         updateFreqSpinnerValue(offset);
     }
 
     public void tune(int offset, boolean fireEvents, boolean snap) {
-        this.offset = offset;
+        updateOffset(offset);
         for (TuneablePanel fftPanel : getPanels()) fftPanel.tune(offset, fireEvents, snap);
         updateFreqSpinnerValue(offset);
     }
@@ -1643,6 +1647,10 @@ public class ReceiverWindow extends JFrame {
             setScopeLower(bandpass.lowCut());
             setScopeUpper(bandpass.highCut());
         }
+    }
+
+    private void updateOffset(int offset) {
+        this.offset = offset;
     }
 
     private static void compactPanel(JComponent featPanel) {

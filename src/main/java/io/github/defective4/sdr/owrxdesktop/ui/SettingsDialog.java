@@ -439,6 +439,24 @@ public class SettingsDialog extends JDialog {
         }
     }
 
+    @Override
+    public void dispose() {
+        super.dispose();
+        if (getParent() instanceof ApplicationWindow app) {
+            app.getAppState().changingSettings = false;
+            app.getPresence().updatePresence();
+        }
+    }
+
+    @Override
+    public void setVisible(boolean visible) {
+        if (getParent() instanceof ApplicationWindow app) {
+            app.getAppState().changingSettings = true;
+            app.getPresence().updatePresence();
+        }
+        super.setVisible(visible);
+    }
+
     private boolean validateSettings() {
         if (rdbtnCustom.isSelected()) {
             for (String line : themeArea.getText().split("\n")) {
@@ -459,4 +477,5 @@ public class SettingsDialog extends JDialog {
         dialog.setVisible(true);
         return dialog.saved;
     }
+
 }

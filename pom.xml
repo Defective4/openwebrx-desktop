@@ -56,5 +56,10 @@
             <artifactId>flatlaf</artifactId>
             <version>3.7.2</version>
         </dependency>
+        <dependency>
+            <groupId>com.github.jncrmx</groupId>
+            <artifactId>discord-game-sdk4j</artifactId>
+            <version>1.0.0-patch</version>
+        </dependency>
     </dependencies>
 </project>
