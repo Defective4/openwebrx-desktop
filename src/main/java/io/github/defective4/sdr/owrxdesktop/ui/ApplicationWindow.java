@@ -69,6 +69,7 @@ public class ApplicationWindow extends JFrame {
         presence = new DiscordPresence(this);
         updateExecutor = Executors.newFixedThreadPool(userStorage.getApplicationSettings().getMaxNetworkWorkers());
         setBounds(100, 100, 768, 512);
+        setMinimumSize(getSize());
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setTitle("OpenWebRX Desktop");
         try (InputStream in = getClass().getResourceAsStream("/logo.png")) {

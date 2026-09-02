@@ -58,6 +58,7 @@ public class BookmarksDialog extends JDialog {
         setModal(true);
         setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
         setSize(450, 400);
+        setMinimumSize(getSize());
         setLocationRelativeTo(window);
         getContentPane().setLayout(new BorderLayout());
         JPanel contentPanel = new JPanel();

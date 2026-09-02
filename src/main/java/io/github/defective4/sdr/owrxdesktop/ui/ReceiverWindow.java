@@ -187,6 +187,7 @@ public class ReceiverWindow extends JFrame {
         userSettings = settings;
         resetAutoFFT();
         setBounds(100, 100, 768, 600);
+        setMinimumSize(getSize());
         setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
         setIconImage(logo);
         addWindowListener(new WindowAdapter() {

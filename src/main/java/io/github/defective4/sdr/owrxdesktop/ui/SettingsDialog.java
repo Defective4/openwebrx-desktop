@@ -5,7 +5,6 @@ import static io.github.defective4.sdr.owrxdesktop.ui.text.FontAwesome.*;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
-import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -68,8 +67,8 @@ public class SettingsDialog extends JDialog {
         setTitle("Receiver settings");
         setModal(true);
         setSize(450, 500);
+        setMinimumSize(getSize());
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
-        setMinimumSize(new Dimension(450, 500));
         setLocationRelativeTo(parent);
         getContentPane().setLayout(new BorderLayout());
         JPanel contentPanel = new JPanel();

@@ -168,6 +168,7 @@ public class BookmarkEditorDialog extends JDialog {
         }
 
         pack();
+        setMinimumSize(getSize());
         setLocationRelativeTo(parent);
     }
 

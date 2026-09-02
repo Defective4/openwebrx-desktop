@@ -439,6 +439,7 @@ public class ApplicationSettingsDialog extends JDialog {
             }
         }
         pack();
+        setMinimumSize(getSize());
         setLocationRelativeTo(parent);
     }
 
