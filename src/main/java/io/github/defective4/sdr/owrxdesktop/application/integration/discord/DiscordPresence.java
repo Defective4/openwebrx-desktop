@@ -2,6 +2,7 @@ package io.github.defective4.sdr.owrxdesktop.application.integration.discord;
 
 import java.text.ParseException;
 import java.time.Instant;
+import java.util.Optional;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -56,11 +57,15 @@ public class DiscordPresence {
         activity.setType(ActivityType.PLAYING);
         activity.setDetails("In server list");
         activity.timestamps().setStart(Instant.ofEpochMilli(timestamp));
+        activity.assets().setSmallImage(null);
 
         if (window.getReceiver().isPresent()) {
             RadioReceiver rx = window.getReceiver().get();
-            activity.setDetails(
-                    rx.getReceiverDetails().map(ReceiverDetails::receiverName).orElse(DEFAULT_RECEIVER_NAME));
+            Optional<ReceiverDetails> details = rx.getReceiverDetails();
+            String name = details.map(ReceiverDetails::receiverName).orElse(DEFAULT_RECEIVER_NAME);
+            if (name.length() > 128) name = name.substring(0, 128);
+            activity.setDetails(name);
+            activity.assets().setSmallImage(rx.getHttpURL() + "static/gfx/openwebrx-avatar.png");
             if (rx.isConnected()) {
                 ReceiverWindow rxWindow = rx.getRxWindow();
                 String freq;

@@ -309,7 +309,7 @@ public class ApplicationWindow extends JFrame {
                                             rxEntry.getSettings(), this, rxEntry.getCache(),
                                             rxEntry.getSettings().isSyncWindowIcon()
                                                     ? rxEntry.getReceiverImage().orElse(logo)
-                                                    : logo);
+                                                    : logo, rxEntry.getRootURL());
                                     appState.receiver = rx;
                                     rx.setVisible(true);
                                     rx.connect();
@@ -423,7 +423,7 @@ public class ApplicationWindow extends JFrame {
                     }
                     RadioReceiver rx = new RadioReceiver(rxEntry.getWebsocketURI(), rxEntry.getSettings(), this,
                             rxEntry.getCache(),
-                            rxEntry.getSettings().isSyncWindowIcon() ? rxEntry.getReceiverImage().orElse(logo) : logo);
+                            rxEntry.getSettings().isSyncWindowIcon() ? rxEntry.getReceiverImage().orElse(logo) : logo, rxEntry.getRootURL());
                     appState.receiver = rx;
                     rx.setVisible(true);
                     rx.connect();

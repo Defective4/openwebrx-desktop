@@ -8,6 +8,7 @@ import java.awt.event.WindowEvent;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.net.URI;
+import java.net.URL;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -64,22 +65,25 @@ public class RadioReceiver {
     private ReceiverDetails details;
 
     private boolean freeTuned;
-    private int jumpFreq = -1;
+    private final URL httpURL;
 
+    private int jumpFreq = -1;
     private String jumpMode;
+
     private final BufferedImage logo;
 
     private String modulation, profileId;
-
     private final ReceiverWindow rxWindow;
+
     private final Bandplan serverBandplan = new Bandplan();
 
     private final ReceiverUserSettings settings;
-
     private final URI uri;
 
+
+
     public RadioReceiver(URI uri, ReceiverUserSettings settings, ApplicationWindow app, ReceiverCache cache,
-            BufferedImage logo) throws LineUnavailableException {
+            BufferedImage logo, URL httpURL) throws LineUnavailableException {
         this.cache = cache;
         this.settings = settings;
         this.logo = logo;
@@ -102,6 +106,7 @@ public class RadioReceiver {
         });
         client = prepareClient();
         this.app = app;
+        this.httpURL = httpURL;
         rxWindow.addListener(new UserInteractionListener() {
 
             @Override
@@ -263,6 +268,10 @@ public class RadioReceiver {
         }
         connected = true;
         app.getPresence().updatePresence();
+    }
+
+    public URL getHttpURL() {
+        return httpURL;
     }
 
     public Optional<ReceiverDetails> getReceiverDetails() {
