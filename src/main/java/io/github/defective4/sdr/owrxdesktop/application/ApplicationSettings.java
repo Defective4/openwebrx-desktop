@@ -7,6 +7,7 @@ import java.util.Objects;
 import io.github.defective4.sdr.owrxclient.model.ReceiverGPS;
 import io.github.defective4.sdr.owrxdesktop.audio.FFMpeg;
 import io.github.defective4.sdr.owrxdesktop.bandplan.SerializedBandplan;
+import io.github.defective4.sdr.owrxdesktop.ui.settings.UITheme;
 
 public class ApplicationSettings {
     private boolean autoDownloadPublicReceivers = true;
@@ -20,6 +21,15 @@ public class ApplicationSettings {
     private int maxNetworkWorkers = 3;
     private boolean notifyChatMessages = true;
     private boolean enableDiscordPresence = true;
+    private UITheme theme = UITheme.FLAT_LAF_DARCULA;
+
+    public UITheme getTheme() {
+        return theme;
+    }
+
+    public void setTheme(UITheme theme) {
+        this.theme = Objects.requireNonNull(theme);
+    }
 
     public boolean isEnableDiscordPresence() {
         return enableDiscordPresence;

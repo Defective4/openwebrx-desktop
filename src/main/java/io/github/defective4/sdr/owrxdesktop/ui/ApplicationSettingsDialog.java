@@ -27,6 +27,7 @@ import javax.swing.BoxLayout;
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
+import javax.swing.JComboBox;
 import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
@@ -65,6 +66,7 @@ import io.github.defective4.sdr.owrxdesktop.bandplan.reader.SDRConsoleBandplanRe
 import io.github.defective4.sdr.owrxdesktop.bandplan.reader.SDRPPBandplanReader;
 import io.github.defective4.sdr.owrxdesktop.bandplan.reader.SDRSharpBandplanReader;
 import io.github.defective4.sdr.owrxdesktop.bandplan.render.BandplanListRenderer;
+import io.github.defective4.sdr.owrxdesktop.ui.settings.UITheme;
 import io.github.defective4.sdr.owrxdesktop.ui.text.FontAwesome;
 
 public class ApplicationSettingsDialog extends JDialog {
@@ -81,6 +83,7 @@ public class ApplicationSettingsDialog extends JDialog {
     private final Window parent;
     private final JTabbedPane tabbedPane = new JTabbedPane(JTabbedPane.LEFT);
     private final JCheckBox chckbxEnableDiscordPresence;
+    private JComboBox<UITheme> themeBox;
 
     public ApplicationSettingsDialog(Window parent, ApplicationSettings settings, DiscordPresence discord) {
         super(parent);
@@ -95,6 +98,52 @@ public class ApplicationSettingsDialog extends JDialog {
         contentPanel.setLayout(new BorderLayout(0, 0));
         {
             contentPanel.add(tabbedPane, BorderLayout.CENTER);
+            {
+                JPanel panel = new JPanel();
+                panel.setBorder(new EmptyBorder(4, 4, 0, 0));
+                tabbedPane.addTab("System", FontAwesome.ICO_COG, panel, null);
+                panel.setLayout(new BorderLayout(0, 0));
+
+                JTabbedPane tabbedPane_1 = new JTabbedPane(JTabbedPane.TOP);
+                panel.add(tabbedPane_1, BorderLayout.CENTER);
+
+                {
+                    JPanel panel1 = new JPanel();
+                    panel1.setBorder(new EmptyBorder(4, 4, 0, 0));
+                    tabbedPane_1.addTab("Appearance", FontAwesome.ICO_PALETTE, panel1, null);
+                    GridBagLayout gbl_panel1 = new GridBagLayout();
+                    gbl_panel1.columnWidths = new int[] { 0, 0 };
+                    gbl_panel1.rowHeights = new int[] { 0, 0, 0 };
+                    gbl_panel1.columnWeights = new double[] { 0.0, Double.MIN_VALUE };
+                    gbl_panel1.rowWeights = new double[] { 0.0, 0.0, Double.MIN_VALUE };
+                    panel1.setLayout(gbl_panel1);
+
+                    JLabel lblTheme = new JLabel("Theme");
+                    GridBagConstraints gbc_lblTheme = new GridBagConstraints();
+                    gbc_lblTheme.anchor = GridBagConstraints.WEST;
+                    gbc_lblTheme.insets = new Insets(0, 0, 5, 0);
+                    gbc_lblTheme.gridx = 0;
+                    gbc_lblTheme.gridy = 0;
+                    panel1.add(lblTheme, gbc_lblTheme);
+
+                    themeBox = new JComboBox<>();
+                    for (UITheme theme : UITheme.values()) if (theme.isValid()) themeBox.addItem(theme);
+                    themeBox.setSelectedItem(settings.getTheme());
+                    GridBagConstraints gbc_comboBox = new GridBagConstraints();
+                    gbc_comboBox.anchor = GridBagConstraints.WEST;
+                    gbc_comboBox.gridx = 0;
+                    gbc_comboBox.gridy = 1;
+                    panel1.add(themeBox, gbc_comboBox);
+                }
+
+                {
+                    JPanel panel1 = new JPanel();
+                    tabbedPane_1.addTab("Tray", FontAwesome.ICO_WINDOWS, panel1, null);
+                    chatNotify = new JCheckBox("Notify about new chat messages when in tray");
+                    panel1.add(chatNotify);
+                    chatNotify.setSelected(settings.isNotifyChatMessages());
+                }
+            }
             {
                 JPanel panel = new JPanel();
                 panel.setBorder(new EmptyBorder(0, 5, 0, 5));
@@ -422,16 +471,6 @@ public class ApplicationSettingsDialog extends JDialog {
                 });
                 panel_2.add(btnFFmpegCheck);
             }
-            {
-                JPanel panel = new JPanel();
-                panel.setBorder(new EmptyBorder(4, 4, 0, 0));
-                tabbedPane.addTab("System", FontAwesome.ICO_WINDOWS, panel, null);
-                panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
-
-                chatNotify = new JCheckBox("Notify about new chat messages when in tray");
-                chatNotify.setSelected(settings.isNotifyChatMessages());
-                panel.add(chatNotify);
-            }
         }
         {
             JPanel buttonPane = new JPanel();
@@ -440,6 +479,7 @@ public class ApplicationSettingsDialog extends JDialog {
             {
                 JButton saveButton = new JButton("Save");
                 saveButton.addActionListener(e -> {
+                    settings.setTheme((UITheme) themeBox.getSelectedItem());
 
                     settings.setAutoDownloadPublicReceivers(autoDownloadCheck.isSelected());
                     settings.setAutoRefreshPrivateReceivers(autoRefreshCheck.isSelected());

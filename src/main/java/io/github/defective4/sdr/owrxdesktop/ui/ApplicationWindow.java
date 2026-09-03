@@ -63,9 +63,10 @@ public class ApplicationWindow extends JFrame {
     private final ReceiverEntryContainer rxContainer = new ReceiverEntryContainer();
     private final ReceiverScraper scraper = new ReceiverbookScraper(this);
     private final ExecutorService updateExecutor;
-    private final UserStorage userStorage = new UserStorage();
+    private final UserStorage userStorage;
 
-    public ApplicationWindow() {
+    public ApplicationWindow(UserStorage userStorage) {
+        this.userStorage = userStorage;
         presence = new DiscordPresence(this);
         updateExecutor = Executors.newFixedThreadPool(userStorage.getApplicationSettings().getMaxNetworkWorkers());
         setBounds(100, 100, 768, 512);

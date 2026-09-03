@@ -104,11 +104,16 @@ public class DiscordPresence {
     }
 
     private void open() {
-        CreateParams params = new CreateParams();
-        params.setFlags(CreateParams.getDefaultFlags());
-        params.setClientID(APP_ID);
-        core = new Core(params);
-        enabled = true;
+        try {
+            CreateParams params = new CreateParams();
+            params.setFlags(CreateParams.getDefaultFlags());
+            params.setClientID(APP_ID);
+            core = new Core(params);
+            enabled = true;
+        } catch (Exception e) {
+            e.printStackTrace();
+            setEnabled(false);
+        }
     }
 
     private void setActivity() {
