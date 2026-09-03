@@ -965,6 +965,8 @@ public class ReceiverWindow extends JFrame {
                 rds.setEnabled(!tabbedPane.isAncestorOf(rdsPanel));
                 ft.setEnabled(!tabbedPane.isAncestorOf(ftPanel));
                 text.setEnabled(!tabbedPane.isAncestorOf(plainTextPanel));
+                dab.setEnabled(!tabbedPane.isAncestorOf(dabPanel));
+                drm.setEnabled(!tabbedPane.isAncestorOf(drmPanel));
 
                 rds.addActionListener(e2 -> {
                     JPanel rdsPanel = new JPanel();
