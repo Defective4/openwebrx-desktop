@@ -24,6 +24,7 @@ public class FontAwesome {
     public static final String FA_COMMENT = "\uf075";
     public static final String FA_CPU = "\uf2db";
     public static final String FA_DELETE = "\uf2ed";
+    public static final String FA_DISCORD = "\uf392";
     public static final String FA_EDIT = "\uf304";
     public static final String FA_GLOBE = "\uf0ac";
     public static final String FA_LINK = "\uf0c1";
@@ -32,7 +33,7 @@ public class FontAwesome {
     public static final String FA_NETWORK = "\uf1eb";
     public static final String FA_PALETTE = "\uf53f";
     public static final String FA_PLUS = "\uf067";
-    public static final Font FA_REGULAR;
+    public static final Font FA_REGULAR, FA_BRANDS;
     public static final String FA_SETTINGS = "\uf1de";
     public static final String FA_SIGN_IN = "\uf2f6";
     public static final String FA_SIGN_OUT = "\uf2f5";
@@ -44,11 +45,16 @@ public class FontAwesome {
     public static final String FA_X = "\u0058";
     public static final Icon ICO_NETWORK, ICO_TAGS, ICO_TASKS, ICO_AUDIO, ICO_BROADCAST, ICO_CHART, ICO_AREA_CHART,
             ICO_PALETTE, ICO_SIGN_IN, ICO_SYNC, ICO_PLUS, ICO_USER, ICO_GLOBE, ICO_SIGN_OUT, ICO_SETTINGS, ICO_EDIT,
-            ICO_DELETE, ICO_COG, ICO_BOOKMARK, ICO_LOCATION, ICO_CPU, ICO_LINK, ICO_COMMENT, ICO_WINDOWS;
+            ICO_DELETE, ICO_COG, ICO_BOOKMARK, ICO_LOCATION, ICO_CPU, ICO_LINK, ICO_COMMENT, ICO_WINDOWS, ICO_DISCORD;
 
     static {
-        try (InputStream in = FontAwesome.class.getResourceAsStream("/font/fa-regular.otf")) {
-            FA_REGULAR = Font.createFont(Font.TRUETYPE_FONT, in);
+        try {
+            try (InputStream in = FontAwesome.class.getResourceAsStream("/font/fa-regular.otf")) {
+                FA_REGULAR = Font.createFont(Font.TRUETYPE_FONT, in);
+            }
+            try (InputStream in = FontAwesome.class.getResourceAsStream("/font/fa-brands.otf")) {
+                FA_BRANDS = Font.createFont(Font.TRUETYPE_FONT, in);
+            }
         } catch (Exception e) {
             throw new IllegalStateException(e);
         }
@@ -76,24 +82,38 @@ public class FontAwesome {
         ICO_LINK = createFAImage(FA_LINK);
         ICO_COMMENT = createFAImage(FA_COMMENT);
         ICO_WINDOWS = createFAImage(FA_WINDOWS);
+        ICO_DISCORD = createFAImage(FA_DISCORD, FA_BRANDS);
     }
 
     private FontAwesome() {}
 
+    public static void setFontAwesomeBrandsFont(JButton cpt) {
+        Font ft = FA_BRANDS.deriveFont(cpt.getFont().getSize2D());
+        setFont(cpt, ft);
+    }
+
     public static void setFontAwesomeFont(JButton cpt) {
         Font ft = FA_REGULAR.deriveFont(cpt.getFont().getSize2D());
-        cpt.setMargin(new Insets(4, 4, 4, 4));
-        cpt.setFont(ft);
+        setFont(cpt, ft);
     }
 
     private static ImageIcon createFAImage(String icon) {
+        return createFAImage(icon, FA_REGULAR);
+    }
+
+    private static ImageIcon createFAImage(String icon, Font font) {
         JLabel label = new JLabel();
         BufferedImage image = new BufferedImage(16, 16, BufferedImage.TYPE_INT_ARGB);
         Graphics2D g2 = image.createGraphics();
         g2.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
-        g2.setFont(FA_REGULAR.deriveFont(13f));
+        g2.setFont(font.deriveFont(13f));
         g2.setColor(label.getForeground());
         g2.drawString(icon, 0, 13);
         return new ImageIcon(image);
+    }
+
+    private static void setFont(JButton cpt, Font ft) {
+        cpt.setMargin(new Insets(4, 4, 4, 4));
+        cpt.setFont(ft);
     }
 }

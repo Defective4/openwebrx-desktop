@@ -269,7 +269,7 @@ public class ApplicationSettingsDialog extends JDialog {
 
                 JTabbedPane tabbedPane_1 = new JTabbedPane(JTabbedPane.TOP);
                 panel.add(tabbedPane_1, BorderLayout.CENTER);
-                
+
                 JPanel panel1 = new JPanel();
                 tabbedPane_1.addTab("Listings", FontAwesome.ICO_TASKS, panel1, null);
                 GridBagLayout gbl_panel = new GridBagLayout();
@@ -338,6 +338,9 @@ public class ApplicationSettingsDialog extends JDialog {
                     });
                     panel_2.add(btnLocate);
                 }
+
+                JPanel panel_1 = new JPanel();
+                tabbedPane_1.addTab("Discord", FontAwesome.ICO_DISCORD, panel_1, null);
             }
             {
                 JPanel panel = new JPanel();
