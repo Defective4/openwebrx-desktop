@@ -12,32 +12,16 @@ import io.github.defective4.sdr.owrxdesktop.ui.settings.UITheme;
 public class ApplicationSettings {
     private boolean autoDownloadPublicReceivers = true;
     private boolean autoRefreshPrivateReceivers = false;
+    private boolean enableDiscordPresence = false;
+
     private String ffmpegPath = FFMpeg.probeFFMpeg().orElse("");
-
     private double latitude = 0;
-    private List<SerializedBandplan> loadedBandplans = List.of();
 
+    private List<SerializedBandplan> loadedBandplans = List.of();
     private double longitude = 0;
     private int maxNetworkWorkers = 3;
     private boolean notifyChatMessages = true;
-    private boolean enableDiscordPresence = true;
     private UITheme theme = UITheme.FLAT_LAF_DARCULA;
-
-    public UITheme getTheme() {
-        return theme;
-    }
-
-    public void setTheme(UITheme theme) {
-        this.theme = Objects.requireNonNull(theme);
-    }
-
-    public boolean isEnableDiscordPresence() {
-        return enableDiscordPresence;
-    }
-
-    public void setEnableDiscordPresence(boolean enableDiscordPresence) {
-        this.enableDiscordPresence = enableDiscordPresence;
-    }
 
     public String getFfmpegPath() {
         return ffmpegPath;
@@ -63,12 +47,20 @@ public class ApplicationSettings {
         return maxNetworkWorkers;
     }
 
+    public UITheme getTheme() {
+        return theme;
+    }
+
     public boolean isAutoDownloadPublicReceivers() {
         return autoDownloadPublicReceivers;
     }
 
     public boolean isAutoRefreshPrivateReceivers() {
         return autoRefreshPrivateReceivers;
+    }
+
+    public boolean isEnableDiscordPresence() {
+        return enableDiscordPresence;
     }
 
     public boolean isNotifyChatMessages() {
@@ -81,6 +73,10 @@ public class ApplicationSettings {
 
     public void setAutoRefreshPrivateReceivers(boolean autoRefreshPrivateReceivers) {
         this.autoRefreshPrivateReceivers = autoRefreshPrivateReceivers;
+    }
+
+    public void setEnableDiscordPresence(boolean enableDiscordPresence) {
+        this.enableDiscordPresence = enableDiscordPresence;
     }
 
     public void setFfmpegPath(String ffmpegPath) {
@@ -105,6 +101,10 @@ public class ApplicationSettings {
 
     public void setNotifyChatMessages(boolean notifyChatMessages) {
         this.notifyChatMessages = notifyChatMessages;
+    }
+
+    public void setTheme(UITheme theme) {
+        this.theme = Objects.requireNonNull(theme);
     }
 
 }

@@ -18,7 +18,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import javax.imageio.ImageIO;
-import javax.sound.sampled.LineUnavailableException;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
@@ -306,20 +305,27 @@ public class ApplicationWindow extends JFrame {
                             connectButton.addActionListener(e2 -> {
                                 setVisible(false);
                                 ReceiverEntry rxEntry = cpt.getEntry();
-                                try {
-                                    if (rxEntry.getSettings().isSyncWindowIcon()) rxEntry.query();
-                                    RadioReceiver rx = new RadioReceiver(rxEntry.getWebsocketURI(),
-                                            rxEntry.getSettings(), this, rxEntry.getCache(),
-                                            rxEntry.getSettings().isSyncWindowIcon()
-                                                    ? rxEntry.getReceiverImage().orElse(logo)
-                                                    : logo,
-                                            rxEntry.getRootURL());
-                                    appState.receiver = rx;
-                                    rx.setVisible(true);
-                                    rx.connect();
-                                } catch (LineUnavailableException e1) {
-                                    e1.printStackTrace();
-                                }
+                                ProgressDialog.show(this, "Connecting", dial -> {
+                                    try {
+                                        if (rxEntry.getSettings().isSyncWindowIcon()) rxEntry.query();
+                                        RadioReceiver rx = new RadioReceiver(rxEntry.getWebsocketURI(),
+                                                rxEntry.getSettings(), this, rxEntry.getCache(),
+                                                rxEntry.getSettings().isSyncWindowIcon()
+                                                        ? rxEntry.getReceiverImage().orElse(logo)
+                                                        : logo,
+                                                rxEntry.getRootURL());
+                                        appState.receiver = rx;
+                                        rx.connect();
+                                        return rx;
+                                    } catch (Exception e1) {
+                                        e1.printStackTrace();
+                                        dial.dispose();
+                                        JOptionPane.showMessageDialog(this, e1.toString(), "Error",
+                                                JOptionPane.ERROR_MESSAGE);
+                                        setVisible(true);
+                                        return null;
+                                    }
+                                }, rx -> { if (rx != null) rx.setVisible(true); });
                             });
 
                             JButton addButton = new JButton("Add to personal", ICO_PLUS);
@@ -421,20 +427,27 @@ public class ApplicationWindow extends JFrame {
             connect.addActionListener(e -> {
                 setVisible(false);
                 ReceiverEntry rxEntry = rxcpt.getEntry();
-                try {
-                    if (rxEntry.getSettings().isSyncWindowIcon()) {
-                        rxEntry.query();
+                ProgressDialog.show(this, "Connecting", dial -> {
+                    try {
+                        if (rxEntry.getSettings().isSyncWindowIcon()) {
+                            rxEntry.query();
+                        }
+                        RadioReceiver rx = new RadioReceiver(rxEntry.getWebsocketURI(), rxEntry.getSettings(), this,
+                                rxEntry.getCache(),
+                                rxEntry.getSettings().isSyncWindowIcon() ? rxEntry.getReceiverImage().orElse(logo)
+                                        : logo,
+                                rxEntry.getRootURL());
+                        appState.receiver = rx;
+                        rx.connect();
+                        return rx;
+                    } catch (Exception e1) {
+                        e1.printStackTrace();
+                        dial.dispose();
+                        JOptionPane.showMessageDialog(this, e1.toString(), "Error", JOptionPane.ERROR_MESSAGE);
+                        setVisible(true);
+                        return null;
                     }
-                    RadioReceiver rx = new RadioReceiver(rxEntry.getWebsocketURI(), rxEntry.getSettings(), this,
-                            rxEntry.getCache(),
-                            rxEntry.getSettings().isSyncWindowIcon() ? rxEntry.getReceiverImage().orElse(logo) : logo,
-                            rxEntry.getRootURL());
-                    appState.receiver = rx;
-                    rx.setVisible(true);
-                    rx.connect();
-                } catch (LineUnavailableException e1) {
-                    e1.printStackTrace();
-                }
+                }, rx -> { if (rx != null) rx.setVisible(true); });
             });
             JButton more = new JButton(FontAwesome.FA_COG);
             FontAwesome.setFontAwesomeFont(more);

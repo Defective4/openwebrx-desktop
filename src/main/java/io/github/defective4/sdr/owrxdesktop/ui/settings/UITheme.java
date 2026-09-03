@@ -28,13 +28,13 @@ public enum UITheme {
         this(resolveClass(className), name);
     }
 
-    public boolean isValid() {
-        return lafClass != null;
-    }
-
     public Class<? extends LookAndFeel> getLafClass() {
         if (!isValid()) return FLAT_LAF_DARCULA.getLafClass();
         return lafClass;
+    }
+
+    public boolean isValid() {
+        return lafClass != null;
     }
 
     @Override

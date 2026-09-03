@@ -46,7 +46,7 @@ public class DiscordPresence {
         }, 0, 5000);
     }
 
-    public void setEnabled(boolean enabled) {
+    public synchronized void setEnabled(boolean enabled) {
         this.enabled = enabled;
         if (!enabled && core != null) {
             core.close();
@@ -56,7 +56,7 @@ public class DiscordPresence {
         }
     }
 
-    public void updatePresence() {
+    public synchronized void updatePresence() {
         if (!enabled) return;
         Activity activity = new Activity();
         activity.setInstance(true);
@@ -103,7 +103,7 @@ public class DiscordPresence {
         }
     }
 
-    private void open() {
+    private synchronized void open() {
         try {
             CreateParams params = new CreateParams();
             params.setFlags(CreateParams.getDefaultFlags());
@@ -116,9 +116,8 @@ public class DiscordPresence {
         }
     }
 
-    private void setActivity() {
-        if (!enabled) return;
-        if (activity == null) return;
+    private synchronized void setActivity() {
+        if (!enabled || (activity == null)) return;
         core.activityManager().updateActivity(activity);
         activity = null;
         lastPresenceUpdate = System.currentTimeMillis();

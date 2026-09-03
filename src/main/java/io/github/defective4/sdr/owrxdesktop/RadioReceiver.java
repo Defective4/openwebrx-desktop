@@ -80,8 +80,6 @@ public class RadioReceiver {
     private final ReceiverUserSettings settings;
     private final URI uri;
 
-
-
     public RadioReceiver(URI uri, ReceiverUserSettings settings, ApplicationWindow app, ReceiverCache cache,
             BufferedImage logo, URL httpURL) throws LineUnavailableException {
         this.cache = cache;
@@ -256,15 +254,14 @@ public class RadioReceiver {
         });
     }
 
-    public void connect() {
+    public void connect() throws Exception {
         app.getPresence().updatePresence();
         try {
             client.connect();
         } catch (Exception e) {
-            e.printStackTrace();
-            JOptionPane.showMessageDialog(rxWindow, e.toString(), "Error", JOptionPane.ERROR_MESSAGE);
             rxWindow.getTrayIcon().ifPresent(SystemTray.getSystemTray()::remove);
             rxWindow.dispose();
+            throw e;
         }
         connected = true;
         app.getPresence().updatePresence();

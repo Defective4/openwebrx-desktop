@@ -76,13 +76,13 @@ public class ApplicationSettingsDialog extends JDialog {
     private final JList<SerializedBandplan> bandsList = new JList<>();
     private final DefaultListModel<SerializedBandplan> bandsModel = new DefaultListModel<>();
     private final JCheckBox chatNotify;
+    private final JCheckBox chckbxEnableDiscordPresence;
     private final JTextField ffmpegPath;
     private final JSpinner latSpinner = new JSpinner();
     private final JSpinner lonSpinner = new JSpinner();
     private final JSpinner networkWorkers = new JSpinner();
     private final Window parent;
     private final JTabbedPane tabbedPane = new JTabbedPane(JTabbedPane.LEFT);
-    private final JCheckBox chckbxEnableDiscordPresence;
     private JComboBox<UITheme> themeBox;
 
     public ApplicationSettingsDialog(Window parent, ApplicationSettings settings, DiscordPresence discord) {
