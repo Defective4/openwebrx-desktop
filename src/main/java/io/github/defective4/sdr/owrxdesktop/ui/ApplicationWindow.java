@@ -129,7 +129,8 @@ public class ApplicationWindow extends JFrame {
 
             JMenuItem mntmApplicationSettings = new JMenuItem("Application settings", ICO_COG);
             mntmApplicationSettings.addActionListener(
-                    e -> new ApplicationSettingsDialog(this, userStorage.getApplicationSettings()).setVisible(true));
+                    e -> new ApplicationSettingsDialog(this, userStorage.getApplicationSettings(), presence)
+                            .setVisible(true));
             mntmApplicationSettings.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_O, InputEvent.CTRL_DOWN_MASK));
             mnEdit.add(mntmApplicationSettings);
             mntmDefaultReceiverSettings
@@ -260,7 +261,7 @@ public class ApplicationWindow extends JFrame {
                             "Error", JOptionPane.OK_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE, null,
                             new String[] { "Take me there", "Cancel" }, null) == 0) {
                         ApplicationSettingsDialog dialog = new ApplicationSettingsDialog(this,
-                                userStorage.getApplicationSettings());
+                                userStorage.getApplicationSettings(), presence);
                         dialog.setSelectedIndex(2);
                         dialog.setVisible(true);
                     }
@@ -310,7 +311,8 @@ public class ApplicationWindow extends JFrame {
                                             rxEntry.getSettings(), this, rxEntry.getCache(),
                                             rxEntry.getSettings().isSyncWindowIcon()
                                                     ? rxEntry.getReceiverImage().orElse(logo)
-                                                    : logo, rxEntry.getRootURL());
+                                                    : logo,
+                                            rxEntry.getRootURL());
                                     appState.receiver = rx;
                                     rx.setVisible(true);
                                     rx.connect();
@@ -424,7 +426,8 @@ public class ApplicationWindow extends JFrame {
                     }
                     RadioReceiver rx = new RadioReceiver(rxEntry.getWebsocketURI(), rxEntry.getSettings(), this,
                             rxEntry.getCache(),
-                            rxEntry.getSettings().isSyncWindowIcon() ? rxEntry.getReceiverImage().orElse(logo) : logo, rxEntry.getRootURL());
+                            rxEntry.getSettings().isSyncWindowIcon() ? rxEntry.getReceiverImage().orElse(logo) : logo,
+                            rxEntry.getRootURL());
                     appState.receiver = rx;
                     rx.setVisible(true);
                     rx.connect();

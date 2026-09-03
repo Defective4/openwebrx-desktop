@@ -19,6 +19,15 @@ public class ApplicationSettings {
     private double longitude = 0;
     private int maxNetworkWorkers = 3;
     private boolean notifyChatMessages = true;
+    private boolean enableDiscordPresence = true;
+
+    public boolean isEnableDiscordPresence() {
+        return enableDiscordPresence;
+    }
+
+    public void setEnableDiscordPresence(boolean enableDiscordPresence) {
+        this.enableDiscordPresence = enableDiscordPresence;
+    }
 
     public String getFfmpegPath() {
         return ffmpegPath;

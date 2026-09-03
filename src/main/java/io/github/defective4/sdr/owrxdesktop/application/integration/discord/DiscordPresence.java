@@ -6,7 +6,6 @@ import java.util.Optional;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import de.jcm.discordgamesdk.ActivityManager;
 import de.jcm.discordgamesdk.Core;
 import de.jcm.discordgamesdk.CreateParams;
 import de.jcm.discordgamesdk.activity.Activity;
@@ -23,24 +22,20 @@ public class DiscordPresence {
     private static final String DEFAULT_RECEIVER_NAME = "<No name>";
     private static final String LOGO_KEY = "logo";
     private Activity activity;
-    private final ActivityManager actManager;
-    private final Core core;
+    private Core core;
 
+    private boolean enabled;
     private final FrequencyFormatter frequencyFormatter = new FrequencyFormatter();
+
     private long lastPresenceUpdate = 0;
 
     private final Object lock = new Object();
-
     private final long timestamp = System.currentTimeMillis();
     private final ApplicationWindow window;
 
     public DiscordPresence(ApplicationWindow window) {
         this.window = window;
-        CreateParams params = new CreateParams();
-        params.setFlags(CreateParams.getDefaultFlags());
-        params.setClientID(APP_ID);
-        core = new Core(params);
-        actManager = core.activityManager();
+        setEnabled(window.getUserStorage().getApplicationSettings().isEnableDiscordPresence());
         new Timer(true).scheduleAtFixedRate(new TimerTask() {
             @Override
             public void run() {
@@ -51,7 +46,18 @@ public class DiscordPresence {
         }, 0, 5000);
     }
 
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
+        if (!enabled && core != null) {
+            core.close();
+            core = null;
+        } else if (enabled) {
+            open();
+        }
+    }
+
     public void updatePresence() {
+        if (!enabled) return;
         Activity activity = new Activity();
         activity.setInstance(true);
         activity.setType(ActivityType.PLAYING);
@@ -97,9 +103,18 @@ public class DiscordPresence {
         }
     }
 
+    private void open() {
+        CreateParams params = new CreateParams();
+        params.setFlags(CreateParams.getDefaultFlags());
+        params.setClientID(APP_ID);
+        core = new Core(params);
+        enabled = true;
+    }
+
     private void setActivity() {
+        if (!enabled) return;
         if (activity == null) return;
-        actManager.updateActivity(activity);
+        core.activityManager().updateActivity(activity);
         activity = null;
         lastPresenceUpdate = System.currentTimeMillis();
     }

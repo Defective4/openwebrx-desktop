@@ -51,6 +51,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
 import io.github.defective4.sdr.owrxdesktop.application.ApplicationSettings;
+import io.github.defective4.sdr.owrxdesktop.application.integration.discord.DiscordPresence;
 import io.github.defective4.sdr.owrxdesktop.application.integration.location.Location;
 import io.github.defective4.sdr.owrxdesktop.application.integration.location.LocationServices;
 import io.github.defective4.sdr.owrxdesktop.audio.FFMpeg;
@@ -79,8 +80,9 @@ public class ApplicationSettingsDialog extends JDialog {
     private final JSpinner networkWorkers = new JSpinner();
     private final Window parent;
     private final JTabbedPane tabbedPane = new JTabbedPane(JTabbedPane.LEFT);
+    private final JCheckBox chckbxEnableDiscordPresence;
 
-    public ApplicationSettingsDialog(Window parent, ApplicationSettings settings) {
+    public ApplicationSettingsDialog(Window parent, ApplicationSettings settings, DiscordPresence discord) {
         super(parent);
         this.parent = parent;
         setTitle("Application settings");
@@ -339,8 +341,22 @@ public class ApplicationSettingsDialog extends JDialog {
                     panel_2.add(btnLocate);
                 }
 
-                JPanel panel_1 = new JPanel();
-                tabbedPane_1.addTab("Discord", FontAwesome.ICO_DISCORD, panel_1, null);
+                JPanel panel_1_1 = new JPanel();
+                panel_1_1.setBorder(new EmptyBorder(4, 4, 0, 0));
+                tabbedPane_1.addTab("Discord", FontAwesome.ICO_DISCORD, panel_1_1, null);
+                GridBagLayout gbl_panel_1_1 = new GridBagLayout();
+                gbl_panel_1_1.columnWidths = new int[] { 0, 0 };
+                gbl_panel_1_1.rowHeights = new int[] { 0, 0 };
+                gbl_panel_1_1.columnWeights = new double[] { 0.0, Double.MIN_VALUE };
+                gbl_panel_1_1.rowWeights = new double[] { 0.0, Double.MIN_VALUE };
+                panel_1_1.setLayout(gbl_panel_1_1);
+
+                chckbxEnableDiscordPresence = new JCheckBox("Enable Discord presence");
+                chckbxEnableDiscordPresence.setSelected(settings.isEnableDiscordPresence());
+                GridBagConstraints gbc_chckbxEnableDiscordPresence = new GridBagConstraints();
+                gbc_chckbxEnableDiscordPresence.gridx = 0;
+                gbc_chckbxEnableDiscordPresence.gridy = 0;
+                panel_1_1.add(chckbxEnableDiscordPresence, gbc_chckbxEnableDiscordPresence);
             }
             {
                 JPanel panel = new JPanel();
@@ -432,9 +448,13 @@ public class ApplicationSettingsDialog extends JDialog {
                     settings.setLatitude((double) latSpinner.getValue());
                     settings.setLongitude((double) lonSpinner.getValue());
 
+                    settings.setEnableDiscordPresence(chckbxEnableDiscordPresence.isSelected());
+
                     settings.setFfmpegPath(ffmpegPath.getText());
 
                     settings.setNotifyChatMessages(chatNotify.isSelected());
+
+                    discord.setEnabled(settings.isEnableDiscordPresence());
                     dispose();
                 });
                 saveButton.setActionCommand("Save");

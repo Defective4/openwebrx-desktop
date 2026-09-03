@@ -34,7 +34,6 @@ import javax.swing.border.TitledBorder;
 import io.github.defective4.sdr.owrxdesktop.application.ApplicationSettings;
 import io.github.defective4.sdr.owrxdesktop.bandplan.SerializedBandplan;
 import io.github.defective4.sdr.owrxdesktop.bandplan.render.BandplanListRenderer;
-import io.github.defective4.sdr.owrxdesktop.ui.component.JLinkLabel;
 import io.github.defective4.sdr.owrxdesktop.ui.settings.ReceiverUserSettings;
 import io.github.defective4.sdr.owrxdesktop.ui.settings.waterfall.BuiltinWaterfallTheme;
 import io.github.defective4.sdr.owrxdesktop.ui.settings.waterfall.WaterfallThemeMode;
@@ -277,21 +276,10 @@ public class SettingsDialog extends JDialog {
                                 gbc_panel_1.gridx = 0;
                                 gbc_panel_1.gridy = 3;
                                 panel.add(panel_1, gbc_panel_1);
-                                {
-                                    JLabel lblNewLabel_1 = new JLabel("You can manage custom band plans in");
-                                    lblNewLabel_1.setEnabled(false);
-                                    panel_1.add(lblNewLabel_1);
-                                }
-                                {
-                                    JLinkLabel lnklblTheSettings = new JLinkLabel("application settings", e -> {
-                                        dispose();
-                                        ApplicationSettingsDialog dialog = new ApplicationSettingsDialog(parent,
-                                                appSettings);
-                                        dialog.setSelectedIndex(1);
-                                        dialog.setVisible(true);
-                                    });
-                                    panel_1.add(lnklblTheSettings);
-                                }
+                                JLabel lblNewLabel_1 = new JLabel(
+                                        "You can manage custom band plans in application settings");
+                                lblNewLabel_1.setEnabled(false);
+                                panel_1.add(lblNewLabel_1);
                             }
                             {
                                 JPanel panel_1 = new JPanel();

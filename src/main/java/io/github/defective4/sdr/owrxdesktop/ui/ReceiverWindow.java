@@ -75,7 +75,6 @@ import io.github.defective4.sdr.owrxclient.model.ReceiverProfile;
 import io.github.defective4.sdr.owrxclient.model.WaterfallLevels;
 import io.github.defective4.sdr.owrxdesktop.application.ApplicationSettings;
 import io.github.defective4.sdr.owrxdesktop.audio.AudioRecorder;
-import io.github.defective4.sdr.owrxdesktop.audio.FFMpeg;
 import io.github.defective4.sdr.owrxdesktop.audio.RecorderQuality;
 import io.github.defective4.sdr.owrxdesktop.bandplan.Bandplan;
 import io.github.defective4.sdr.owrxdesktop.cache.ReceiverCache;
@@ -85,7 +84,6 @@ import io.github.defective4.sdr.owrxdesktop.ui.component.FFTPanel;
 import io.github.defective4.sdr.owrxdesktop.ui.component.FFTPanel.FFTPanelListener;
 import io.github.defective4.sdr.owrxdesktop.ui.component.JCloseableTab;
 import io.github.defective4.sdr.owrxdesktop.ui.component.JFrequencySpinner;
-import io.github.defective4.sdr.owrxdesktop.ui.component.JLinkLabel;
 import io.github.defective4.sdr.owrxdesktop.ui.component.TuneablePanel;
 import io.github.defective4.sdr.owrxdesktop.ui.component.WaterfallPanel;
 import io.github.defective4.sdr.owrxdesktop.ui.component.demodulation.DABPanel;
@@ -872,22 +870,6 @@ public class ReceiverWindow extends JFrame {
                 gbc_lblThisRequiredFfmpeg.gridx = 0;
                 gbc_lblThisRequiredFfmpeg.gridy = 1;
                 panel.add(lblThisRequiredFfmpeg, gbc_lblThisRequiredFfmpeg);
-
-                JLinkLabel ffmpegLabel = new JLinkLabel("Configure", e -> {
-                    ApplicationSettingsDialog dialog = new ApplicationSettingsDialog(this, appSettings);
-                    dialog.setSelectedIndex(3);
-                    dialog.setVisible(true);
-                    FFMpeg ffmpeg = new FFMpeg(appSettings.getFfmpegPath());
-                    chckbxRecordToMp.setEnabled(ffmpeg.isAvailable());
-                    audioRecorder.setFfmpeg(ffmpeg);
-                    audioRecorder.setProcessMP3(chckbxRecordToMp.isSelected() && chckbxRecordToMp.isEnabled());
-                });
-                GridBagConstraints gbc_linkLabel = new GridBagConstraints();
-                gbc_linkLabel.anchor = GridBagConstraints.NORTHWEST;
-                gbc_linkLabel.insets = new Insets(0, 0, 16, 0);
-                gbc_linkLabel.gridx = 0;
-                gbc_linkLabel.gridy = 2;
-                panel.add(ffmpegLabel, gbc_linkLabel);
             } else {
                 gbc_chckbxRecordToMp.insets = new Insets(0, 0, 16, 0);
             }
