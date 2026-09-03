@@ -264,13 +264,20 @@ public class ApplicationSettingsDialog extends JDialog {
             }
             {
                 JPanel panel = new JPanel();
-                tabbedPane.addTab("Listings", FontAwesome.ICO_TASKS, panel, null);
+                tabbedPane.addTab("Integrations", FontAwesome.ICO_LINK, panel, null);
+                panel.setLayout(new BorderLayout(0, 0));
+
+                JTabbedPane tabbedPane_1 = new JTabbedPane(JTabbedPane.TOP);
+                panel.add(tabbedPane_1, BorderLayout.CENTER);
+                
+                JPanel panel1 = new JPanel();
+                tabbedPane_1.addTab("Listings", FontAwesome.ICO_TASKS, panel1, null);
                 GridBagLayout gbl_panel = new GridBagLayout();
                 gbl_panel.columnWidths = new int[] { 0, 0 };
                 gbl_panel.rowHeights = new int[] { 0, 0 };
                 gbl_panel.columnWeights = new double[] { 1.0, Double.MIN_VALUE };
                 gbl_panel.rowWeights = new double[] { 0.0, Double.MIN_VALUE };
-                panel.setLayout(gbl_panel);
+                panel1.setLayout(gbl_panel);
                 {
                     JPanel panel_1 = new JPanel();
                     panel_1.setBorder(new TitledBorder(null, "Your location", TitledBorder.LEADING, TitledBorder.TOP,
@@ -279,7 +286,7 @@ public class ApplicationSettingsDialog extends JDialog {
                     gbc_panel_1.fill = GridBagConstraints.BOTH;
                     gbc_panel_1.gridx = 0;
                     gbc_panel_1.gridy = 0;
-                    panel.add(panel_1, gbc_panel_1);
+                    panel1.add(panel_1, gbc_panel_1);
                     panel_1.setLayout(new BoxLayout(panel_1, BoxLayout.Y_AXIS));
                     JPanel panel_2 = new JPanel();
                     panel_2.setAlignmentX(Component.LEFT_ALIGNMENT);
@@ -402,7 +409,7 @@ public class ApplicationSettingsDialog extends JDialog {
                 tabbedPane.addTab("System", FontAwesome.ICO_WINDOWS, panel, null);
                 panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
 
-                chatNotify = new JCheckBox("Notify of new chat messages when in tray");
+                chatNotify = new JCheckBox("Notify about new chat messages when in tray");
                 chatNotify.setSelected(settings.isNotifyChatMessages());
                 panel.add(chatNotify);
             }
